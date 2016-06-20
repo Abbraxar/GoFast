@@ -7,7 +7,6 @@ public class Main extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // test commit
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
     }
