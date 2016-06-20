@@ -9,7 +9,7 @@
       <entry name="!?*.groovy" />
       <entry name="!?*.scala" />
       <entry name="!?*.flex" />
-      <entry name="!?*.kt" />
+      <entry name="!?*.kt"/>
       <entry name="!?*.clj" />
       <entry name="!?*.aj" />
     </wildcardResourcePatterns>
