@@ -14,7 +14,8 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="@string/writeDestination"
-        android:id="@+id/textView"
+        android:id="@+id/adressTextView"
+        android:labelFor="@+id/adressEditText"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="46dp" />
@@ -24,8 +25,8 @@
         android:layout_height="wrap_content"
         android:inputType="textPostalAddress"
         android:ems="10"
-        android:id="@+id/editText"
-        android:layout_below="@+id/textView"
+        android:id="@+id/adressEditText"
+        android:layout_below="@+id/adressTextView"
         android:layout_centerHorizontal="true" />
 
     <Button
@@ -34,7 +35,7 @@
         android:layout_height="wrap_content"
         android:text="@string/validTravelConf"
         android:id="@+id/btSelectDestination"
-        android:layout_below="@+id/editText"
+        android:layout_below="@+id/adressEditText"
         android:layout_alignParentEnd="true"
         android:onClick="validConfigureTravel" />
 </RelativeLayout>
