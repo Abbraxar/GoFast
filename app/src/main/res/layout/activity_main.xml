@@ -7,10 +7,28 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.i3.gowise.gofast.Main">
+    tools:context="com.i3cnam.gofast.Main">
 
-    <TextView
+    <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!" />
+        android:text="@string/i_am_passenger"
+        android:id="@+id/btPassenger"
+        android:layout_marginTop="125dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignStart="@+id/btDriver"
+        android:layout_alignEnd="@+id/btDriver"
+        android:onClick="selectUserType"
+        android:tag="passenger" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/i_am_driver"
+        android:id="@+id/btDriver"
+        android:layout_below="@+id/btPassenger"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="98dp"
+        android:onClick="selectUserType"
+        android:tag="driver" />
 </RelativeLayout>
