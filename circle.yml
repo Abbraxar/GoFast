@@ -1,3 +1,5 @@
 dependencies:
+  pre:
+    - echo y | android update sdk --no-ui --all --filter "android-24"
   override:
     - chmod +x gradlew
