@@ -38,6 +38,8 @@
         <activity
             android:name=".PassengerMap"
             android:label="@string/title_activity_passenger_map"></activity>
+
+        <activity android:name=".PassengerResult"></activity>
     </application>
 
 </manifest>
