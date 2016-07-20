@@ -24,7 +24,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ConfigureTravel" />
         <activity android:name=".activities.EnterDestination" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -39,10 +38,10 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".activities.PassengerMap"
+            android:name=".activities.DestinationMap"
             android:label="@string/title_activity_passenger_map" />
-        <activity android:name=".activities.CarpoolingOptions" />
         <activity android:name=".activities.Navigate"></activity>
+        <activity android:name=".activities.CarpoolingList"></activity>
     </application>
 
 </manifest>

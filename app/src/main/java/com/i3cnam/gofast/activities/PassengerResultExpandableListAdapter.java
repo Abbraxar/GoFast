@@ -1,4 +1,4 @@
-package com.i3cnam.gofast;
+package com.i3cnam.gofast.activities;
 
 /**
  * Created by nadege on 08/07/16.
@@ -15,6 +15,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
+
+import com.i3cnam.gofast.R;
 
 public class PassengerResultExpandableListAdapter extends BaseExpandableListAdapter {
 

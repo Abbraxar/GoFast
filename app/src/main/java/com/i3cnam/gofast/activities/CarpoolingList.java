@@ -1,10 +1,9 @@
-package com.i3cnam.gofast;
+package com.i3cnam.gofast.activities;
 
 /**
  * Created by nadege on 08/07/16.
  */
 
-import android.app.Activity;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,26 +13,67 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
+import android.widget.ListView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.i3cnam.gofast.R;
+import com.i3cnam.gofast.communication.Communication;
+import com.i3cnam.gofast.model.Carpooling;
+import com.i3cnam.gofast.model.PassengerTravel;
+import com.i3cnam.gofast.model.PlaceClass;
+import com.i3cnam.gofast.model.User;
 
 
-public class PassengerResult extends FragmentActivity implements OnMapReadyCallback {
+public class CarpoolingList extends FragmentActivity implements OnMapReadyCallback {
 
     ExpandableListAdapter listAdapter;
     ExpandableListView expListView;
     List<String> listDataHeader;
     HashMap<String, List<String>> listDataChild;
     private GoogleMap mMap;
+    public final static String TRAVEL = "com.i3cnam.gofast.TRAVEL";
+    private PassengerTravel passengerTravel;
+    private ListView carpoolingsList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_passenger_result);
+        setContentView(R.layout.activity_carpooling_list);
+
+        passengerTravel = new PassengerTravel();
+
+        Intent intent = getIntent();
+        Bundle bundle = intent.getExtras();
+
+        passengerTravel.setOrigin((PlaceClass)bundle.getSerializable(DestinationMap.ORIGIN));
+        passengerTravel.setDestination((PlaceClass)bundle.getSerializable(EnterDestination.DESTINATION));
+        passengerTravel.setUser(User.getMe());
+        passengerTravel.setRadius(intent.getIntExtra(EnterDestination.RADIUS,500));
+
+        //carpoolingsList = (ListView) findViewById(R.id.carpoolingsList);
+
+//        intent = new Intent(this, CarpoolingManagementService.class);
+        /*
+        bundle = new Bundle();
+        bundle.putSerializable(TRAVEL, passengerTravel);
+        intent.putExtras(bundle);
+*/
+//        startService(intent);
+        System.out.println("Send request");
+        List<Carpooling> possibilities = Communication.findCarpoolingPossibilities(passengerTravel);
+        System.out.println("Request sent");
+
+
+        for (Carpooling onePossibility: possibilities) {
+            System.out.println("====================== C A R P O O L I N G ======================");
+            System.out.println(onePossibility.getPickup_point());
+        }
+
+        System.out.println("Finish");
 
         // Renvoi vers le ExpandableListView de activity_passenger_result
        expListView = (ExpandableListView) findViewById(R.id.covoitResult);

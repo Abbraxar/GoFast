@@ -83,7 +83,7 @@ public class EnterDestination extends Activity implements OnItemClickListener {
             selectedPlace = new PlaceClass(textView.getText().toString());
         }
 
-        Intent intent = new Intent(this, PassengerMap.class);
+        Intent intent = new Intent(this, DestinationMap.class);
         Bundle bundle = new Bundle();
         bundle.putSerializable(DESTINATION, selectedPlace);
         intent.putExtras(bundle);

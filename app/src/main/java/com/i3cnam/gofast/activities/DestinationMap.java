@@ -23,7 +23,7 @@ import com.i3cnam.gofast.geo.DirectionsService;
 import com.i3cnam.gofast.geo.LocationService;
 import com.i3cnam.gofast.model.PlaceClass;
 
-public class PassengerMap extends FragmentActivity implements OnMapReadyCallback {
+public class DestinationMap extends FragmentActivity implements OnMapReadyCallback {
 
     public final static String ORIGIN = "com.i3cnam.gofast.ORIGIN";
     private PlaceClass destination;
@@ -36,7 +36,7 @@ public class PassengerMap extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_validate_destination);
+        setContentView(R.layout.activity_destination_map);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -143,11 +143,11 @@ public class PassengerMap extends FragmentActivity implements OnMapReadyCallback
 
         Intent intent;
 
-        if (userType=="driver") {
+        if (userType.equals("driver")) {
             intent = new Intent(this, Navigate.class);
         }
         else {
-            intent = new Intent(this, CarpoolingOptions.class);
+            intent = new Intent(this, CarpoolingList.class);
             intent.putExtra(EnterDestination.DESTINATION, radius);
         }
 
