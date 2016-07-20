@@ -15,6 +15,7 @@ public class Main extends AppCompatActivity {
     }
 
     public void selectUserType(View view) {
+//        Intent intent = new Intent(this, GooglePlacesAutocompleteActivity.class);
         Intent intent = new Intent(this, ConfigureTravel.class);
         String userType = view.getTag().toString();
         intent.putExtra(USER_TYPE, userType);
