@@ -13,22 +13,32 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/i_am_passenger"
+        android:textColor="#24278e"
         android:id="@+id/btPassenger"
-        android:layout_marginTop="125dp"
+        android:layout_marginTop="30dp"
         android:layout_alignParentTop="true"
         android:layout_alignStart="@+id/btDriver"
         android:layout_alignEnd="@+id/btDriver"
         android:onClick="selectUserType"
+        android:drawableTop="@drawable/pedestrian"
+        android:paddingTop="32sp"
+        android:drawablePadding="-15sp"
         android:tag="passenger" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/i_am_driver"
+        android:textColor="#24278e"
         android:id="@+id/btDriver"
         android:layout_below="@+id/btPassenger"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="98dp"
+        android:layout_marginTop="10dp"
         android:onClick="selectUserType"
+        android:drawableTop="@drawable/driver"
+        android:paddingTop="32sp"
+        android:drawablePadding="-15sp"
         android:tag="driver" />
+
+
 </RelativeLayout>
