@@ -1,4 +1,4 @@
-package com.i3cnam.gofast.activities;
+package com.i3cnam.gofast.views;
 
 /**
  * Created by nadege on 08/07/16.
@@ -13,7 +13,6 @@ import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 
 import com.i3cnam.gofast.R;

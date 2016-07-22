@@ -1,4 +1,4 @@
-package com.i3cnam.gofast.activities;
+package com.i3cnam.gofast.views;
 
 import android.Manifest;
 import android.content.Context;

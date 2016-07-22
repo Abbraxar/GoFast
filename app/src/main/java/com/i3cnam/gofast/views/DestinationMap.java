@@ -1,4 +1,4 @@
-package com.i3cnam.gofast.activities;
+package com.i3cnam.gofast.views;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -26,9 +26,11 @@ import com.i3cnam.gofast.model.PlaceClass;
 public class DestinationMap extends FragmentActivity implements OnMapReadyCallback {
 
     public final static String ORIGIN = "com.i3cnam.gofast.ORIGIN";
+    public final static String ENCODED_POINTS = "com.i3cnam.gofast.ENCODED_POINTS";
     private PlaceClass destination;
     private PlaceClass origin;
     private int radius;
+    private String encodedPoints;
     private GoogleMap mMap;
     private String userType;
     private DirectionsService path;
@@ -120,6 +122,7 @@ public class DestinationMap extends FragmentActivity implements OnMapReadyCallba
             path = new DirectionsService();
             path.setDestination(destination);
             path.computeDirections();
+            encodedPoints = path.getEncodedPolyline();
 
             // draw the path
             Polyline myPolyline = mMap.addPolyline(new PolylineOptions());
@@ -145,10 +148,11 @@ public class DestinationMap extends FragmentActivity implements OnMapReadyCallba
 
         if (userType.equals("driver")) {
             intent = new Intent(this, Navigate.class);
+            intent.putExtra(ENCODED_POINTS, encodedPoints);
         }
         else {
             intent = new Intent(this, CarpoolingList.class);
-            intent.putExtra(EnterDestination.DESTINATION, radius);
+            intent.putExtra(EnterDestination.RADIUS, radius);
         }
 
         Bundle bundle = new Bundle();
