@@ -3,7 +3,7 @@ package com.i3cnam.gofast.geo;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.i3cnam.gofast.model.PlaceClass;
+import com.i3cnam.gofast.model.Place;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -27,7 +27,7 @@ public class PlacesService {
     /**
      * autocomplete :
      * param input: the string pattern to be found
-     * returns a list of PlaceClass matching with the pattern
+     * returns a list of Place matching with the pattern
      */
 
     public static ArrayList autocomplete(String input) {
@@ -80,7 +80,7 @@ public class PlacesService {
             for (int i = 0; i < predsJsonArray.length(); i++) {
                 System.out.println(predsJsonArray.getJSONObject(i).getString("description"));
                 System.out.println("============================================================");
-                PlaceClass toBeAdded = new PlaceClass(predsJsonArray.getJSONObject(i).getString("description"),
+                Place toBeAdded = new Place(predsJsonArray.getJSONObject(i).getString("description"),
                         predsJsonArray.getJSONObject(i).getString("place_id"));
                 resultList.add(toBeAdded);
             }

@@ -21,14 +21,14 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.i3cnam.gofast.R;
 import com.i3cnam.gofast.geo.DirectionsService;
 import com.i3cnam.gofast.geo.LocationService;
-import com.i3cnam.gofast.model.PlaceClass;
+import com.i3cnam.gofast.model.Place;
 
 public class DestinationMap extends FragmentActivity implements OnMapReadyCallback {
 
     public final static String ORIGIN = "com.i3cnam.gofast.ORIGIN";
     public final static String ENCODED_POINTS = "com.i3cnam.gofast.ENCODED_POINTS";
-    private PlaceClass destination;
-    private PlaceClass origin;
+    private Place destination;
+    private Place origin;
     private int radius;
     private String encodedPoints;
     private GoogleMap mMap;
@@ -48,7 +48,7 @@ public class DestinationMap extends FragmentActivity implements OnMapReadyCallba
 
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
-        this.destination = (PlaceClass)bundle.getSerializable(EnterDestination.DESTINATION);
+        this.destination = (Place)bundle.getSerializable(EnterDestination.DESTINATION);
         this.userType = intent.getStringExtra(Main.USER_TYPE);
 //        this.radius = Integer.parseInt(intent.getStringExtra(EnterDestination.RADIUS));
         this.radius = intent.getIntExtra(EnterDestination.RADIUS,500);
@@ -78,7 +78,7 @@ public class DestinationMap extends FragmentActivity implements OnMapReadyCallba
 
         // get the position of the device
         LatLng devicePosition = LocationService.getActualLocation();
-        origin = new PlaceClass(devicePosition);
+        origin = new Place(devicePosition);
 
         // set the bounds for the map
         LatLngBounds mapBounds = new LatLngBounds(

@@ -9,8 +9,8 @@ public class PassengerTravel implements Serializable{
 
     private int id;
     private User passenger; // passenger doing or asking for a travel
-    private PlaceClass origin; // initial position of the passenger
-    private PlaceClass destination; // place where the passenger wants to go to
+    private Place origin; // initial position of the passenger
+    private Place destination; // place where the passenger wants to go to
     private int radius = 500; // distance that the passenger accepts to walk to the pickup and dropoff points
 
     /*
@@ -28,19 +28,19 @@ public class PassengerTravel implements Serializable{
         this.passenger = passenger;
     }
 
-    public PlaceClass getOrigin() {
+    public Place getOrigin() {
         return origin;
     }
 
-    public void setOrigin(PlaceClass origin) {
+    public void setOrigin(Place origin) {
         this.origin = origin;
     }
 
-    public PlaceClass getDestination() {
+    public Place getDestination() {
         return destination;
     }
 
-    public void setDestination(PlaceClass destination) {
+    public void setDestination(Place destination) {
         this.destination = destination;
     }
 

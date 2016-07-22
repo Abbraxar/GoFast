@@ -12,8 +12,8 @@ public class DriverCourse {
 
     private int id;
     private User driver; // the user thar makes the course
-    private PlaceClass origin; // start position of the driver
-    private PlaceClass destination; // final position of the driver
+    private Place origin; // start position of the driver
+    private Place destination; // final position of the driver
     private List<Step> steps; // set of steps
     private String encodedPoints; // encoded gps points of path
     private LatLng actualPosition; // actual position of the driver
@@ -35,19 +35,19 @@ public class DriverCourse {
         this.driver = driver;
     }
 
-    public PlaceClass getOrigin() {
+    public Place getOrigin() {
         return origin;
     }
 
-    public void setOrigin(PlaceClass origin) {
+    public void setOrigin(Place origin) {
         this.origin = origin;
     }
 
-    public PlaceClass getDestination() {
+    public Place getDestination() {
         return destination;
     }
 
-    public void setDestination(PlaceClass destination) {
+    public void setDestination(Place destination) {
         this.destination = destination;
     }
 

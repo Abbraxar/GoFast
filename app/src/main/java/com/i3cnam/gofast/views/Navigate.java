@@ -8,7 +8,7 @@ import com.i3cnam.gofast.R;
 import com.i3cnam.gofast.communication.CommInterface;
 import com.i3cnam.gofast.communication.Communication;
 import com.i3cnam.gofast.model.DriverCourse;
-import com.i3cnam.gofast.model.PlaceClass;
+import com.i3cnam.gofast.model.Place;
 import com.i3cnam.gofast.model.User;
 
 
@@ -25,8 +25,8 @@ public class Navigate extends AppCompatActivity {
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
         driverCourse = new DriverCourse();
-        driverCourse.setOrigin((PlaceClass)bundle.getSerializable(DestinationMap.ORIGIN));
-        driverCourse.setDestination((PlaceClass)bundle.getSerializable(EnterDestination.DESTINATION));
+        driverCourse.setOrigin((Place)bundle.getSerializable(DestinationMap.ORIGIN));
+        driverCourse.setDestination((Place)bundle.getSerializable(EnterDestination.DESTINATION));
         driverCourse.setDriver(User.getMe());
         driverCourse.setEncodedPoints(intent.getStringExtra(DestinationMap.ENCODED_POINTS));
 

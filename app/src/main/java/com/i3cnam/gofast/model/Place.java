@@ -11,21 +11,21 @@ import java.io.Serializable;
 /**
  * Created by Nestor on 16/07/2016.
  */
-public class PlaceClass implements Serializable{
+public class Place implements Serializable{
     private String placeName;
     private LatLng coordinates;
     private String placeId;
 
-    public PlaceClass(String placeName) {
+    public Place(String placeName) {
         this.placeName = placeName;
     }
 
-    public PlaceClass(String placeName, String placeId) {
+    public Place(String placeName, String placeId) {
         this.placeName = placeName;
         this.placeId = placeId;
     }
 
-    public PlaceClass(LatLng coordinates) {
+    public Place(LatLng coordinates) {
         this.coordinates = coordinates;
     }
 
@@ -52,7 +52,7 @@ public class PlaceClass implements Serializable{
 
     public String getPlaceId() {
         if (placeId == null) {
-            placeId = ((PlaceClass) PlacesService.autocomplete(placeName).get(0)).getPlaceId();
+            placeId = ((Place) PlacesService.autocomplete(placeName).get(0)).getPlaceId();
         }
         return placeId;
     }
@@ -63,7 +63,7 @@ public class PlaceClass implements Serializable{
 
     @Override
     public String toString() {
-        return "PlaceClass[palce_name=" + this.placeName + ", place_id=" + this.placeId + ", lat=" + this.coordinates.latitude +  ", long=" + this.coordinates.longitude + "]";
+        return "Place[place_name=" + this.placeName + ", place_id=" + this.placeId + ", lat=" + this.coordinates.latitude +  ", long=" + this.coordinates.longitude + "]";
     }
 
     private void readObject(final ObjectInputStream ois) throws IOException,

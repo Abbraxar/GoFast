@@ -21,10 +21,10 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.i3cnam.gofast.R;
 import com.i3cnam.gofast.communication.CommInterface;
-import com.i3cnam.gofast.communication.Communication;
+import com.i3cnam.gofast.communication.CommunicationStub;
 import com.i3cnam.gofast.model.Carpooling;
 import com.i3cnam.gofast.model.PassengerTravel;
-import com.i3cnam.gofast.model.PlaceClass;
+import com.i3cnam.gofast.model.Place;
 import com.i3cnam.gofast.model.User;
 
 
@@ -48,8 +48,8 @@ public class CarpoolingList extends FragmentActivity implements OnMapReadyCallba
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
 
-        passengerTravel.setOrigin((PlaceClass)bundle.getSerializable(DestinationMap.ORIGIN));
-        passengerTravel.setDestination((PlaceClass)bundle.getSerializable(EnterDestination.DESTINATION));
+        passengerTravel.setOrigin((Place)bundle.getSerializable(DestinationMap.ORIGIN));
+        passengerTravel.setDestination((Place)bundle.getSerializable(EnterDestination.DESTINATION));
         passengerTravel.setPassenger(User.getMe());
         passengerTravel.setRadius(intent.getIntExtra(EnterDestination.RADIUS,500));
 
@@ -62,15 +62,16 @@ public class CarpoolingList extends FragmentActivity implements OnMapReadyCallba
         intent.putExtras(bundle);
 */
 //        startService(intent);
-        CommInterface serverCom = new Communication();
+        CommInterface serverCom = new CommunicationStub();
         System.out.println("Send request");
         List<Carpooling> possibilities = serverCom.findCarpoolingPossibilities(passengerTravel);
         System.out.println("Request sent");
 
-
         for (Carpooling onePossibility: possibilities) {
             System.out.println("====================== C A R P O O L I N G ======================");
             System.out.println(onePossibility.getPickupPoint());
+            System.out.println(onePossibility.getDropoffPoint());
+            System.out.println(onePossibility.getPickupTime());
         }
 
         System.out.println("Finish");
