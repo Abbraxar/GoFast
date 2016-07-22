@@ -1,4 +1,4 @@
-package com.i3cnam.gofast.activities;
+package com.i3cnam.gofast.views;
 
 /**
  * Created by nadege on 08/07/16.
@@ -13,7 +13,6 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
-import android.widget.ListView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -21,6 +20,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.i3cnam.gofast.R;
+import com.i3cnam.gofast.communication.CommInterface;
 import com.i3cnam.gofast.communication.Communication;
 import com.i3cnam.gofast.model.Carpooling;
 import com.i3cnam.gofast.model.PassengerTravel;
@@ -35,9 +35,8 @@ public class CarpoolingList extends FragmentActivity implements OnMapReadyCallba
     List<String> listDataHeader;
     HashMap<String, List<String>> listDataChild;
     private GoogleMap mMap;
-    public final static String TRAVEL = "com.i3cnam.gofast.TRAVEL";
+//    public final static String TRAVEL = "com.i3cnam.gofast.TRAVEL";
     private PassengerTravel passengerTravel;
-    private ListView carpoolingsList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +50,7 @@ public class CarpoolingList extends FragmentActivity implements OnMapReadyCallba
 
         passengerTravel.setOrigin((PlaceClass)bundle.getSerializable(DestinationMap.ORIGIN));
         passengerTravel.setDestination((PlaceClass)bundle.getSerializable(EnterDestination.DESTINATION));
-        passengerTravel.setUser(User.getMe());
+        passengerTravel.setPassenger(User.getMe());
         passengerTravel.setRadius(intent.getIntExtra(EnterDestination.RADIUS,500));
 
         //carpoolingsList = (ListView) findViewById(R.id.carpoolingsList);
@@ -63,14 +62,15 @@ public class CarpoolingList extends FragmentActivity implements OnMapReadyCallba
         intent.putExtras(bundle);
 */
 //        startService(intent);
+        CommInterface serverCom = new Communication();
         System.out.println("Send request");
-        List<Carpooling> possibilities = Communication.findCarpoolingPossibilities(passengerTravel);
+        List<Carpooling> possibilities = serverCom.findCarpoolingPossibilities(passengerTravel);
         System.out.println("Request sent");
 
 
         for (Carpooling onePossibility: possibilities) {
             System.out.println("====================== C A R P O O L I N G ======================");
-            System.out.println(onePossibility.getPickup_point());
+            System.out.println(onePossibility.getPickupPoint());
         }
 
         System.out.println("Finish");

@@ -2,61 +2,67 @@ package com.i3cnam.gofast.model;
 
 import com.google.android.gms.maps.model.LatLng;
 
-import java.sql.Time;
+import java.util.Date;
 
 /**
  * Created by Nestor on 18/07/2016.
  */
 public class Carpooling {
-    // etat du covoiturage
+    // etats du covoiturage
     public enum CarpoolingState{POTENTIAL, IN_DEMAND, IN_PROGRESS, REFUSED, CONFLICT, ACHIEVED};
 
-    private DriverCourse driver;
-    private PassengerTravel passenger;
+    private int id;
 
-    private LatLng pickup_point;
-    private LatLng dropoff_point;
-    private Time pickupTime;
+    private DriverCourse driverCourse; // the driverCourse of the carpool driver
+    private PassengerTravel passengerTravel; // the travel of the carpool passenger
 
-    private CarpoolingState state;
+    private LatLng pickupPoint; // coordinates of the point the passenger is supposed to be picked up
+    private LatLng dropoffPoint; // coordinates of the point the passenger is supposed to be dropped off
+    private Date pickupTime; // time when the passenger is supposed to be picked up
 
-    public DriverCourse getDriver() {
-        return driver;
+    private CarpoolingState state; // state of carpool
+
+    public int getId() { return id; }
+
+    public void setId(int id) { this.id = id; }
+
+    public DriverCourse getDriverCourse() {
+        return driverCourse;
     }
 
-    public void setDriver(DriverCourse driver) {
-        this.driver = driver;
+    public void setDriverCourse(DriverCourse driverCourse) {
+        this.driverCourse = driverCourse;
     }
 
-    public PassengerTravel getPassenger() {
-        return passenger;
+    public PassengerTravel getPassengerTravel() {
+        return passengerTravel;
     }
 
-    public void setPassenger(PassengerTravel passenger) {
-        this.passenger = passenger;
+    public void setPassengerTravel(PassengerTravel passengerTravel) {
+        this.passengerTravel = passengerTravel;
     }
 
-    public LatLng getPickup_point() {
-        return pickup_point;
+    public LatLng getPickupPoint() {
+        return pickupPoint;
     }
 
-    public void setPickup_point(LatLng pickup_point) {
-        this.pickup_point = pickup_point;
+    public void setPickupPoint(LatLng pickupPoint) {
+        this.pickupPoint = pickupPoint;
     }
 
-    public LatLng getDropoff_point() {
-        return dropoff_point;
+    public LatLng getDropoffPoint() {
+        return dropoffPoint;
     }
 
-    public void setDropoff_point(LatLng dropoff_point) {
-        this.dropoff_point = dropoff_point;
+    public void setDropoffPoint(LatLng dropoffPoint) {
+        this.dropoffPoint = dropoffPoint;
     }
 
-    public Time getPickupTime() {
+    public Date getPickupTime() {
         return pickupTime;
     }
 
-    public void setPickupTime(Time pickupTime) {
+    public void setPickupTime(Date pickupTime) {
         this.pickupTime = pickupTime;
     }
 
@@ -67,4 +73,13 @@ public class Carpooling {
     public void setState(CarpoolingState state) {
         this.state = state;
     }
+
+    public User getDriver() {
+        return getDriverCourse().getDriver();
+    }
+
+    public User getPassenger() {
+        return getPassengerTravel().getPassenger();
+    }
+
 }

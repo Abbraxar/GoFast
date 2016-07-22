@@ -17,9 +17,9 @@ import java.util.List;
 public class LocationService {
 
     public static LatLng getActualLocation() {
-        // Get the location manager
-
         return new LatLng(43.6032661, 1.4422609);
+
+        // Get the location manager
         /*
         Location loc;
 

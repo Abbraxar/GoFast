@@ -17,14 +17,14 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activities.Main">
+        <activity android:name=".views.Main">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.EnterDestination" />
+        <activity android:name=".views.EnterDestination" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -38,10 +38,10 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".activities.DestinationMap"
+            android:name=".views.DestinationMap"
             android:label="@string/title_activity_passenger_map" />
-        <activity android:name=".activities.Navigate"></activity>
-        <activity android:name=".activities.CarpoolingList"></activity>
+        <activity android:name=".views.Navigate"></activity>
+        <activity android:name=".views.CarpoolingList"></activity>
     </application>
 
 </manifest>
