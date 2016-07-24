@@ -3,6 +3,7 @@ package com.i3cnam.gofast.communication;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.i3cnam.gofast.geo.GeoConstants;
 import com.i3cnam.gofast.model.Carpooling;
 import com.i3cnam.gofast.model.DriverCourse;
 import com.i3cnam.gofast.model.PassengerTravel;
@@ -134,8 +135,7 @@ public class Communication implements CommInterface {
         // prepare the string for the request
         StringBuilder sb = new StringBuilder(SERVER_IP + ACCEPT_CARPOOL);
         sb.append("?course_id=" + driverCourse.getId());
-        sb.append("&new_position=" + driverCourse.getActualPosition().latitude + ","
-                +driverCourse.getActualPosition().longitude);
+        sb.append("&new_position=" + GeoConstants.coordinatesUrlParam(driverCourse.getActualPosition()));
 
         // call the service and obtain a response
         String rawJSON = useService(sb.toString());
@@ -148,8 +148,7 @@ public class Communication implements CommInterface {
         // prepare the string for the request
         StringBuilder sb = new StringBuilder(SERVER_IP + ACCEPT_CARPOOL);
         sb.append("?course_id=" + driverCourse.getId());
-        sb.append("&new_position=" + driverCourse.getActualPosition().latitude + ","
-                +driverCourse.getActualPosition().longitude);
+        sb.append("&new_position=" + GeoConstants.coordinatesUrlParam(driverCourse.getActualPosition()));
         sb.append("&new_encoded_points=" + driverCourse.getEncodedPoints());
 
         // call the service and obtain a response

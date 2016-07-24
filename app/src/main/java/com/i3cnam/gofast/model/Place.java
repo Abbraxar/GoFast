@@ -40,7 +40,7 @@ public class Place implements Serializable{
     public LatLng getCoordinates() {
         if (coordinates == null) {
             if (placeId != null) {
-                this.coordinates = PlacesService.getPlaceLocation(placeId);
+                this.coordinates = PlacesService.getCoordinatesByPlaceId(placeId);
             }
         }
         return coordinates;

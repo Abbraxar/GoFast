@@ -141,7 +141,7 @@ public class DirectionsService {
 
     /**
      * ---------------------------------------------------------------------------------------------
-     * Requests the Google DirectionsService API for the  configured path
+     * Requests the Google DirectionsService API for the configured path
      * (it takes into account all the options)
      */
     public void computeDirections() {

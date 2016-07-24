@@ -24,7 +24,6 @@ public class Main extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         List<String> myProviders = locationManager.getAllProviders();
@@ -78,7 +77,6 @@ public class Main extends AppCompatActivity {
             }
         }
         System.out.println("=============FIN LOCATION=============");
-
 
     }
 
