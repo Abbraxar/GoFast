@@ -20,8 +20,12 @@ public class Carpooling {
     private LatLng dropoffPoint; // coordinates of the point the passenger is supposed to be dropped off
     private Date pickupTime; // time when the passenger is supposed to be picked up
 
+    private float fare; // amount of money to be applied to the carpooling
+
     private CarpoolingState state; // state of carpool
 
+
+    /* --------------------------- GETTERS AND SETTERS --------------------------- */
     public int getId() { return id; }
 
     public void setId(int id) { this.id = id; }
@@ -68,6 +72,14 @@ public class Carpooling {
 
     public CarpoolingState getState() {
         return state;
+    }
+
+    public float getFare() {
+        return fare;
+    }
+
+    public void setFare(float fare) {
+        this.fare = fare;
     }
 
     public void setState(CarpoolingState state) {

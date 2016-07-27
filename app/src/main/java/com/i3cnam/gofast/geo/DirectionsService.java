@@ -4,7 +4,7 @@ import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.PolyUtil;
-import com.i3cnam.gofast.model.PlaceClass;
+import com.i3cnam.gofast.model.Place;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -28,8 +28,8 @@ public class DirectionsService {
 
     /* directions options */
     private boolean alternatives; // when alternatives is true, multiple results can be returned
-    private PlaceClass origin = null; // if origin is null, the device position is used
-    private PlaceClass destination = null; // mandatory
+    private Place origin = null; // if origin is null, the device position is used
+    private Place destination = null; // mandatory
     private String mode = "driving"; // Specifies the mode of transport to use when calculating directions (driving, walking bicycling)
     private List<LatLng> waypoints = null; // Specifies an array of waypoints. Waypoints alter a route by routing it through the specified location(s)
 
@@ -43,11 +43,11 @@ public class DirectionsService {
         this.alternatives = alternatives;
     }
 
-    public void setOrigin(PlaceClass origin) {
+    public void setOrigin(Place origin) {
         this.origin = origin;
     }
 
-    public void setDestination(PlaceClass destination) {
+    public void setDestination(Place destination) {
         this.destination = destination;
     }
 
@@ -141,7 +141,7 @@ public class DirectionsService {
 
     /**
      * ---------------------------------------------------------------------------------------------
-     * Requests the Google DirectionsService API for the  configured path
+     * Requests the Google DirectionsService API for the configured path
      * (it takes into account all the options)
      */
     public void computeDirections() {
@@ -217,7 +217,7 @@ public class DirectionsService {
      * @param destination
      * @return
      */
-    public static List getDirections(PlaceClass destination) {
+    public static List getDirections(Place destination) {
 
         List resultList = null;
 

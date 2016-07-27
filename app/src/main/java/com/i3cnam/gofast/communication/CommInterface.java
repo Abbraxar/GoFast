@@ -1,6 +1,5 @@
 package com.i3cnam.gofast.communication;
 
-import com.google.android.gms.maps.model.LatLng;
 import com.i3cnam.gofast.model.Carpooling;
 import com.i3cnam.gofast.model.DriverCourse;
 import com.i3cnam.gofast.model.PassengerTravel;

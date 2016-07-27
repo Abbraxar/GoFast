@@ -16,7 +16,7 @@ import android.widget.Toast;
 
 import com.i3cnam.gofast.R;
 import com.i3cnam.gofast.geo.PlacesService;
-import com.i3cnam.gofast.model.PlaceClass;
+import com.i3cnam.gofast.model.Place;
 
 import java.util.ArrayList;
 
@@ -24,7 +24,7 @@ public class EnterDestination extends Activity implements OnItemClickListener {
     public final static String DESTINATION = "com.i3cnam.gofast.DESTINATION";
     public final static String RADIUS = "com.i3cnam.gofast.RADIUS";
     private GooglePlacesAutocompleteAdapter autocompleteAdapter;
-    private PlaceClass selectedPlace;
+    private Place selectedPlace;
     private String userType;
 
     @Override
@@ -60,7 +60,7 @@ public class EnterDestination extends Activity implements OnItemClickListener {
 
     public void onItemClick(AdapterView adapterView, View view, int position, long id) {
         System.out.println("onItemClick OK");
-//        String str = ((PlaceClass) adapterView.getItemAtPosition(position)).getPlaceName();
+//        String str = ((Place) adapterView.getItemAtPosition(position)).getPlaceName();
         String str = (adapterView.getItemAtPosition(position)).toString();
         Toast.makeText(this, str, Toast.LENGTH_SHORT).show();
         selectedPlace = autocompleteAdapter.getResultList().get(position);
@@ -79,8 +79,8 @@ public class EnterDestination extends Activity implements OnItemClickListener {
         if (selectedPlace == null) {
 
             AutoCompleteTextView textView = (AutoCompleteTextView) findViewById(R.id.autoCompleteTextView);
-//            selectedPlace = new PlaceClass("toto");
-            selectedPlace = new PlaceClass(textView.getText().toString());
+//            selectedPlace = new Place("toto");
+            selectedPlace = new Place(textView.getText().toString());
         }
 
         Intent intent = new Intent(this, DestinationMap.class);
@@ -97,14 +97,14 @@ public class EnterDestination extends Activity implements OnItemClickListener {
 
 
     class GooglePlacesAutocompleteAdapter extends ArrayAdapter implements Filterable {
-        private ArrayList<PlaceClass> resultList;
+        private ArrayList<Place> resultList;
 
         public GooglePlacesAutocompleteAdapter(Context context, int textViewResourceId) {
             super(context, textViewResourceId);
             System.out.println("GooglePlacesAutocompleteAdapter OK");
         }
 
-        public ArrayList<PlaceClass> getResultList() {
+        public ArrayList<Place> getResultList() {
             return resultList;
         }
 
