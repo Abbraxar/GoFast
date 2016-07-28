@@ -5,4 +5,8 @@
     <string name="title_activity_passenger_map">PassengerMap</string>
     <string name="writeDestination">Je saisis ma destination</string>
     <string name="validTravelConf">OK</string>
+    <string name="permissionsRationale">La localisation est indispensable à l\'utilisation de l\'application.</string>
+    <string name="permissionsDisabled">Vous pouvez réactiver la localisation dans la configuration des applications</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Quitter</string>
 </resources>
