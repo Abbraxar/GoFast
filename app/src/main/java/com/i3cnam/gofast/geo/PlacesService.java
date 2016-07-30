@@ -3,7 +3,7 @@ package com.i3cnam.gofast.geo;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.i3cnam.gofast.communication.Communication;
+
 import com.i3cnam.gofast.model.Place;
 
 import org.json.JSONArray;
@@ -37,7 +37,7 @@ public class PlacesService {
                 GeoConstants.TYPE_AUTOCOMPLETE +
                 GeoConstants.OUT_JSON);
         sb.append("?key=" + GeoConstants.API_KEY);
-//            sb.append("&components=country:fr");
+        sb.append("&components=country:fr");
         try {
             sb.append("&input=" + URLEncoder.encode(input, "utf8"));
         } catch (UnsupportedEncodingException e) {
@@ -84,7 +84,7 @@ public class PlacesService {
                 GeoConstants.TYPE_DETAILS +
                 GeoConstants.OUT_JSON);
         sb.append("?key=" + GeoConstants.API_KEY);
-//            sb.append("&components=country:fr");
+        sb.append("&components=country:fr");
         try {
             sb.append("&placeid=" + URLEncoder.encode(placeId, "utf8"));
         } catch (UnsupportedEncodingException e) {
@@ -125,7 +125,7 @@ public class PlacesService {
                 GeoConstants.GEOCODE_API  +
                 GeoConstants.OUT_JSON);
         sb.append("?key=" + GeoConstants.API_KEY);
-//            sb.append("&components=country:fr");
+        sb.append("&components=country:fr");
         sb.append("&latlng=" + GeoConstants.coordinatesUrlParam(coordinates));
 
         // call the service and obtain a response

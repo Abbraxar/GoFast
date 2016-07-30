@@ -1,6 +1,7 @@
 package com.i3cnam.gofast.views;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.v4.app.FragmentActivity;
@@ -45,12 +46,10 @@ public class DestinationMap extends FragmentActivity implements OnMapReadyCallba
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
         this.destination = (Place)bundle.getSerializable(EnterDestination.DESTINATION);
         this.userType = intent.getStringExtra(Main.USER_TYPE);
-//        this.radius = Integer.parseInt(intent.getStringExtra(EnterDestination.RADIUS));
         this.radius = intent.getIntExtra(EnterDestination.RADIUS,500);
 
 
@@ -62,13 +61,31 @@ public class DestinationMap extends FragmentActivity implements OnMapReadyCallba
 //        System.out.println(destination.getPlaceId());
         System.out.println(destination.getPlaceName());
 
+        /*
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
-
-        destination.getCoordinates();
+*/
+//        destination.getCoordinates();
+//        TestTask MaTask =  new TestTask();
+//        String toto = MaTask.doInBackground();
         System.out.println(destination.getPlaceId());
+//        System.out.println(destination.getCoordinates());
 
     }
+
+
+/*
+    private class TestTask extends AsyncTask<String, String,String> {
+        protected String doInBackground(String... urls) {
+            destination.getCoordinates();
+            return "toto";
+
+        }
+
+    }
+*/
+
+
 
 
     @Override
@@ -133,9 +150,9 @@ public class DestinationMap extends FragmentActivity implements OnMapReadyCallba
         }
 
 
-
-
     }
+
+
 
     public void closeMap(View view) {
         System.out.println("closing activity");

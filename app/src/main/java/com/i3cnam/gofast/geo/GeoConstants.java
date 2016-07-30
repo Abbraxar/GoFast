@@ -43,6 +43,7 @@ public class GeoConstants {
         HttpURLConnection conn = null;
         StringBuilder jsonResults = new StringBuilder();
         try {
+            System.out.println("trying to reach:");
             System.out.println(serviceString);
             URL url = new URL(serviceString);
             conn = (HttpURLConnection) url.openConnection();

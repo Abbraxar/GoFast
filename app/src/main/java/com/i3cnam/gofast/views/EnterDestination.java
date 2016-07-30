@@ -38,17 +38,12 @@ public class EnterDestination extends Activity implements OnItemClickListener {
 
         NumberPicker np;
         np = (NumberPicker) findViewById(R.id.radius);
-        String[] values = {"100","200","300","400","500","600","700","800","900","1000"};
-        np.setDisplayedValues(values);
+        // only show radius selector to the pedestrian
         if (userType.equals("driver")) {
+            String[] values = {"100","200","300","400","500","600","700","800","900","1000"};
+            np.setDisplayedValues(values);
             np.setVisibility(View.INVISIBLE);
         }
-        /*
-        np.setValue(500);
-        np.setMinValue(100);
-        np.setMaxValue(1000);
-*/
-
         np.setWrapSelectorWheel(false);
 
         AutoCompleteTextView autoCompView = (AutoCompleteTextView) findViewById(R.id.autoCompleteTextView);
@@ -73,13 +68,8 @@ public class EnterDestination extends Activity implements OnItemClickListener {
 
     public void validConfigureTravel(View view) {
 
-//        AutoCompleteTextView textView = (AutoCompleteTextView) findViewById(R.id.autoCompleteTextView);
-//        System.out.println("le texte: " + textView.getText());
-//        intent.putExtra(DESTINATION, selectedPlace);
         if (selectedPlace == null) {
-
             AutoCompleteTextView textView = (AutoCompleteTextView) findViewById(R.id.autoCompleteTextView);
-//            selectedPlace = new Place("toto");
             selectedPlace = new Place(textView.getText().toString());
         }
 

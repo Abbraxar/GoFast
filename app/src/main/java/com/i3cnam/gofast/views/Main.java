@@ -39,11 +39,12 @@ public class Main extends AppCompatActivity {
 //        }
         System.out.println("=============LOCATION=============");
 
-        Context context ;
-        context = getApplicationContext();
+        Context context;
+//        context = getApplicationContext();
+        context = this;
 
         System.out.println("=============ACCESS_FINE_LOCATION:" + PermissionChecker.checkSelfPermission( context, Manifest.permission.ACCESS_FINE_LOCATION ) + "=============");
-        System.out.println("=============PERMISSION_GRANTED:" + PackageManager.PERMISSION_GRANTED + "=============");
+        System.out.println("=============PERMISSION_GRANTED ? " + PackageManager.PERMISSION_GRANTED + "=============");
 
         if (ContextCompat.checkSelfPermission( context, Manifest.permission.ACCESS_FINE_LOCATION ) == PackageManager.PERMISSION_GRANTED ) {
             System.out.println("=============PERMISSION OK=============");
@@ -59,8 +60,6 @@ public class Main extends AppCompatActivity {
         else {
             System.out.println("=============PERMISSION KO=============");
         }
-
-
 
         int status = context.getPackageManager().checkPermission(Manifest.permission.ACCESS_FINE_LOCATION,
                 context.getPackageName());
