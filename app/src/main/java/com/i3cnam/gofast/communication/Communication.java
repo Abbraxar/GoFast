@@ -30,6 +30,7 @@ public class Communication implements CommInterface {
     static final String DECLARE_COURSE = "/declare_course";
     static final String REQUEST_CARPOOL = "/request_carpooling";
     static final String ACCEPT_CARPOOL = "/accept_carpooling";
+    static final String GET_TRAVEL = "/accept_carpooling";
     static final String UPDATE_POSITION = "/update_position";
 
     private static final String LOG_TAG = "Server Communication";
@@ -164,6 +165,54 @@ public class Communication implements CommInterface {
     public void unobserveCourse(DriverCourse driverCourse) {
 
     }
+
+    @Override
+    public List<Carpooling> getTravelState(PassengerTravel travel) {
+        // prepare the return variable
+        List<Carpooling> matchesList = new ArrayList<>();
+
+        // prepare the string for the request
+        StringBuilder sb = new StringBuilder(SERVER_IP + FIND_MATCHES);
+        sb.append("?" + travel.getParametersString());
+
+        // call the service and obtain a response
+        String rawJSON = useService(sb.toString());
+
+        try {
+            // Create a JSON object hierarchy from the results
+            JSONObject jsonObject = new JSONObject(rawJSON);
+
+            // get the element matches
+            JSONArray routesJsonArray = jsonObject.getJSONArray("matches");
+
+            // browse the element matches
+            for (int i = 0; i < routesJsonArray.length(); i++) {
+                Carpooling toBeAdded = new Carpooling();
+
+                JSONObject pickupPoint = routesJsonArray.getJSONObject(i).getJSONObject("pickup_point");
+                JSONObject dropoffPoint = routesJsonArray.getJSONObject(i).getJSONObject("dropoff_point");
+                String pickupTime = routesJsonArray.getJSONObject(i).getString("pickup_time");
+
+                toBeAdded.setPickupPoint(
+                        new LatLng(Double.parseDouble(pickupPoint.getString("lat")),
+                                Double.parseDouble(pickupPoint.getString("long")))
+                );
+                toBeAdded.setDropoffPoint(
+                        new LatLng(Double.parseDouble(dropoffPoint.getString("lat")),
+                                Double.parseDouble(dropoffPoint.getString("long")))
+                );
+//                toBeAdded.setPickupTime(Time.valueOf(pickupTime));
+
+                toBeAdded.setState(Carpooling.CarpoolingState.POTENTIAL);
+
+                matchesList.add(toBeAdded);
+            }
+
+
+        } catch (JSONException e) {
+            Log.e(LOG_TAG, "Cannot process JSON results", e);
+        }
+        return matchesList;    }
 
     @Override
     public void observeTravel(PassengerTravel passengerTravel) {

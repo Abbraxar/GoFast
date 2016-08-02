@@ -40,8 +40,14 @@
         <activity
             android:name=".views.DestinationMap"
             android:label="@string/title_activity_passenger_map" />
-        <activity android:name=".views.Navigate"></activity>
-        <activity android:name=".views.CarpoolingList"></activity>
+        <activity android:name=".views.Navigate" />
+        <activity android:name=".views.CarpoolingList" />
+
+        <service android:name=".management.carpooling.CarpoolingManagementService" />
+        <service
+            android:name=".management.course.CourseManagementService"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>

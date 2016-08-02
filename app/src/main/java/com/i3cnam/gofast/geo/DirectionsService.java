@@ -92,20 +92,14 @@ public class DirectionsService {
     }
 
     private String OriginString() {
-        if (origin==null){
-            return "&origin=" + Double.toString(LocationService.getActualLocation().latitude) + ","
-                + Double.toString(LocationService.getActualLocation().longitude);
+        if (origin.getPlaceId() != null) {
+            return "&origin=place_id:" + origin.getPlaceId();
         }
-        else {
-            if (origin.getPlaceId() != null) {
-                return "&origin=place_id:" + origin.getPlaceId();
-            }
-            else if (origin.getCoordinates() != null) {
-                return "&origin=" +  Double.toString(origin.getCoordinates().latitude) + ","
-                        + Double.toString(origin.getCoordinates().longitude);
-            }
-            else return "&origin=" + origin.getPlaceName();
+        else if (origin.getCoordinates() != null) {
+            return "&origin=" +  Double.toString(origin.getCoordinates().latitude) + ","
+                    + Double.toString(origin.getCoordinates().longitude);
         }
+        else return "&origin=" + origin.getPlaceName();
     }
 
     private String DestinationString() {
@@ -217,7 +211,7 @@ public class DirectionsService {
      * @param destination
      * @return
      */
-    public static List getDirections(Place destination) {
+    public static List getDirections(Place origin, Place destination) {
 
         List resultList = null;
 
@@ -226,10 +220,9 @@ public class DirectionsService {
         try {
             StringBuilder sb = new StringBuilder(GeoConstants.API_BASE + GeoConstants.DIRECTIONS_API + GeoConstants.OUT_JSON);
             sb.append("?key=" + GeoConstants.API_KEY);
-//            sb.append("&components=country:fr");
-            LatLng toto = LocationService.getActualLocation();
-            sb.append("&origin=" + Double.toString(LocationService.getActualLocation().latitude) + ","
-                    + Double.toString(LocationService.getActualLocation().longitude));
+            sb.append("&components=country:fr");
+
+            sb.append("&origin=place_id:" + URLEncoder.encode(origin.getPlaceId(), "utf8"));
             sb.append("&destination=place_id:" + URLEncoder.encode(destination.getPlaceId(), "utf8"));
 
             System.out.println(sb.toString());

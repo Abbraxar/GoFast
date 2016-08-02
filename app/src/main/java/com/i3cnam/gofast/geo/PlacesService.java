@@ -27,7 +27,7 @@ public class PlacesService {
      * @param input: the string pattern to be found
      * @return a list of Place matching with the pattern
      */
-    public static ArrayList autocomplete(String input) {
+    public static ArrayList autocomplete(String input, LatLng location) {
 
         ArrayList resultList = null;
 
@@ -43,9 +43,11 @@ public class PlacesService {
         } catch (UnsupportedEncodingException e) {
             Log.e(LOG_TAG, "Error encoding URL", e);
         }
-        LatLng myPosition = LocationService.getActualLocation();
-        sb.append("&location=" + GeoConstants.coordinatesUrlParam(myPosition));
-        sb.append("&radius=100000");
+//        LatLng myPosition = LocationService.getActualLocation();
+        if (location != null) {
+            sb.append("&location=" + GeoConstants.coordinatesUrlParam(location));
+            sb.append("&radius=100000");
+        }
 
         // call the service and obtain a response
         String rawJSON = GeoConstants.useService(sb.toString());
@@ -118,7 +120,7 @@ public class PlacesService {
      */
     public static Place getPlaceByCoordinates(LatLng coordinates) {
 
-        Place foundPlace = new Place(coordinates);
+        Place foundPlace = null;
         StringBuilder jsonResults = new StringBuilder();
 
         StringBuilder sb = new StringBuilder(GeoConstants.API_BASE +
@@ -136,6 +138,7 @@ public class PlacesService {
             JSONObject jsonObj = new JSONObject(jsonResults.toString());
             JSONObject addressObj = jsonObj.getJSONObject("result").getJSONObject("adr_address");
 
+            foundPlace = new Place(coordinates);
             foundPlace.setPlaceId(addressObj.getString("place_id"));
             foundPlace.setPlaceName(addressObj.getString("formatted_address"));
 

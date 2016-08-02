@@ -94,4 +94,18 @@ public class Carpooling {
         return getPassengerTravel().getPassenger();
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        boolean isEqual = false;
+        if (obj instanceof Carpooling) {
+            if (((Carpooling)obj).getId() == id &&
+                    ((Carpooling)obj).getState().equals(getState()) &&
+                    ((Carpooling)obj).getPickupTime().equals(getPickupTime()) &&
+                    ((Carpooling)obj).getState().equals(getState())) {
+                isEqual = true;
+                System.out.println(((Carpooling)obj).getId() + "is equal" + id);
+            }
+        }
+        return isEqual;
+    }
 }

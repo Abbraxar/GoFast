@@ -63,6 +63,12 @@ public interface CommInterface {
      * Request to keep informed about the carpooling of the travel
      * @param passengerTravel the travel to be observed
      */
+    List<Carpooling> getTravelState(PassengerTravel passengerTravel);
+
+    /**
+     * Request to keep informed about the carpooling of the travel
+     * @param passengerTravel the travel to be observed
+     */
     void observeTravel(PassengerTravel passengerTravel);
 
     /**

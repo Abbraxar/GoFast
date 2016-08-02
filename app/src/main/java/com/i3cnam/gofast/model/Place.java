@@ -37,11 +37,9 @@ public class Place implements Serializable{
         this.placeName = placeName;
     }
 
-    public LatLng getCoordinates() {
+    public synchronized LatLng getCoordinates() {
         if (coordinates == null) {
-            if (placeId != null) {
-                this.coordinates = PlacesService.getCoordinatesByPlaceId(placeId);
-            }
+            this.coordinates = PlacesService.getCoordinatesByPlaceId(getPlaceId());
         }
         return coordinates;
     }
@@ -52,7 +50,19 @@ public class Place implements Serializable{
 
     public String getPlaceId() {
         if (placeId == null) {
-            placeId = ((Place) PlacesService.autocomplete(placeName).get(0)).getPlaceId();
+            if (placeName != null) {
+                Place thisPlace = (Place) PlacesService.autocomplete(placeName, coordinates).get(0);
+//                System.out.println(thisPlace);
+                placeId = thisPlace.getPlaceId();
+            }
+            if (coordinates != null) {
+                Place thisPlace = PlacesService.getPlaceByCoordinates(coordinates);
+//                System.out.println(thisPlace);
+                if (thisPlace != null) {
+                    placeId = thisPlace.getPlaceId();
+                    placeName = thisPlace.getPlaceName();
+                }
+            }
         }
         return placeId;
     }
@@ -63,15 +73,18 @@ public class Place implements Serializable{
 
     @Override
     public String toString() {
-        return "Place[place_name=" + this.placeName + ", place_id=" + this.placeId + ", lat=" + this.coordinates.latitude +  ", long=" + this.coordinates.longitude + "]";
+        return "Place[place_name=" + this.placeName +
+                ", place_id=" + this.placeId +
+                ", lat=" + (this.coordinates == null ?  "" : this.coordinates.latitude)  +
+                ", long=" + (this.coordinates == null ?  "" : this.coordinates.longitude) + "]";
     }
 
     private void readObject(final ObjectInputStream ois) throws IOException,
             ClassNotFoundException {
         this.placeName = (String) ois.readObject();
         this.placeId = (String) ois.readObject();
-        double latitude = (double) ois.readObject();
-        double longitude = (double) ois.readObject();
+        double latitude = ois.readDouble();
+        double longitude = ois.readDouble();
         if (latitude != 99.9 && longitude != 99.9) {
             this.coordinates = new LatLng(latitude, longitude);
         }
@@ -80,8 +93,8 @@ public class Place implements Serializable{
     private void writeObject(final ObjectOutputStream oos) throws IOException {
         oos.writeObject(this.placeName);
         oos.writeObject(this.placeId);
-        oos.writeObject(coordinates == null ? 99.9 : this.coordinates.latitude);
-        oos.writeObject(coordinates == null ? 99.9 : this.coordinates.longitude);
+        oos.writeDouble(coordinates == null ? 99.9 : this.coordinates.latitude);
+        oos.writeDouble(coordinates == null ? 99.9 : this.coordinates.longitude);
     }
 
 

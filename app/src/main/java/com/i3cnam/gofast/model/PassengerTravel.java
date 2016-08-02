@@ -1,5 +1,10 @@
 package com.i3cnam.gofast.model;
 
+import com.google.android.gms.maps.model.LatLng;
+
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 /**
@@ -64,5 +69,28 @@ public class PassengerTravel implements Serializable{
         returnString += Integer.toString(radius);
         return returnString;
     }
+
+
+    private void readObject(final ObjectInputStream ois) throws IOException,
+            ClassNotFoundException {
+        this.id = ois.readInt();
+        this.passenger = (User) ois.readObject();
+        this.origin  = (Place) ois.readObject();
+        this.destination = (Place) ois.readObject();
+        this.radius = ois.readInt();
+
+    }
+
+    private void writeObject(final ObjectOutputStream oos) throws IOException {
+        oos.writeInt(this.id);
+        oos.writeObject(this.passenger);
+        oos.writeObject(this.origin);
+        oos.writeObject(this.destination);
+        oos.writeInt(this.radius);
+    }
+
+
+
+
 
 }

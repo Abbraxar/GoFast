@@ -2,13 +2,14 @@ package com.i3cnam.gofast.model;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
 /**
  * Created by Nestor on 18/07/2016.
  */
-public class DriverCourse {
+public class DriverCourse implements Serializable{
 
     private int id;
     private User driver; // the user thar makes the course

@@ -16,24 +16,29 @@ import java.util.List;
  */
 public class LocationService {
 
-    public static LatLng getActualLocation() {
-        return new LatLng(43.6032661, 1.4422609);
+    public static LatLng getActualLocation(Context context) {
+//        return new LatLng(43.6032661, 1.4422609);
 
         // Get the location manager
-        /*
-        Location loc;
+
+        Location loc = null;
 
         if (ContextCompat.checkSelfPermission( context, android.Manifest.permission.ACCESS_FINE_LOCATION ) == PackageManager.PERMISSION_GRANTED ) {
             System.out.println("=============PERMISSION OK=============");
             LocationManager mgr = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-            List<String> providers = mgr.getAllProviders();
-            if (providers != null && providers.contains(LocationManager.NETWORK_PROVIDER)) {
-                 loc = mgr.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            List<String> providers = mgr.getProviders(true);
+            System.out.println(providers);
+            if (providers != null && providers.contains(LocationManager.GPS_PROVIDER)) {
+                 loc = mgr.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                 if (loc != null) {
                     System.out.println(loc.getLatitude() + "*" + loc.getLongitude());
                 }
             }
         }
+        else {
+            System.out.println("=============PERMISSION KO =============");
+        }
+
 
         Double lat,lon;
         try {
@@ -43,9 +48,9 @@ public class LocationService {
         }
         catch (NullPointerException e){
             e.printStackTrace();
-            return null;
+            return new LatLng(43.6032661, 1.4422609);
         }
-        */
+
     }
 
 }

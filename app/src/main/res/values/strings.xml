@@ -2,6 +2,8 @@
     <string name="app_name">GoFast</string>
     <string name="i_am_passenger">Je suis passager</string>
     <string name="i_am_driver">Je suis conducteur</string>
+    <string name="origin_title">Départ</string>
+    <string name="destination_title">Arrivée</string>
     <string name="title_activity_passenger_map">PassengerMap</string>
     <string name="writeDestination">Je saisis ma destination</string>
     <string name="validTravelConf">OK</string>

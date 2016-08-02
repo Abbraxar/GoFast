@@ -3,6 +3,7 @@ package com.i3cnam.gofast.views;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -14,7 +15,10 @@ import android.widget.Filterable;
 import android.widget.NumberPicker;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.i3cnam.gofast.R;
+import com.i3cnam.gofast.geo.GPSTracker;
+import com.i3cnam.gofast.geo.LocationService;
 import com.i3cnam.gofast.geo.PlacesService;
 import com.i3cnam.gofast.model.Place;
 
@@ -88,10 +92,13 @@ public class EnterDestination extends Activity implements OnItemClickListener {
 
     class GooglePlacesAutocompleteAdapter extends ArrayAdapter implements Filterable {
         private ArrayList<Place> resultList;
+        private Context context;
+        private GPSTracker gps;
 
         public GooglePlacesAutocompleteAdapter(Context context, int textViewResourceId) {
             super(context, textViewResourceId);
-            System.out.println("GooglePlacesAutocompleteAdapter OK");
+            this.context = context;
+            gps = new GPSTracker(context);
         }
 
         public ArrayList<Place> getResultList() {
@@ -116,7 +123,16 @@ public class EnterDestination extends Activity implements OnItemClickListener {
                     FilterResults filterResults = new FilterResults();
                     if (constraint != null) {
                         // Retrieve the autocomplete results.
-                        resultList = PlacesService.autocomplete(constraint.toString());
+                        Location loc = gps.getLocation();
+                        LatLng coord = null;
+                        try {
+                            coord = new LatLng(loc.getLatitude(), loc.getLongitude());
+                        }
+                        catch (NullPointerException e) {
+                            // JE SUIS PLACE DU CAPITOLE
+//                            coord = new LatLng(43.6032661,1.4422609);
+                        }
+                        resultList = PlacesService.autocomplete(constraint.toString(), coord);
 
                         // Assign the data to the FilterResults
                         filterResults.values = resultList;

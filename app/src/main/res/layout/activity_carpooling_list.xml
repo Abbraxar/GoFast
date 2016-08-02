@@ -4,6 +4,33 @@
     android:layout_height="match_parent">
 
 
+    <Button
+        android:onClick="requestCarpool"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Demander covoiturage"
+        android:id="@+id/request_carpool_btn"
+        android:layout_gravity="center_horizontal" />
+
+    <Button
+        android:onClick="cancelRequest"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Annuler demande"
+        android:id="@+id/cancel_request_btn"
+        android:layout_gravity="center_horizontal" />
+
+    <Button
+        android:onClick="abortCarpooling"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Interrompre covoiturage"
+        android:id="@+id/abort_carpooling_btn"
+        android:layout_gravity="center_horizontal" />
+
     <ExpandableListView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
