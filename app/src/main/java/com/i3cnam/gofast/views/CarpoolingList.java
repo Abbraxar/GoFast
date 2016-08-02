@@ -92,7 +92,7 @@ public class CarpoolingList extends FragmentActivity implements OnMapReadyCallba
      * Preparing the list data
      */
     private void prepareListData() {
-       listDataHeader = new ArrayList<String>();
+        listDataHeader = new ArrayList<String>();
         listDataChild = new HashMap<String, List<String>>();
 
         // Adding child data

@@ -1,87 +1,115 @@
 package com.i3cnam.gofast.views;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.PermissionChecker;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 import com.i3cnam.gofast.R;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Main extends AppCompatActivity {
     public final static String USER_TYPE = "com.i3cnam.gofast.USER_TYPE";
+    public final static int PERMISSIONS_REQUEST_LOCATION = 1;
+
+    // flag which is a workaround for Android bug https://code.google.com/p/android/issues/detail?id=23761
+    // more info on http://stackoverflow.com/questions/33264031/calling-dialogfragments-show-from-within-onrequestpermissionsresult-causes
+    private boolean stateWorkaroundFlagShowRationaleFragment = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
-        List<String> myProviders = locationManager.getAllProviders();
-
-        for (String oneProvider : myProviders) {
-            System.out.println(oneProvider);
-        }
-
-//        LocationProvider locationProvider = locationManager.getProvider(LocationManager.GPS_PROVIDER);
-
-//        if (checkPermission(android.Manifest.permission.ACCESS_FINE_LOCATION,0,0) == PackageManager.PERMISSION_GRANTED) {
-//            Location myLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-//        }
-        System.out.println("=============LOCATION=============");
-
-        Context context;
-//        context = getApplicationContext();
-        context = this;
-
-        System.out.println("=============ACCESS_FINE_LOCATION:" + PermissionChecker.checkSelfPermission( context, Manifest.permission.ACCESS_FINE_LOCATION ) + "=============");
-        System.out.println("=============PERMISSION_GRANTED ? " + PackageManager.PERMISSION_GRANTED + "=============");
-
-        if (ContextCompat.checkSelfPermission( context, Manifest.permission.ACCESS_FINE_LOCATION ) == PackageManager.PERMISSION_GRANTED ) {
-            System.out.println("=============PERMISSION OK=============");
-            LocationManager mgr = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-            List<String> providers = mgr.getAllProviders();
-            if (providers != null && providers.contains(LocationManager.NETWORK_PROVIDER)) {
-                Location loc = mgr.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                if (loc != null) {
-                    System.out.println(loc.getLatitude() + "*" + loc.getLongitude());
-                }
-            }
-        }
-        else {
-            System.out.println("=============PERMISSION KO=============");
-        }
-
-        int status = context.getPackageManager().checkPermission(Manifest.permission.ACCESS_FINE_LOCATION,
-                context.getPackageName());
-        System.out.println("=============status: " + status + "=============");
-        System.out.println("=============required: " + PackageManager.PERMISSION_GRANTED + "=============");
-        if (status == PackageManager.PERMISSION_GRANTED) {
-            LocationManager mgr = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-            List<String> providers = mgr.getAllProviders();
-            if (providers != null && providers.contains(LocationManager.NETWORK_PROVIDER)) {
-                Location loc = mgr.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                if (loc != null) {
-                    System.out.println(loc.getLatitude() + "*" + loc.getLongitude());
-                }
-            }
-        }
-        System.out.println("=============FIN LOCATION=============");
-
+        // check permissions
+        checkAndRequestPermissions();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if(stateWorkaroundFlagShowRationaleFragment) {
+            // Show a permission explanation to the user
+            DialogFragment newFragment = new PermissionsRationale();
+            newFragment.show(getSupportFragmentManager(), "rationale");
+            stateWorkaroundFlagShowRationaleFragment = false;
+        }
+    }
+
+
+    /**
+     * Check and request application permissions
+     * @return true if application has permissions
+     */
+    public  boolean checkAndRequestPermissions() {
+        int fineLocationPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+        int coarseLocationPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+        List<String> listPermissionsNeeded = new ArrayList<>();
+        if (fineLocationPermission != PackageManager.PERMISSION_GRANTED) {
+            listPermissionsNeeded.add(Manifest.permission.ACCESS_FINE_LOCATION);
+        }
+        if (coarseLocationPermission != PackageManager.PERMISSION_GRANTED) {
+            listPermissionsNeeded.add(Manifest.permission.ACCESS_FINE_LOCATION);
+        }
+        if (!listPermissionsNeeded.isEmpty()) {
+            ActivityCompat.requestPermissions(this,listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]), PERMISSIONS_REQUEST_LOCATION);
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String permissions[], @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_LOCATION: {
+                Map<String, Integer> perms = new HashMap<>();
+                // Initialize the map with both permissions
+                perms.put(Manifest.permission.ACCESS_COARSE_LOCATION, PackageManager.PERMISSION_GRANTED);
+                perms.put(Manifest.permission.ACCESS_FINE_LOCATION, PackageManager.PERMISSION_GRANTED);
+                // Fill with actual results from user
+                if (grantResults.length > 0) {
+                    for (int i = 0; i < permissions.length; i++) {
+                        perms.put(permissions[i], grantResults[i]);
+                    }
+                    // Check for both permissions
+                    if (perms.get(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                            || perms.get(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        // Permission denied
+                        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                                || ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                            // Show a permission explanation to the user
+                            stateWorkaroundFlagShowRationaleFragment = true;
+                        }
+                        // Permission is denied and never ask again is checked
+                        else {
+                            // TODO: handle this case (say user can enable permissions from his settings and quit app)
+                            finish();
+                        }
+                    }
+                }
+                break;
+            }
+        }
+    }
+
+    /**
+     * Call activity when user select his type
+     * @param view View
+     */
     public void selectUserType(View view) {
         Intent intent = new Intent(this, EnterDestination.class);
-//        Intent intent = new Intent(this, ConfigureTravel.class);
         String userType = view.getTag().toString();
         intent.putExtra(USER_TYPE, userType);
         startActivity(intent);
