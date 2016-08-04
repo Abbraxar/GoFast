@@ -43,8 +43,8 @@ public class GeoConstants {
         HttpURLConnection conn = null;
         StringBuilder jsonResults = new StringBuilder();
         try {
-            System.out.println("trying to reach:");
-            System.out.println(serviceString);
+            Log.d(LOG_TAG, "trying to reach:");
+            Log.d(LOG_TAG, serviceString);
             URL url = new URL(serviceString);
             conn = (HttpURLConnection) url.openConnection();
             InputStreamReader in = new InputStreamReader(conn.getInputStream());
@@ -72,7 +72,7 @@ public class GeoConstants {
 
     /**
      * Returns a string corresponding to google api format of coordinates (ie: "43.63508,1.39703")
-     * @param coordinates
+     * @param coordinates coordinates to be formatted
      * @return a string like "43.63508,1.39703"
      */
     public static String coordinatesUrlParam(LatLng coordinates) {

@@ -61,8 +61,6 @@ public class CommunicationStub implements CommInterface {
         returnList.add(carpooling);
         //---------------------------------------------------------------
 
-        System.out.println(carpooling.getPickupTime()); // Sat Jan 02 00:00:00 GMT 2010
-
         returnList.add(carpooling);
         return returnList;
     }

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.i3cnam.gofast.communication.CommInterface;
@@ -25,6 +26,8 @@ public class CarpoolingManagementService extends Service {
     private CommInterface serverCom;
     private Thread observeTravel;
     private PassengerTravel passengerTravel;
+
+    private final String TAG_LOG = "Carpooling Service"; // tag for log messages
 
     /**
      * Class used for the client Binder.  Because we know this service always
@@ -49,7 +52,7 @@ public class CarpoolingManagementService extends Service {
     public void onCreate()
     {
         super.onCreate();
-        System.out.println("Service CREATE");
+        Log.d(TAG_LOG, "Service CREATE");
         Toast.makeText(this,"Service created ...", Toast.LENGTH_LONG).show();
 
     }
@@ -58,7 +61,7 @@ public class CarpoolingManagementService extends Service {
     @Override
     public void onDestroy()
     {
-        System.out.println("Service DESTROY");
+        Log.d(TAG_LOG, "Service DESTROY");
 
     }
 
@@ -66,17 +69,17 @@ public class CarpoolingManagementService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        System.out.println("Service START");
+        Log.d(TAG_LOG, "Service START");
 
         Bundle bundle = intent.getExtras();
 
         passengerTravel = (PassengerTravel)(bundle.getSerializable(CarpoolingList.TRAVEL));
-        System.out.println(passengerTravel.getParametersString());
+        Log.d(TAG_LOG, passengerTravel.getParametersString());
 
         serverCom = new CommunicationStub();
-        System.out.println("Send request");
+        Log.d(TAG_LOG, "Send request");
         carpoolingPossibilities = serverCom.findCarpoolingPossibilities(passengerTravel);
-        System.out.println("Request sent");
+        Log.d(TAG_LOG, "Request sent");
 
         observeTravel = new Thread(new ObserveTravel());
 //        observeTravel.run();
@@ -86,23 +89,23 @@ public class CarpoolingManagementService extends Service {
     }
 
     public void updateStatus() {
-        System.out.println("Status to be updated");
+        Log.d(TAG_LOG, "Status to be updated");
 
     }
 
 
     public void requestCarpool() {
-        System.out.println("Carpool requested");
-        System.out.println(passengerTravel.getParametersString());
+        Log.d(TAG_LOG, "Carpool requested");
+        Log.d(TAG_LOG, passengerTravel.getParametersString());
     }
 
     public void cancelRequest() {
-        System.out.println("Request canceled");
-        System.out.println(passengerTravel.getParametersString());
+        Log.d(TAG_LOG, "Request canceled");
+        Log.d(TAG_LOG, passengerTravel.getParametersString());
     }
 
     public void abortCarpooling() {
-        System.out.println("Carpooling aborted");
+        Log.d(TAG_LOG, "Carpooling aborted");
         observeTravel.stop();
     }
 
@@ -118,7 +121,7 @@ public class CarpoolingManagementService extends Service {
                     updateStatus();
                 }
 */
-                System.out.println("My LOG");
+                Log.d(TAG_LOG, "My LOG");
                 try {
                     Thread.sleep(5000);
                 } catch (InterruptedException e) {
@@ -130,12 +133,12 @@ public class CarpoolingManagementService extends Service {
         private boolean searchStateChanges() {
             // compare lists sizes
             if (lastList.size() != carpoolingPossibilities.size()) {
-                System.out.println("new carpooling");
+                Log.d(TAG_LOG, "new carpooling");
                 return true;
             }
             for (Carpooling newCarpool : lastList) {
                 if (!carpoolingPossibilities.contains(newCarpool)) {
-                    System.out.println("change detected");
+                    Log.d(TAG_LOG, "change detected");
                     return true;
                 }
 

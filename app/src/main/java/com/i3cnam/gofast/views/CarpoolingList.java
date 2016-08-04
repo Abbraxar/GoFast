@@ -15,6 +15,7 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
@@ -49,6 +50,8 @@ public class CarpoolingList extends FragmentActivity implements OnMapReadyCallba
     List<String> listDataHeader;
     HashMap<String, List<String>> listDataChild;
 
+    private final String TAG_LOG = "Carpooling View";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,7 +76,7 @@ public class CarpoolingList extends FragmentActivity implements OnMapReadyCallba
         serviceIntent.putExtras(serviceBundle);
         // start service with th intent and bind it
         startService(serviceIntent);
-        System.out.println("Bind Service");
+        Log.d(TAG_LOG, "Bind Service");
         bindService(serviceIntent, myConnection, Context.BIND_AUTO_CREATE);
 
         // test du stub communication
@@ -106,7 +109,7 @@ public class CarpoolingList extends FragmentActivity implements OnMapReadyCallba
     @Override
     protected void onStart() {
         super.onStart();
-        System.out.println("ON_START");
+        Log.d(TAG_LOG, "ON_START");
         // tester l'appel au service
 
 //        myService.requestCarpool();
@@ -137,8 +140,8 @@ public class CarpoolingList extends FragmentActivity implements OnMapReadyCallba
      * Preparing the list data
      */
     private void prepareListData() {
-        listDataHeader = new ArrayList<String>();
-        listDataChild = new HashMap<String, List<String>>();
+        listDataHeader = new ArrayList<>();
+        listDataChild = new HashMap<>();
 
         // Adding child data
         listDataHeader.add("Covoiturage 1");
@@ -146,14 +149,14 @@ public class CarpoolingList extends FragmentActivity implements OnMapReadyCallba
         listDataHeader.add("Covoiturage 3");
 
         // Adding child data
-        List<String> covoiturage1 = new ArrayList<String>();
+        List<String> covoiturage1 = new ArrayList<>();
         covoiturage1.add("map à venir");
 
-        List<String> covoiturage2 = new ArrayList<String>();
+        List<String> covoiturage2 = new ArrayList<>();
         covoiturage2.add("map à venir");
 
 
-        List<String> covoiturage3 = new ArrayList<String>();
+        List<String> covoiturage3 = new ArrayList<>();
         covoiturage3.add("map à venir");
 
         listDataChild.put(listDataHeader.get(0), covoiturage1); // Header, Child data
@@ -173,18 +176,18 @@ public class CarpoolingList extends FragmentActivity implements OnMapReadyCallba
 
     /** Boutons de tests */
     public void requestCarpool(View view) {
-        System.out.println("requestCarpool");
+        Log.d(TAG_LOG, "requestCarpool");
         myService.requestCarpool();
 
     }
 
     public void cancelRequest(View view) {
-        System.out.println("cancelRequest");
+        Log.d(TAG_LOG, "cancelRequest");
         myService.cancelRequest();
     }
 
     public void abortCarpooling(View view) {
-        System.out.println("abortCarpooling");
+        Log.d(TAG_LOG, "abortCarpooling");
         myService.abortCarpooling();
 
 

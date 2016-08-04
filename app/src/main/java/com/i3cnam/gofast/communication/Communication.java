@@ -38,7 +38,7 @@ public class Communication implements CommInterface {
     @Override
     public List<Carpooling> findCarpoolingPossibilities(PassengerTravel travel) {
         // prepare the return variable
-        List<Carpooling> matchesList = new ArrayList<Carpooling>();
+        List<Carpooling> matchesList = new ArrayList<>();
 
         // prepare the string for the request
         StringBuilder sb = new StringBuilder(SERVER_IP + FIND_MATCHES);
@@ -234,7 +234,7 @@ public class Communication implements CommInterface {
         HttpURLConnection conn = null;
         StringBuilder jsonResults = new StringBuilder();
         try {
-            System.out.println(serviceString);
+            Log.d(LOG_TAG, serviceString);
             URL url = new URL(serviceString);
             conn = (HttpURLConnection) url.openConnection();
             InputStreamReader in = new InputStreamReader(conn.getInputStream());

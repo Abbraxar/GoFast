@@ -88,7 +88,7 @@ public class CourseManagementService extends Service {
 
     /**
      * verify if actual position is in the path
-     * @return
+     * @return true if the user deviated from the path
      */
     private boolean courseChanged() {
         Log.d("CourseManagementService","COURSE CHANGED?");
@@ -102,7 +102,7 @@ public class CourseManagementService extends Service {
         LatLng nearestPoint;
         // we browse each pair of consecutive points
         // (the loop is between the first and the second to last
-        while (returnValue == true && i < (actualPath.size() - 1)) {
+        while (returnValue && i < (actualPath.size() - 1)) {
 
             // calculate nearest point to the segment
             nearestPoint = Operations.nearestPoint(actualPath.get(i), actualPath.get(i + 1),  driverCourse.getActualPosition());

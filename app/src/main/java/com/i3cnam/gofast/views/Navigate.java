@@ -26,6 +26,8 @@ public class Navigate extends AppCompatActivity {
     CourseManagementService myService;
     boolean isBound = false;
 
+    private final static String TAG_LOG = "Navigate view";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,7 +57,7 @@ public class Navigate extends AppCompatActivity {
         serviceIntent.putExtras(serviceBundle);
         // start service with th intent and bind it
         startService(serviceIntent);
-        System.out.println("Bind Service");
+        Log.d(TAG_LOG, "Bind Service");
         bindService(serviceIntent, myConnection, Context.BIND_AUTO_CREATE);
 
     }

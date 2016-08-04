@@ -77,7 +77,7 @@ public class DirectionsService {
 
     public void addWaypoint(LatLng waypoint) {
         if (this.waypoints == null) {
-            this.waypoints = new ArrayList<LatLng>();
+            this.waypoints = new ArrayList<>();
         }
         waypoints.add(waypoint);
     }
@@ -118,7 +118,7 @@ public class DirectionsService {
     }
 
     private String ModeString() {
-        if (mode != "driving") {
+        if (!mode.equals("driving")) {
             return "&mode=" + mode;
         }
         else return "";
@@ -129,7 +129,7 @@ public class DirectionsService {
         else {
             String returnString = "&waypoints=";
             for (LatLng oneWaypoint: waypoints) {
-                if (returnString != "&waypoints=") returnString += "|";
+                if (!returnString.equals("&waypoints=")) returnString += "|";
                 returnString += oneWaypoint.latitude + "," + oneWaypoint.longitude;
             }
             return returnString;
@@ -156,7 +156,7 @@ public class DirectionsService {
             sb.append(ModeString());
             sb.append(WaypointsString());
 
-            System.out.println(sb.toString());
+            Log.d(LOG_TAG, sb.toString());
 
             URL url = new URL(sb.toString());
             conn = (HttpURLConnection) url.openConnection();
@@ -191,7 +191,7 @@ public class DirectionsService {
     /**
      * ---------------------------------------------------------------------------------------------
      * returns the encoded polyline of a computed path
-     * @return
+     * @return the encoded polyline
      */
     public String getEncodedPolyline() {
         try {
@@ -212,8 +212,8 @@ public class DirectionsService {
 
     /**
      * static call of directions api
-     * @param destination
-     * @return
+     * @param destination destination Place
+     * @return a list of LatLng points
      */
     public static List getDirections(Place origin, Place destination) {
 
@@ -229,7 +229,7 @@ public class DirectionsService {
             sb.append("&origin=place_id:" + URLEncoder.encode(origin.getPlaceId(), "utf8"));
             sb.append("&destination=place_id:" + URLEncoder.encode(destination.getPlaceId(), "utf8"));
 
-            System.out.println(sb.toString());
+            Log.d(LOG_TAG, sb.toString());
 
             URL url = new URL(sb.toString());
             conn = (HttpURLConnection) url.openConnection();
@@ -244,10 +244,10 @@ public class DirectionsService {
 
         } catch (MalformedURLException e) {
             Log.e(LOG_TAG, "Error processing Places API URL", e);
-            return resultList;
+            return null;
         } catch (IOException e) {
             Log.e(LOG_TAG, "Error connecting to Places API", e);
-            return resultList;
+            return null;
         } finally {
             if (conn != null) {
                 conn.disconnect();
@@ -256,7 +256,7 @@ public class DirectionsService {
 
         try {
 
-            System.out.println(jsonResults.toString());
+            Log.d(LOG_TAG, jsonResults.toString());
 
             // Create a JSON object hierarchy from the results
             JSONObject jsonObj = new JSONObject(jsonResults.toString());

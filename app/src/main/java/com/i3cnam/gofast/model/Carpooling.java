@@ -9,7 +9,7 @@ import java.util.Date;
  */
 public class Carpooling {
     // etats du covoiturage
-    public enum CarpoolingState{POTENTIAL, IN_DEMAND, IN_PROGRESS, REFUSED, CONFLICT, ACHIEVED};
+    public enum CarpoolingState{POTENTIAL, IN_DEMAND, IN_PROGRESS, REFUSED, CONFLICT, ACHIEVED}
 
     private int id;
 
@@ -103,7 +103,6 @@ public class Carpooling {
                     ((Carpooling)obj).getPickupTime().equals(getPickupTime()) &&
                     ((Carpooling)obj).getState().equals(getState())) {
                 isEqual = true;
-                System.out.println(((Carpooling)obj).getId() + "is equal" + id);
             }
         }
         return isEqual;

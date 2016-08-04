@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.View;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -40,10 +41,12 @@ public class DestinationMap extends FragmentActivity implements OnMapReadyCallba
     private List<LatLng> pathPoints;
     private Marker homeMarker, destinationMarker;
 
+    private static final String TAG_LOG = "Destination map";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        System.out.println("ON CREATE");
+        Log.d(TAG_LOG, "ON CREATE");
         setContentView(R.layout.activity_destination_map);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -69,7 +72,7 @@ public class DestinationMap extends FragmentActivity implements OnMapReadyCallba
     @Override
     protected void onResume() {
         super.onResume();
-        System.out.println("ON_RESUME");
+        Log.d(TAG_LOG, "ON_RESUME");
 //        TaskGetCoordinates MaTask =  new TaskGetCoordinates();
 //        MaTask.execute("");
     }
@@ -77,31 +80,31 @@ public class DestinationMap extends FragmentActivity implements OnMapReadyCallba
     @Override
     protected void onStart() {
         super.onStart();
-        System.out.println("ON_START");
+        Log.d(TAG_LOG, "ON_START");
     }
 
     @Override
     protected void onRestart() {
         super.onRestart();
-        System.out.println("ON_RESTART");
+        Log.d(TAG_LOG, "ON_RESTART");
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        System.out.println("ON_STOP");
+        Log.d(TAG_LOG, "ON_STOP");
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        System.out.println("ON_PAUSE");
+        Log.d(TAG_LOG, "ON_PAUSE");
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        System.out.println("ON_DESTROY");
+        Log.d(TAG_LOG, "ON_DESTROY");
     }
 
     private class TaskGetCoordinates extends AsyncTask<String, String,String> {
@@ -115,7 +118,7 @@ public class DestinationMap extends FragmentActivity implements OnMapReadyCallba
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        System.out.println("ON_MAP_READY");
+        Log.d(TAG_LOG, "ON_MAP_READY");
         mMap = googleMap;
 
         // get the position of the device
@@ -171,8 +174,8 @@ public class DestinationMap extends FragmentActivity implements OnMapReadyCallba
     private class TaskComputeAndDrawPath extends AsyncTask<String, String,String> {
         protected String doInBackground(String... urls) {
             // calculate the path between the two points
-            System.out.println(origin);
-            System.out.println(destination);
+            Log.d(TAG_LOG, origin.toString());
+            Log.d(TAG_LOG, destination.toString());
 
             path = new DirectionsService();
             path.setOrigin(origin);
@@ -231,7 +234,7 @@ public class DestinationMap extends FragmentActivity implements OnMapReadyCallba
     }
 
     public void closeMap(View view) {
-        System.out.println("closing activity");
+        Log.d(TAG_LOG, "closing activity");
         this.finish();
     }
 

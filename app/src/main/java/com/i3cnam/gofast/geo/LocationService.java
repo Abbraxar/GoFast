@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -24,19 +25,19 @@ public class LocationService {
         Location loc = null;
 
         if (ContextCompat.checkSelfPermission( context, android.Manifest.permission.ACCESS_FINE_LOCATION ) == PackageManager.PERMISSION_GRANTED ) {
-            System.out.println("=============PERMISSION OK=============");
+            Log.d("Location Service", "=============PERMISSION OK=============");
             LocationManager mgr = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
             List<String> providers = mgr.getProviders(true);
-            System.out.println(providers);
+            Log.d("Location Service", providers.toString());
             if (providers != null && providers.contains(LocationManager.GPS_PROVIDER)) {
                  loc = mgr.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                 if (loc != null) {
-                    System.out.println(loc.getLatitude() + "*" + loc.getLongitude());
+                    Log.d("Location Service", loc.getLatitude() + "*" + loc.getLongitude());
                 }
             }
         }
         else {
-            System.out.println("=============PERMISSION KO =============");
+            Log.d("Location Service", "=============PERMISSION KO =============");
         }
 
 
