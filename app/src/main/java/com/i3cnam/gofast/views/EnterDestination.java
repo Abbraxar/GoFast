@@ -18,7 +18,6 @@ import android.widget.Toast;
 import com.google.android.gms.maps.model.LatLng;
 import com.i3cnam.gofast.R;
 import com.i3cnam.gofast.geo.GPSTracker;
-import com.i3cnam.gofast.geo.LocationService;
 import com.i3cnam.gofast.geo.PlacesService;
 import com.i3cnam.gofast.model.Place;
 

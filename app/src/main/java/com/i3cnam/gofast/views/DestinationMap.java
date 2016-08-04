@@ -3,9 +3,6 @@ package com.i3cnam.gofast.views;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.StrictMode;
 import android.support.v4.app.FragmentActivity;
 import android.view.View;
 
@@ -26,6 +23,8 @@ import com.i3cnam.gofast.geo.DirectionsService;
 import com.i3cnam.gofast.geo.LocationService;
 import com.i3cnam.gofast.model.Place;
 
+import java.util.List;
+
 public class DestinationMap extends FragmentActivity implements OnMapReadyCallback {
 
     public final static String ORIGIN = "com.i3cnam.gofast.ORIGIN";
@@ -38,6 +37,8 @@ public class DestinationMap extends FragmentActivity implements OnMapReadyCallba
     private String userType;
     private DirectionsService path;
     private LatLngBounds mapBounds;
+    private List<LatLng> pathPoints;
+    private Marker homeMarker, destinationMarker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,9 +131,9 @@ public class DestinationMap extends FragmentActivity implements OnMapReadyCallba
         new TaskZoomMap().execute("");
 
         // set the ORIGIN marker
-        Marker homeMarker = mMap.addMarker(new MarkerOptions().position(devicePosition).title(getResources().getString(R.string.origin_title)));
+        homeMarker = mMap.addMarker(new MarkerOptions().position(devicePosition).title(getResources().getString(R.string.origin_title)));
         // set the destination marker
-        Marker destinationMarker = mMap.addMarker(new MarkerOptions().position(destination.getCoordinates())
+        destinationMarker = mMap.addMarker(new MarkerOptions().position(destination.getCoordinates())
                 .title(getResources().getString(R.string.destination_title))
                 .snippet(destination.getPlaceName()));
         destinationMarker.showInfoWindow();
@@ -159,8 +160,6 @@ public class DestinationMap extends FragmentActivity implements OnMapReadyCallba
             // launch an asynchronous task to compute and draw the path
             new TaskComputeAndDrawPath().execute("");
 
-            // change the icon of the origin marker
-            homeMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.driver_50));
         }
 
 
@@ -180,12 +179,31 @@ public class DestinationMap extends FragmentActivity implements OnMapReadyCallba
             path.setDestination(destination);
             path.computeDirections();
             encodedPoints = path.getEncodedPolyline();
+            pathPoints = path.getPathPoints();
             return null;
         }
         protected void onPostExecute(String result) {
             // draw the path
             Polyline pathPolyline = mMap.addPolyline(new PolylineOptions());
-            pathPolyline.setPoints(path.getPathPoints());
+            pathPolyline.setPoints(pathPoints);
+            /*
+            // rotate the car icon
+            //      (the cap function calculates the cap with the reference of the north pole
+            //       and clockwise then, we need to add 270 deg)
+            float angle = (float)(Operations.toDegrees(Operations.cap(pathPoints.get(0),pathPoints.get(1))));
+            angle += 270;
+            while (angle > 360 ) { angle -= 360; }
+            homeMarker.setRotation(angle);
+
+            // change the icon of the origin marker
+            if (angle > 90 && angle < 270) {
+                homeMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.driver_50_flip));
+            }
+            else {
+                homeMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.driver_50));
+            }
+            */
+            homeMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.driver_50));
         }
     }
 

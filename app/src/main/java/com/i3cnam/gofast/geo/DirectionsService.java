@@ -47,6 +47,10 @@ public class DirectionsService {
         this.origin = origin;
     }
 
+    public void setOrigin(LatLng origin) {
+        this.origin = new Place(origin);
+    }
+
     public void setDestination(Place destination) {
         this.destination = destination;
     }

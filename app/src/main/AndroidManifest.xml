@@ -40,7 +40,11 @@
         <activity
             android:name=".views.DestinationMap"
             android:label="@string/title_activity_passenger_map" />
-        <activity android:name=".views.Navigate" />
+        <activity android:name=".views.Navigate">
+            <intent-filter>
+                <action android:name="com.i3cnam.gofast.UPDATE_POSITION"></action>
+            </intent-filter>
+        </activity>
         <activity android:name=".views.CarpoolingList" />
 
         <service android:name=".management.carpooling.CarpoolingManagementService" />

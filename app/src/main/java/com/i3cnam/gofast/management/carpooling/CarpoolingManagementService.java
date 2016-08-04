@@ -73,14 +73,13 @@ public class CarpoolingManagementService extends Service {
         passengerTravel = (PassengerTravel)(bundle.getSerializable(CarpoolingList.TRAVEL));
         System.out.println(passengerTravel.getParametersString());
 
-
         serverCom = new CommunicationStub();
         System.out.println("Send request");
         carpoolingPossibilities = serverCom.findCarpoolingPossibilities(passengerTravel);
         System.out.println("Request sent");
 
         observeTravel = new Thread(new ObserveTravel());
-        observeTravel.run();
+//        observeTravel.run();
         // We want this service to continue running until it is explicitly
         // stopped, so return sticky.
         return START_STICKY;
