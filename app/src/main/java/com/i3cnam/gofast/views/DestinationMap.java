@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -25,6 +27,8 @@ import com.i3cnam.gofast.geo.LocationService;
 import com.i3cnam.gofast.model.Place;
 
 import java.util.List;
+
+import systr.cartographie.Operations;
 
 public class DestinationMap extends FragmentActivity implements OnMapReadyCallback {
 
@@ -129,6 +133,26 @@ public class DestinationMap extends FragmentActivity implements OnMapReadyCallba
             devicePosition = new LatLng(43.6032661,1.4422609);
         }
         origin = new Place(devicePosition);
+
+        double straightLineDistance = Operations.dist2PointsEnM(origin.getCoordinates(),destination.getCoordinates());
+        Log.d(TAG_LOG, Double.toString(straightLineDistance));
+        String redText = null;
+        if (straightLineDistance > 100000) {
+            redText = "Vous allez trop loin, GoFast n'est pas approprié à votre usage";
+        }
+
+        if (userType.equals("passenger")) {
+           if(straightLineDistance < (2 * radius)) {
+               redText = "Votre destination est trop proche, allez à pied";
+            }
+        }
+        if (redText != null) {
+            TextView redMessage = (TextView) findViewById(R.id.redMessage);
+            redMessage.setText(redText);
+            redMessage.setVisibility(View.VISIBLE);
+            Button validateButton = (Button) findViewById(R.id.btValidateDestination);
+            validateButton.setEnabled(false);
+        }
 
         // set the bounds for the map
         new TaskZoomMap().execute("");

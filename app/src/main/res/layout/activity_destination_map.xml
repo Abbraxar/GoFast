@@ -8,6 +8,7 @@
     tools:context=".views.DestinationMap">
 
     <Button
+        android:id="@+id/btValidateDestination"
         android:onClick="validate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -30,5 +31,22 @@
         android:padding="10dp"
         android:layout_marginTop="20dp"
         android:paddingRight="100dp"/>
+
+    <TextView
+        android:visibility="invisible"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_gravity="center"
+        android:text="Turlututu"
+        android:id="@+id/redMessage"
+        android:background="#aaff1111"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:padding="50dp"
+        android:textStyle="bold"
+        android:layout_marginTop="46dp" />
+
+
 
     </fragment>
