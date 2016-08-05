@@ -96,12 +96,12 @@ public class DirectionsService {
     }
 
     private String OriginString() {
-        if (origin.getPlaceId() != null) {
-            return "&origin=place_id:" + origin.getPlaceId();
-        }
-        else if (origin.getCoordinates() != null) {
+        if (origin.getCoordinates() != null) {
             return "&origin=" +  Double.toString(origin.getCoordinates().latitude) + ","
                     + Double.toString(origin.getCoordinates().longitude);
+        }
+        else if (origin.getPlaceId() != null) {
+            return "&origin=place_id:" + origin.getPlaceId();
         }
         else return "&origin=" + origin.getPlaceName();
     }

@@ -10,13 +10,18 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import com.i3cnam.gofast.R;
+import com.i3cnam.gofast.management.carpooling.CarpoolListEncapsulated;
 import com.i3cnam.gofast.management.course.CourseManagementService;
+import com.i3cnam.gofast.model.Carpooling;
 import com.i3cnam.gofast.model.DriverCourse;
 import com.i3cnam.gofast.model.Place;
 import com.i3cnam.gofast.model.User;
+
+import java.util.List;
 
 
 public class Navigate extends AppCompatActivity {
@@ -25,6 +30,7 @@ public class Navigate extends AppCompatActivity {
     private DriverCourse driverCourse;
     CourseManagementService myService;
     boolean isBound = false;
+    private List<Carpooling> requestedCarpoolings;
 
     private final static String TAG_LOG = "Navigate view";
 
@@ -48,9 +54,8 @@ public class Navigate extends AppCompatActivity {
     }
 
     private void launchAndBindCourseManagementService()  {
-
         // new intent for publication:
-        Intent serviceIntent = new Intent(this, CourseManagementService.class);
+        Intent serviceIntent = new Intent(Navigate.this, CourseManagementService.class);
         // new bundle
         Bundle serviceBundle = new Bundle();
         serviceBundle.putSerializable(COURSE, driverCourse);
@@ -59,7 +64,6 @@ public class Navigate extends AppCompatActivity {
         startService(serviceIntent);
         Log.d(TAG_LOG, "Bind Service");
         bindService(serviceIntent, myConnection, Context.BIND_AUTO_CREATE);
-
     }
 
     /** Defines callbacks for service binding, passed to bindService() */
@@ -82,31 +86,85 @@ public class Navigate extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(CourseManagementService.BROADCAST_ACTION);
-        registerReceiver(broadcastReceiver, filter);
+        // for the course changes
+        IntentFilter courseFilter = new IntentFilter();
+        courseFilter.addAction(CourseManagementService.BROADCAST_UPDATE_COURSE_ACTION);
+        registerReceiver(broadcastCourseReceiver, courseFilter);
+
+        // for the carpooling request changes
+        IntentFilter carpoolingFilter = new IntentFilter();
+        carpoolingFilter.addAction(CourseManagementService.BROADCAST_UPDATE_CARPOOLING_ACTION);
+        registerReceiver(broadcastCarpoolingReceiver, carpoolingFilter);
+
         super.onResume();
     }
 
     @Override
     protected void onPause() {
-        unregisterReceiver(broadcastReceiver);
+        unregisterReceiver(broadcastCarpoolingReceiver);
+        unregisterReceiver(broadcastCourseReceiver);
         super.onPause();
     }
 
 
+    /** Boutons de test */
+    public void acceptCarpool(View view) {
+        Log.d(TAG_LOG, "acceptCarpool");
+        myService.acceptCarpooling(requestedCarpoolings.get(0));
+    }
 
-    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+    public void refuseCarpool(View view) {
+        Log.d(TAG_LOG, "refuseCarpool");
+        myService.refuseCarpooling(requestedCarpoolings.get(0));
+    }
+
+    public void abortCarpooling(View view) {
+        Log.d(TAG_LOG, "abortCarpooling");
+        myService.abortCarpooling(requestedCarpoolings.get(0));
+    }
+
+
+
+    private BroadcastReceiver broadcastCourseReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             // TODO
             Log.d("BroadcastReceiver", "Broadcast received");
-            Toast.makeText(getApplicationContext(), "Broadcast received", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "Course received", Toast.LENGTH_SHORT).show();
 
             Bundle bundle = intent.getExtras();
-            driverCourse = (DriverCourse)(bundle.getSerializable("UPDATED_COURSE"));
+            driverCourse = (DriverCourse)(bundle.getSerializable("COURSE"));
 
             Toast.makeText(getApplicationContext(), "New position is : \n" + driverCourse.getActualPosition(), Toast.LENGTH_LONG).show();
         }
     };
+
+    private BroadcastReceiver broadcastCarpoolingReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // TODO
+            Log.d("BroadcastReceiver", "Broadcast received");
+            Toast.makeText(getApplicationContext(), "Carpooling received", Toast.LENGTH_SHORT).show();
+
+            Bundle bundle = intent.getExtras();
+            CarpoolListEncapsulated listEncapsulated= (CarpoolListEncapsulated) (bundle.getSerializable("CARPOOL"));
+            requestedCarpoolings = listEncapsulated.list;
+            // TODO
+            // DO SOMETHING
+            String s;
+            for (Carpooling c : requestedCarpoolings) {
+                s = "Carpooling " + c.getId() + "\n" +
+                        "pick up: " + c.getPickupPoint() + "\n" +
+                        "drop off: " + c.getDropoffPoint() + "\n" +
+                        "time: " + c.getPickupTime() + "\n" +
+                        "state: " + c.getState() + "\n" +
+                        "fare: " + c.getFare() + "\n";
+
+                Log.d("BroadcastReceiver", s);
+                Toast.makeText(getApplicationContext(), s, Toast.LENGTH_SHORT).show();
+            }
+        }
+    };
+
+
 }

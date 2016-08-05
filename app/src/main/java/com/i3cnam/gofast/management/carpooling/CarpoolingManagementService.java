@@ -2,13 +2,14 @@ package com.i3cnam.gofast.management.carpooling;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.i3cnam.gofast.communication.CommInterface;
+import com.i3cnam.gofast.communication.Communication;
 import com.i3cnam.gofast.communication.CommunicationStub;
 import com.i3cnam.gofast.model.Carpooling;
 import com.i3cnam.gofast.model.PassengerTravel;
@@ -24,8 +25,18 @@ public class CarpoolingManagementService extends Service {
     private List<Carpooling> carpoolingPossibilities;
     private final IBinder myBinder = new LocalBinder();
     private CommInterface serverCom;
-    private Thread observeTravel;
     private PassengerTravel passengerTravel;
+    private Thread observeTravel;
+
+    // temporary global variables to communicate between threads:
+    private Carpooling carpoolingToRequest;
+    private Carpooling carpoolingToCancel;
+    private Carpooling carpoolingToAbort;
+
+    // test pour le broadcast
+    public static final String BROADCAST_ACTION = "com.i3cnam.gofast.UPDATE_CARPOOLING";
+    private Intent broadcastIntent;
+
 
     private final String TAG_LOG = "Carpooling Service"; // tag for log messages
 
@@ -53,8 +64,7 @@ public class CarpoolingManagementService extends Service {
     {
         super.onCreate();
         Log.d(TAG_LOG, "Service CREATE");
-        Toast.makeText(this,"Service created ...", Toast.LENGTH_LONG).show();
-
+        broadcastIntent = new Intent(BROADCAST_ACTION);
     }
 
 
@@ -66,7 +76,6 @@ public class CarpoolingManagementService extends Service {
     }
 
 
-
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG_LOG, "Service START");
@@ -76,56 +85,86 @@ public class CarpoolingManagementService extends Service {
         passengerTravel = (PassengerTravel)(bundle.getSerializable(CarpoolingList.TRAVEL));
         Log.d(TAG_LOG, passengerTravel.getParametersString());
 
+        // create communication module
         serverCom = new CommunicationStub();
-        Log.d(TAG_LOG, "Send request");
-        carpoolingPossibilities = serverCom.findCarpoolingPossibilities(passengerTravel);
-        Log.d(TAG_LOG, "Request sent");
 
+        // launch observer thread
         observeTravel = new Thread(new ObserveTravel());
-//        observeTravel.run();
+        observeTravel.start();
         // We want this service to continue running until it is explicitly
         // stopped, so return sticky.
         return START_STICKY;
     }
 
-    public void updateStatus() {
+    /**
+     * Broadcast the carpooling update
+     */
+    private void updateStatus() {
         Log.d(TAG_LOG, "Status to be updated");
+        Log.d("BroadcastService", "entered sendCarpoolingUpdate");
+        broadcastIntent.putExtra("UPDATED_CARPOOLING", new CarpoolListEncapsulated(carpoolingPossibilities));
+        sendBroadcast(broadcastIntent);
 
     }
 
+    /*
+    ------------------------------------------------------------------------------------------------
+        PUBLIC METHODS
+        (Called by the activity)
+    ------------------------------------------------------------------------------------------------
+     */
 
-    public void requestCarpool() {
-        Log.d(TAG_LOG, "Carpool requested");
-        Log.d(TAG_LOG, passengerTravel.getParametersString());
+    public void requestCarpool(Carpooling carpooling) {
+        carpoolingToRequest = carpooling;
+        new AsynchronousRequestCarpool().execute();
     }
 
-    public void cancelRequest() {
-        Log.d(TAG_LOG, "Request canceled");
-        Log.d(TAG_LOG, passengerTravel.getParametersString());
+    public void cancelRequest(Carpooling carpooling) {
+        carpoolingToCancel = carpooling;
+        new AsynchronousCancelRequest().execute();
     }
 
-    public void abortCarpooling() {
-        Log.d(TAG_LOG, "Carpooling aborted");
+    public void abortCarpooling(Carpooling carpooling) {
+        carpoolingToAbort = carpooling;
+        new AsynchronousAbortCarpool().execute();
         observeTravel.stop();
     }
+
+    /*
+    ------------------------------------------------------------------------------------------------
+    */
 
     private class ObserveTravel implements Runnable {
         List<Carpooling> lastList;
         @Override
         public void run() {
+            // declare travel
+            int id = serverCom.declareTravel(passengerTravel);
+            passengerTravel.setId(id);
+
+            // do first query
+            Log.d(TAG_LOG, "Send request");
+            carpoolingPossibilities = serverCom.findCarpoolingPossibilities(passengerTravel);
+
+            // broadcast initial data
+            updateStatus();
+
+            // then do one query every second
             while (true) {
-                /*
-                serverCom.observeTravel(passengerTravel);
-                lastList = serverCom.getTravelState(passengerTravel);
-                if (searchStateChanges()) {
-                    updateStatus();
-                }
-*/
-                Log.d(TAG_LOG, "My LOG");
+                // wait one second
                 try {
-                    Thread.sleep(5000);
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
+                }
+
+                // do the query
+                serverCom.observeTravel(passengerTravel);
+                lastList = serverCom.getTravelState(passengerTravel);
+                // compare results
+                if (searchStateChanges()) {
+                    carpoolingPossibilities = lastList;
+                    updateStatus();
                 }
             }
         }
@@ -136,17 +175,61 @@ public class CarpoolingManagementService extends Service {
                 Log.d(TAG_LOG, "new carpooling");
                 return true;
             }
+            // search if each carpool is identical than previous version
             for (Carpooling newCarpool : lastList) {
                 if (!carpoolingPossibilities.contains(newCarpool)) {
                     Log.d(TAG_LOG, "change detected");
                     return true;
                 }
-
+            }
+            // search if no carpool was deleted
+            for (Carpooling newCarpool : carpoolingPossibilities) {
+                if (!lastList.contains(newCarpool)) {
+                    Log.d(TAG_LOG, "change detected");
+                    return true;
+                }
             }
             return false;
-
         }
 
+
+
+    }
+
+    /**
+     * Request a carpool in a new thread
+     */
+    private class AsynchronousRequestCarpool extends AsyncTask<String, String,String> {
+        protected String doInBackground(String... urls) {
+            Log.d(TAG_LOG, "Carpool requested");
+            Log.d(TAG_LOG, passengerTravel.getParametersString());
+            serverCom.requestCarpool(carpoolingToRequest);
+            return null;
+        }
+    }
+
+    /**
+     * Cancel a carpool request in a new thread
+     */
+    private class AsynchronousCancelRequest extends AsyncTask<String, String,String> {
+        protected String doInBackground(String... urls) {
+            Log.d(TAG_LOG, "Request canceled");
+            Log.d(TAG_LOG, passengerTravel.getParametersString());
+            serverCom.cancelRequest(carpoolingToCancel);
+            return null;
+        }
+    }
+
+    /**
+     * Abort a carpool in a new thread
+     */
+    private class AsynchronousAbortCarpool extends AsyncTask<String, String,String> {
+        protected String doInBackground(String... urls) {
+            Log.d(TAG_LOG, "Carpooling aborted");
+            Log.d(TAG_LOG, passengerTravel.getParametersString());
+            serverCom.abortCarpool(carpoolingToAbort);
+            return null;
+        }
     }
 
 }

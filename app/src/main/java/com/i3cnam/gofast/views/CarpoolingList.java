@@ -8,9 +8,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -19,6 +21,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -28,9 +31,12 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.i3cnam.gofast.R;
 import com.i3cnam.gofast.communication.CommInterface;
 import com.i3cnam.gofast.communication.CommunicationStub;
+import com.i3cnam.gofast.management.carpooling.CarpoolListEncapsulated;
 import com.i3cnam.gofast.management.carpooling.CarpoolingManagementService;
 import com.i3cnam.gofast.management.carpooling.CarpoolingManagementService.LocalBinder;
+import com.i3cnam.gofast.management.course.CourseManagementService;
 import com.i3cnam.gofast.model.Carpooling;
+import com.i3cnam.gofast.model.DriverCourse;
 import com.i3cnam.gofast.model.PassengerTravel;
 import com.i3cnam.gofast.model.Place;
 import com.i3cnam.gofast.model.User;
@@ -44,6 +50,7 @@ public class CarpoolingList extends FragmentActivity implements OnMapReadyCallba
     private PassengerTravel passengerTravel;
     CarpoolingManagementService myService;
     boolean isBound = false;
+    private List<Carpooling> possibilities; // list of carpooling possibilities
     // pour la liste
     ExpandableListAdapter listAdapter;
     ExpandableListView expListView;
@@ -82,7 +89,7 @@ public class CarpoolingList extends FragmentActivity implements OnMapReadyCallba
         // test du stub communication
         CommInterface serverCom = new CommunicationStub();
         System.out.println("Send request");
-        List<Carpooling> possibilities = serverCom.findCarpoolingPossibilities(passengerTravel);
+        possibilities = serverCom.findCarpoolingPossibilities(passengerTravel);
         System.out.println("Request sent");
 
         for (Carpooling onePossibility: possibilities) {
@@ -111,10 +118,25 @@ public class CarpoolingList extends FragmentActivity implements OnMapReadyCallba
         super.onStart();
         Log.d(TAG_LOG, "ON_START");
         // tester l'appel au service
-
 //        myService.requestCarpool();
-
     }
+
+
+    @Override
+    protected void onResume() {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(CarpoolingManagementService.BROADCAST_ACTION);
+        registerReceiver(broadcastReceiver, filter);
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        unregisterReceiver(broadcastReceiver);
+        super.onPause();
+    }
+
+
 
     /** Defines callbacks for service binding, passed to bindService() */
     private ServiceConnection myConnection = new ServiceConnection() {
@@ -177,22 +199,44 @@ public class CarpoolingList extends FragmentActivity implements OnMapReadyCallba
     /** Boutons de tests */
     public void requestCarpool(View view) {
         Log.d(TAG_LOG, "requestCarpool");
-        myService.requestCarpool();
-
+        myService.requestCarpool(possibilities.get(0));
     }
 
     public void cancelRequest(View view) {
         Log.d(TAG_LOG, "cancelRequest");
-        myService.cancelRequest();
+        myService.cancelRequest(possibilities.get(0));
     }
 
     public void abortCarpooling(View view) {
         Log.d(TAG_LOG, "abortCarpooling");
-        myService.abortCarpooling();
-
-
+        myService.abortCarpooling(possibilities.get(0));
     }
 
 
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("BroadcastReceiver", "Broadcast received");
+            Toast.makeText(getApplicationContext(), "Broadcast received", Toast.LENGTH_SHORT).show();
+
+            Bundle bundle = intent.getExtras();
+            CarpoolListEncapsulated carpoolListEncapsulated = (CarpoolListEncapsulated)(bundle.getSerializable("UPDATED_CARPOOLING"));
+            possibilities = carpoolListEncapsulated.list;
+            // TODO
+            // DO SOMETHING
+            String s;
+            for (Carpooling c : possibilities) {
+                s = "Carpooling " + c.getId() + "\n" +
+                        "pick up: " + c.getPickupPoint() + "\n" +
+                        "drop off: " + c.getDropoffPoint() + "\n" +
+                        "time: " + c.getPickupTime() + "\n" +
+                        "state: " + c.getState() + "\n" +
+                        "fare: " + c.getFare() + "\n";
+
+                Log.d("BroadcastReceiver", s);
+                Toast.makeText(getApplicationContext(), s, Toast.LENGTH_SHORT).show();
+            }
+        }
+    };
 
 }

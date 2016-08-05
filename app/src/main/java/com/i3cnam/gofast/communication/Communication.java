@@ -17,6 +17,9 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,64 +28,24 @@ import java.util.List;
  */
 public class Communication implements CommInterface {
 
-    static final String SERVER_IP = "http://10.0.2.2:9090";
-    static final String FIND_MATCHES = "/find_matches";
+    static final String SERVER_IP = "http://10.0.2.2:9090"; // serveur local
+//    static final String SERVER_IP = "http://92.222.82.175:9090/"; // serveur OVH
     static final String DECLARE_COURSE = "/declare_course";
+    static final String DECLARE_TRAVEL = "/declare_travel";
+    static final String FIND_MATCHES = "/find_matches";
     static final String REQUEST_CARPOOL = "/request_carpooling";
+    static final String CANCEL_REQUEST = "/cancel_request";
     static final String ACCEPT_CARPOOL = "/accept_carpooling";
-    static final String GET_TRAVEL = "/accept_carpooling";
+    static final String REFUSE_CARPOOL = "/refuse_carpooling";
+    static final String ABORT_CARPOOL = "/abort_carpooling";
+    static final String GET_TRAVEL = "/get_travel";
+    static final String GET_COURSE = "/get_course";
     static final String UPDATE_POSITION = "/update_position";
+    static final String UPDATE_COURSE = "/update_course";
 
     private static final String LOG_TAG = "Server Communication";
+    private static final DateFormat format = new SimpleDateFormat("y/M/d H:m");
 
-    @Override
-    public List<Carpooling> findCarpoolingPossibilities(PassengerTravel travel) {
-        // prepare the return variable
-        List<Carpooling> matchesList = new ArrayList<>();
-
-        // prepare the string for the request
-        StringBuilder sb = new StringBuilder(SERVER_IP + FIND_MATCHES);
-        sb.append("?" + travel.getParametersString());
-
-        // call the service and obtain a response
-        String rawJSON = useService(sb.toString());
-
-        try {
-            // Create a JSON object hierarchy from the results
-            JSONObject jsonObject = new JSONObject(rawJSON);
-
-            // get the element matches
-            JSONArray routesJsonArray = jsonObject.getJSONArray("matches");
-
-            // browse the element matches
-            for (int i = 0; i < routesJsonArray.length(); i++) {
-                Carpooling toBeAdded = new Carpooling();
-
-                JSONObject pickupPoint = routesJsonArray.getJSONObject(i).getJSONObject("pickup_point");
-                JSONObject dropoffPoint = routesJsonArray.getJSONObject(i).getJSONObject("dropoff_point");
-                String pickupTime = routesJsonArray.getJSONObject(i).getString("pickup_time");
-
-                toBeAdded.setPickupPoint(
-                        new LatLng(Double.parseDouble(pickupPoint.getString("lat")),
-                                Double.parseDouble(pickupPoint.getString("long")))
-                );
-                toBeAdded.setDropoffPoint(
-                        new LatLng(Double.parseDouble(dropoffPoint.getString("lat")),
-                                Double.parseDouble(dropoffPoint.getString("long")))
-                );
-//                toBeAdded.setPickupTime(Time.valueOf(pickupTime));
-
-                toBeAdded.setState(Carpooling.CarpoolingState.POTENTIAL);
-
-                matchesList.add(toBeAdded);
-            }
-
-
-            } catch (JSONException e) {
-            Log.e(LOG_TAG, "Cannot process JSON results", e);
-        }
-        return matchesList;
-    }
 
     @Override
     public int declareCourse(DriverCourse driverCourse) {
@@ -111,30 +74,127 @@ public class Communication implements CommInterface {
         return returnValue;
     }
 
+
+    @Override
+    public int declareTravel(PassengerTravel passengerTravel) {
+        // prepare the return variable
+        int returnValue = 0;
+
+        // prepare the string for the request
+        StringBuilder sb = new StringBuilder(SERVER_IP + DECLARE_TRAVEL);
+        sb.append("?" + passengerTravel.getParametersString());
+
+        // call the service and obtain a response
+        String rawJSON = useService(sb.toString());
+
+
+        try {
+            // Create a JSON object hierarchy from the results
+            JSONObject jsonObject = new JSONObject(rawJSON);
+
+            // get course id
+            returnValue = jsonObject.getInt("travel_id");
+
+        } catch (JSONException e) {
+            Log.e(LOG_TAG, "Cannot process JSON results", e);
+        }
+
+        return returnValue;
+    }
+
+
+    @Override
+    public List<Carpooling> findCarpoolingPossibilities(PassengerTravel travel) {
+        // prepare the return variable
+        List<Carpooling> matchesList = new ArrayList<>();
+
+        // prepare the string for the request
+        StringBuilder sb = new StringBuilder(SERVER_IP + FIND_MATCHES);
+        sb.append("?travel_id" + travel.getId());
+
+        // call the service and obtain a response
+        String rawJSON = useService(sb.toString());
+
+        try {
+            // Create a JSON object hierarchy from the results
+            JSONObject jsonObject = new JSONObject(rawJSON);
+
+            // get the element matches
+            JSONArray routesJsonArray = jsonObject.getJSONArray("matches");
+
+            // browse the element matches
+            for (int i = 0; i < routesJsonArray.length(); i++) {
+                matchesList.add(parseCarpoolingJsonObject(routesJsonArray.getJSONObject(i)));
+            }
+
+        } catch (JSONException e) {
+            Log.e(LOG_TAG, "Cannot process JSON results", e);
+        }
+        return matchesList;
+    }
+
+
     @Override
     public void requestCarpool(Carpooling carpooling) {
         // prepare the string for the request
         StringBuilder sb = new StringBuilder(SERVER_IP + REQUEST_CARPOOL);
-        sb.append("?carpool_id" + carpooling.getId());
+        sb.append("?carpool_id=" + carpooling.getId());
 
         // call the service and obtain a response
         String rawJSON = useService(sb.toString());
     }
+
 
     @Override
     public void acceptCarpool(Carpooling carpooling) {
         // prepare the string for the request
         StringBuilder sb = new StringBuilder(SERVER_IP + ACCEPT_CARPOOL);
-        sb.append("?carpool_id" + carpooling.getId());
+        sb.append("?carpool_id=" + carpooling.getId());
 
         // call the service and obtain a response
         String rawJSON = useService(sb.toString());
     }
 
     @Override
+    public void refuseCarpool(Carpooling carpooling) {
+        // prepare the string for the request
+        StringBuilder sb = new StringBuilder(SERVER_IP + REFUSE_CARPOOL);
+        sb.append("?carpool_id=" + carpooling.getId());
+
+        // call the service and obtain a response
+        String rawJSON = useService(sb.toString());
+
+    }
+
+
+    @Override
+    public void cancelRequest(Carpooling carpooling) {
+        // prepare the string for the request
+        StringBuilder sb = new StringBuilder(SERVER_IP + CANCEL_REQUEST);
+        sb.append("?carpool_id=" + carpooling.getId());
+
+        // call the service and obtain a response
+        String rawJSON = useService(sb.toString());
+
+    }
+
+
+    @Override
+    public void abortCarpool(Carpooling carpooling) {
+        // prepare the string for the request
+        StringBuilder sb = new StringBuilder(SERVER_IP + ABORT_CARPOOL);
+        sb.append("?carpool_id=" + carpooling.getId());
+
+        // call the service and obtain a response
+        String rawJSON = useService(sb.toString());
+
+    }
+
+
+    @Override
     public void updatePosition(DriverCourse driverCourse) {
         // prepare the string for the request
-        StringBuilder sb = new StringBuilder(SERVER_IP + ACCEPT_CARPOOL);
+        StringBuilder sb = new StringBuilder(SERVER_IP + UPDATE_POSITION);
         sb.append("?course_id=" + driverCourse.getId());
         sb.append("&new_position=" + GeoConstants.coordinatesUrlParam(driverCourse.getActualPosition()));
 
@@ -147,7 +207,7 @@ public class Communication implements CommInterface {
     public void updateCourse(DriverCourse driverCourse) {
 
         // prepare the string for the request
-        StringBuilder sb = new StringBuilder(SERVER_IP + ACCEPT_CARPOOL);
+        StringBuilder sb = new StringBuilder(SERVER_IP + UPDATE_COURSE);
         sb.append("?course_id=" + driverCourse.getId());
         sb.append("&new_position=" + GeoConstants.coordinatesUrlParam(driverCourse.getActualPosition()));
         sb.append("&new_encoded_points=" + driverCourse.getEncodedPoints());
@@ -167,13 +227,23 @@ public class Communication implements CommInterface {
     }
 
     @Override
+    public void observeTravel(PassengerTravel passengerTravel) {
+
+    }
+
+    @Override
+    public void unobserveTravel(PassengerTravel passengerTravel) {
+
+    }
+
+    @Override
     public List<Carpooling> getTravelState(PassengerTravel travel) {
         // prepare the return variable
         List<Carpooling> matchesList = new ArrayList<>();
 
         // prepare the string for the request
-        StringBuilder sb = new StringBuilder(SERVER_IP + FIND_MATCHES);
-        sb.append("?" + travel.getParametersString());
+        StringBuilder sb = new StringBuilder(SERVER_IP + GET_TRAVEL);
+        sb.append("?travel_id=" + travel.getId());
 
         // call the service and obtain a response
         String rawJSON = useService(sb.toString());
@@ -187,41 +257,49 @@ public class Communication implements CommInterface {
 
             // browse the element matches
             for (int i = 0; i < routesJsonArray.length(); i++) {
-                Carpooling toBeAdded = new Carpooling();
 
-                JSONObject pickupPoint = routesJsonArray.getJSONObject(i).getJSONObject("pickup_point");
-                JSONObject dropoffPoint = routesJsonArray.getJSONObject(i).getJSONObject("dropoff_point");
-                String pickupTime = routesJsonArray.getJSONObject(i).getString("pickup_time");
+                matchesList.add(parseCarpoolingJsonObject(routesJsonArray.getJSONObject(i)));
 
-                toBeAdded.setPickupPoint(
-                        new LatLng(Double.parseDouble(pickupPoint.getString("lat")),
-                                Double.parseDouble(pickupPoint.getString("long")))
-                );
-                toBeAdded.setDropoffPoint(
-                        new LatLng(Double.parseDouble(dropoffPoint.getString("lat")),
-                                Double.parseDouble(dropoffPoint.getString("long")))
-                );
-//                toBeAdded.setPickupTime(Time.valueOf(pickupTime));
-
-                toBeAdded.setState(Carpooling.CarpoolingState.POTENTIAL);
-
-                matchesList.add(toBeAdded);
             }
 
 
         } catch (JSONException e) {
             Log.e(LOG_TAG, "Cannot process JSON results", e);
         }
-        return matchesList;    }
-
-    @Override
-    public void observeTravel(PassengerTravel passengerTravel) {
-
+        return matchesList;
     }
 
     @Override
-    public void unobserveTravel(PassengerTravel passengerTravel) {
+    public List<Carpooling> getCourseState(DriverCourse driverCourse) {
+        // prepare the return variable
+        List<Carpooling> requestedCarpoolings = new ArrayList<>();
 
+        // prepare the string for the request
+        StringBuilder sb = new StringBuilder(SERVER_IP + GET_COURSE);
+        sb.append("?course_id=" + driverCourse.getId());
+
+        // call the service and obtain a response
+        String rawJSON = useService(sb.toString());
+
+        try {
+            // Create a JSON object hierarchy from the results
+            JSONObject jsonObject = new JSONObject(rawJSON);
+
+            // get the element matches
+            JSONArray routesJsonArray = jsonObject.getJSONArray("matches");
+
+            // browse the element matches
+            for (int i = 0; i < routesJsonArray.length(); i++) {
+
+                requestedCarpoolings.add(parseCarpoolingJsonObject(routesJsonArray.getJSONObject(i)));
+
+            }
+
+
+        } catch (JSONException e) {
+            Log.e(LOG_TAG, "Cannot process JSON results", e);
+        }
+        return requestedCarpoolings;
     }
 
 
@@ -258,6 +336,45 @@ public class Communication implements CommInterface {
 
         return jsonResults.toString();
 
+    }
+
+    private static Carpooling parseCarpoolingJsonObject(JSONObject jsonCarpooling) {
+
+        Carpooling carpooling = new Carpooling();
+        try {
+            int id = jsonCarpooling.getInt("id");
+            carpooling.setId(id);
+
+            JSONObject pickupPoint = jsonCarpooling.getJSONObject("pickup_point");
+            JSONObject dropoffPoint = jsonCarpooling.getJSONObject("dropoff_point");
+
+            carpooling.setPickupPoint(
+                    new LatLng(Double.parseDouble(pickupPoint.getString("lat")),
+                            Double.parseDouble(pickupPoint.getString("long")))
+            );
+            carpooling.setDropoffPoint(
+                    new LatLng(Double.parseDouble(dropoffPoint.getString("lat")),
+                            Double.parseDouble(dropoffPoint.getString("long")))
+            );
+
+            String pickupTime = jsonCarpooling.getString("pickup_time");
+            try {
+                carpooling.setPickupTime(format.parse(pickupTime));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+            String state = jsonCarpooling.getString("state");
+            carpooling.setState(Carpooling.CarpoolingState.valueOf(state));
+
+            float fare = (float) jsonCarpooling.getDouble("fare");
+            carpooling.setFare(fare);
+        }
+        catch (JSONException e) {
+            Log.e(LOG_TAG, "Cannot process JSON results", e);
+        }
+
+        return carpooling;
     }
 
 }

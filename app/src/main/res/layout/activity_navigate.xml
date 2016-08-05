@@ -9,4 +9,39 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.i3cnam.gofast.views.Navigate">
 
+
+    <Button
+        android:onClick="acceptCarpool"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Accepter covoiturage"
+        android:id="@+id/accept_carpooling_btn"
+        android:layout_gravity="center_horizontal"
+        android:layout_above="@+id/refuse_carpooling_btn"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:onClick="refuseCarpool"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Refuser covoiturage"
+        android:id="@+id/refuse_carpooling_btn"
+        android:layout_gravity="center_horizontal"
+        android:layout_above="@+id/abort_carpooling_btn"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:onClick="abortCarpooling"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Interrompre covoiturage"
+        android:id="@+id/abort_carpooling_btn"
+        android:layout_gravity="center_horizontal"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true" />
+
+
 </RelativeLayout>

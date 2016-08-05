@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -16,6 +17,8 @@ import com.i3cnam.gofast.communication.CommunicationStub;
 import com.i3cnam.gofast.geo.DirectionsService;
 import com.i3cnam.gofast.geo.GPSTracker;
 import systr.cartographie.Operations;
+
+import com.i3cnam.gofast.management.carpooling.CarpoolListEncapsulated;
 import com.i3cnam.gofast.model.Carpooling;
 import com.i3cnam.gofast.model.DriverCourse;
 import com.i3cnam.gofast.views.Navigate;
@@ -23,7 +26,6 @@ import com.i3cnam.gofast.views.Navigate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import android.os.Handler;
 
 public class CourseManagementService extends Service {
 
@@ -33,9 +35,17 @@ public class CourseManagementService extends Service {
     private List<Carpooling> requestedCarpoolings = new ArrayList<>();
 
     // test pour le broadcast
-    public static final String BROADCAST_ACTION = "com.i3cnam.gofast.UPDATE_POSITION";
-    private Intent broadcastIntent;
-//    private final Handler handler = new Handler() ;
+    public static final String BROADCAST_UPDATE_COURSE_ACTION = "com.i3cnam.gofast.UPDATE_COURSE";
+    public static final String BROADCAST_UPDATE_CARPOOLING_ACTION = "com.i3cnam.gofast.UPDATE_CARPOOLING";
+    private Intent broadcastCourseIntent;
+    private Intent broadcastCarpoolingIntent;
+
+    // temporary global variables to communicate between threads:
+    private Carpooling carpoolingToAccept;
+    private Carpooling carpoolingToRefuse;
+    private Carpooling carpoolingToAbort;
+
+    private final String TAG_LOG = "Course Service"; // tag for log messages
 
 
     /**
@@ -52,7 +62,8 @@ public class CourseManagementService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        broadcastIntent = new Intent(BROADCAST_ACTION);
+        broadcastCourseIntent = new Intent(BROADCAST_UPDATE_COURSE_ACTION);
+        broadcastCarpoolingIntent = new Intent(BROADCAST_UPDATE_CARPOOLING_ACTION);
     }
 
     @Override
@@ -73,10 +84,8 @@ public class CourseManagementService extends Service {
         // init the comunication module for the service
         serverCom = new CommunicationStub();
 
-        // declare the course on the server
-        int courseID = serverCom.declareCourse(driverCourse);
-        driverCourse.setId(courseID);
-        Log.d("CourseManagementService","the course was declared with ID: " + courseID);
+        // launch the thread for the management of the course
+        new Thread(new ObserveCourse()).start();
 
         // start the navigation listener
         new GPSForNavigation(this);
@@ -120,6 +129,7 @@ public class CourseManagementService extends Service {
                 }
                 // replace current point
                 actualPath.set(0 , driverCourse.getActualPosition());
+                // save path
                 driverCourse.setEncodedPoints(PolyUtil.encode(actualPath));
             }
             if (minDist > delta) {
@@ -136,7 +146,6 @@ public class CourseManagementService extends Service {
      */
     private void recalculatePath() {
         Log.d("CourseManagementService","RECALCULANDO");
-        // TODO
         // compute new path
         DirectionsService directions = new DirectionsService();
         directions.setOrigin(driverCourse.getActualPosition());
@@ -152,6 +161,63 @@ public class CourseManagementService extends Service {
         driverCourse.setEncodedPoints(directions.getEncodedPolyline());
     }
 
+
+    /*
+    ------------------------------------------------------------------------------------------------
+        BROADCAST METHODS:
+        They represent state changes of the course
+        They are received by the activity to show the changes
+        If the activity is not visible, the generate a notification
+    ------------------------------------------------------------------------------------------------
+     */
+
+    /**
+     * Broadcast the course update
+     */
+    private void sendCourseUpdate() {
+        Log.d("BroadcastService", "entered sendCourseUpdate");
+
+        broadcastCourseIntent.putExtra("COURSE", driverCourse);
+        sendBroadcast(broadcastCourseIntent);
+    }
+
+    /**
+     * Broadcast the carpooling update
+     */
+    private void sendCarpoolUpdate() {
+        Log.d("BroadcastService", "entered sendCarpoolUpdate");
+
+        broadcastCarpoolingIntent.putExtra("CARPOOL", new CarpoolListEncapsulated(requestedCarpoolings));
+        sendBroadcast(broadcastCarpoolingIntent);
+    }
+
+    /*
+    ------------------------------------------------------------------------------------------------
+        PUBLIC METHODS
+        (Called by the activity)
+    ------------------------------------------------------------------------------------------------
+     */
+
+    public void acceptCarpooling(Carpooling carpooling) {
+        carpoolingToAccept = carpooling;
+        new AsynchronousAcceptCarpool().execute();
+    }
+
+    public void refuseCarpooling(Carpooling carpooling) {
+        carpoolingToRefuse = carpooling;
+        new AsynchronousRefuseCarpool().execute();
+    }
+
+    public void abortCarpooling(Carpooling carpooling) {
+        carpoolingToAbort = carpooling;
+        new AsynchronousAbortCarpool().execute();
+    }
+
+    /*
+    ------------------------------------------------------------------------------------------------
+    */
+
+
     /**
      * Management of the user change location
      */
@@ -163,9 +229,25 @@ public class CourseManagementService extends Service {
 
         @Override
         public void onLocationChanged(Location location) {
+            new Thread(new ProcessLocationChanged(location)).start();
+        }
+
+    }
+
+    /**
+     * Process location change in a new thread
+     */
+    private class ProcessLocationChanged implements Runnable {
+        Location newLocation;
+
+        public ProcessLocationChanged(Location newLocation) {
+            this.newLocation = newLocation;
+        }
+        @Override
+        public void run() {
             Log.d("GPSForNavigation","LOCATION CHANGED");
             // store the new position and the time
-            driverCourse.setActualPosition(new LatLng(location.getLatitude(), location.getLongitude()));
+            driverCourse.setActualPosition(new LatLng(newLocation.getLatitude(), newLocation.getLongitude()));
             driverCourse.setPositioningTime(new Date());
             // verify if user has deviated and consequently recalculate the path
             if (courseChanged()) {
@@ -177,19 +259,104 @@ public class CourseManagementService extends Service {
                 Log.d("GPSForNavigation","SENDING POSITION UPDATE");
                 serverCom.updatePosition(driverCourse);
             }
-
             sendCourseUpdate();
-
         }
     }
 
-    private void sendCourseUpdate() {
-        Log.d("BroadcastService", "entered sendCourseUpdate");
 
-        broadcastIntent.putExtra("UPDATED_COURSE", driverCourse);
-        sendBroadcast(broadcastIntent);
+    /**
+     * Process location change in a new thread
+     */
+    private class ObserveCourse implements Runnable {
+        List<Carpooling> lastList;
+
+        @Override
+        public void run() {
+            // first declare the course on the server
+            int courseID = serverCom.declareCourse(driverCourse);
+            // set the returned id to the object
+            driverCourse.setId(courseID);
+            Log.d("CourseManagementService", "the course was declared with ID: " + courseID);
+
+            // then do one query every second
+            while (true) {
+                // wait one second
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                // do the query
+                serverCom.observeCourse(driverCourse);
+                lastList = serverCom.getCourseState(driverCourse);
+                // compare results
+                if (searchStateChanges()) {
+                    requestedCarpoolings = lastList;
+                    sendCarpoolUpdate();
+                }
+            }
+        }
+
+
+        private boolean searchStateChanges() {
+            // compare lists sizes
+            if (lastList.size() != requestedCarpoolings.size()) {
+                Log.d(TAG_LOG, "new carpooling");
+                return true;
+            }
+            // search if each carpool is identical than previous version
+            for (Carpooling newCarpool : lastList) {
+                if (!requestedCarpoolings.contains(newCarpool)) {
+                    Log.d(TAG_LOG, "change detected");
+                    return true;
+                }
+            }
+            // search if no carpool was deleted
+            for (Carpooling newCarpool : requestedCarpoolings) {
+                if (!lastList.contains(newCarpool)) {
+                    Log.d(TAG_LOG, "change detected");
+                    return true;
+                }
+            }
+            return false;
+        }
+
+
     }
 
 
+    /**
+     * Abort a carpool in a new thread
+     */
+    private class AsynchronousAcceptCarpool extends AsyncTask<String, String,String> {
+        protected String doInBackground(String... urls) {
+            Log.d(TAG_LOG, "Carpooling accepted");
+            serverCom.acceptCarpool(carpoolingToAccept);
+            return null;
+        }
+    }
+
+    /**
+     * Abort a carpool in a new thread
+     */
+    private class AsynchronousRefuseCarpool extends AsyncTask<String, String,String> {
+        protected String doInBackground(String... urls) {
+            Log.d(TAG_LOG, "Carpooling refused");
+            serverCom.refuseCarpool(carpoolingToRefuse);
+            return null;
+        }
+    }
+
+    /**
+     * Abort a carpool in a new thread
+     */
+    private class AsynchronousAbortCarpool extends AsyncTask<String, String,String> {
+        protected String doInBackground(String... urls) {
+            Log.d(TAG_LOG, "Carpooling aborted");
+            serverCom.abortCarpool(carpoolingToAbort);
+            return null;
+        }
+    }
 
 }

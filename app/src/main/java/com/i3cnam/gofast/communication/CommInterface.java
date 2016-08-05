@@ -9,12 +9,6 @@ import java.util.List;
 
 public interface CommInterface {
 
-    /**
-     * retrieves all the potential carpools for this travel
-     * @param travel
-     * @return
-     */
-    List<Carpooling> findCarpoolingPossibilities(PassengerTravel travel);
 
     /**
      * Declares a new course into the system
@@ -22,6 +16,20 @@ public interface CommInterface {
      * @return the id of the course
      */
     int declareCourse(DriverCourse driverCourse);
+
+    /**
+     * Declares a new travel into the system
+     * @param passengerTravel
+     * @return the id of the travel
+     */
+    int declareTravel(PassengerTravel passengerTravel);
+
+    /**
+     * retrieves all the potential carpools for this travel
+     * @param travel
+     * @return
+     */
+    List<Carpooling> findCarpoolingPossibilities(PassengerTravel travel);
 
     /**
      * Sends a carpooling request th the server
@@ -34,6 +42,24 @@ public interface CommInterface {
      * @param carpooling the carpool accepted
      */
     void acceptCarpool(Carpooling carpooling);
+
+    /**
+     * Refuse a requested carpool
+     * @param carpooling the carpool refused
+     */
+    void refuseCarpool(Carpooling carpooling);
+
+    /**
+     * Cancel a requested carpool
+     * @param carpooling the carpool canceled
+     */
+    void cancelRequest(Carpooling carpooling);
+
+    /**
+     * Abort a requested carpool
+     * @param carpooling the carpool aborted
+     */
+    void abortCarpool(Carpooling carpooling);
 
     /**
      * Updates the new position of the car
@@ -63,12 +89,6 @@ public interface CommInterface {
      * Request to keep informed about the carpooling of the travel
      * @param passengerTravel the travel to be observed
      */
-    List<Carpooling> getTravelState(PassengerTravel passengerTravel);
-
-    /**
-     * Request to keep informed about the carpooling of the travel
-     * @param passengerTravel the travel to be observed
-     */
     void observeTravel(PassengerTravel passengerTravel);
 
     /**
@@ -76,5 +96,20 @@ public interface CommInterface {
      * @param passengerTravel the travel to be unobserved
      */
     void unobserveTravel(PassengerTravel passengerTravel);
+
+    /**
+     * Returns the carpooling of the travel
+     * @param passengerTravel the travel to be observed
+     */
+    List<Carpooling> getTravelState(PassengerTravel passengerTravel);
+
+
+    /**
+     * Returns the carpooling of the course
+     * @param driverCourse the travel to be observed
+     */
+    List<Carpooling> getCourseState(DriverCourse driverCourse);
+
+
 
 }

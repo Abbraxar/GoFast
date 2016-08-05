@@ -100,7 +100,7 @@ public class DriverCourse implements Serializable{
         returnString += "&destination=";
         returnString += destination.getCoordinates().latitude + ",";
         returnString += destination.getCoordinates().longitude;
-        returnString += "&points=" + getEncodedPoints();
+        returnString += "&encoded_points=" + getEncodedPoints();
         return returnString;
     }
 

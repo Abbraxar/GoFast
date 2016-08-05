@@ -127,7 +127,6 @@ public class PlacesService {
                 GeoConstants.GEOCODE_API  +
                 GeoConstants.OUT_JSON);
         sb.append("?key=" + GeoConstants.API_KEY);
-        sb.append("&components=country:fr");
         sb.append("&latlng=" + GeoConstants.coordinatesUrlParam(coordinates));
 
         // call the service and obtain a response
@@ -135,8 +134,9 @@ public class PlacesService {
 
         try {
             // Create a JSON object hierarchy from the results
-            JSONObject jsonObj = new JSONObject(jsonResults.toString());
-            JSONObject addressObj = jsonObj.getJSONObject("result").getJSONObject("adr_address");
+            JSONObject jsonObj = new JSONObject(rawJSON);
+            JSONArray addressArr = jsonObj.getJSONArray("results");
+            JSONObject addressObj = addressArr.getJSONObject(0);
 
             foundPlace = new Place(coordinates);
             foundPlace.setPlaceId(addressObj.getString("place_id"));

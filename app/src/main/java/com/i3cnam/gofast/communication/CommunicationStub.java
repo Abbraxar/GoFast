@@ -17,18 +17,31 @@ import java.util.List;
  */
 public class CommunicationStub implements CommInterface {
 
+    private int counter = 0;
+
+
+    @Override
+    public int declareCourse(DriverCourse driverCourse) {
+        return 1;
+    }
+
+    @Override
+    public int declareTravel(PassengerTravel passengerTravel) {
+        return 2;
+    }
+
     @Override
     public List<Carpooling> findCarpoolingPossibilities(PassengerTravel travel) {
         List<Carpooling> returnList = new ArrayList<>();
         DateFormat format = new SimpleDateFormat("y/M/d H:m");
 
         Carpooling carpooling = new Carpooling();
-
         //---------------------------------------------------------------
         carpooling.setId(1);
         carpooling.setPickupPoint(new LatLng(43.61 , 1.45));
         carpooling.setDropoffPoint(new LatLng(43.66 , 1.44));
         carpooling.setState(Carpooling.CarpoolingState.POTENTIAL);
+        carpooling.setFare(3.25f);
         try {
             carpooling.setPickupTime(format.parse("2016/08/01 8:51"));
         } catch (ParseException e) {
@@ -41,6 +54,7 @@ public class CommunicationStub implements CommInterface {
         carpooling.setPickupPoint(new LatLng(43.62 , 1.46));
         carpooling.setDropoffPoint(new LatLng(43.65 , 1.42));
         carpooling.setState(Carpooling.CarpoolingState.POTENTIAL);
+        carpooling.setFare(3.30f);
         try {
             carpooling.setPickupTime(format.parse("2016/08/01 8:52"));
         } catch (ParseException e) {
@@ -53,6 +67,7 @@ public class CommunicationStub implements CommInterface {
         carpooling.setPickupPoint(new LatLng(43.63 , 1.47));
         carpooling.setDropoffPoint(new LatLng(43.64 , 1.40));
         carpooling.setState(Carpooling.CarpoolingState.POTENTIAL);
+        carpooling.setFare(3.50f);
         try {
             carpooling.setPickupTime(format.parse("2016/08/01 8:53"));
         } catch (ParseException e) {
@@ -60,14 +75,7 @@ public class CommunicationStub implements CommInterface {
         }
         returnList.add(carpooling);
         //---------------------------------------------------------------
-
-        returnList.add(carpooling);
         return returnList;
-    }
-
-    @Override
-    public int declareCourse(DriverCourse driverCourse) {
-        return 1;
     }
 
     @Override
@@ -77,6 +85,21 @@ public class CommunicationStub implements CommInterface {
 
     @Override
     public void acceptCarpool(Carpooling carpooling) {
+
+    }
+
+    @Override
+    public void refuseCarpool(Carpooling carpooling) {
+
+    }
+
+    @Override
+    public void cancelRequest(Carpooling carpooling) {
+
+    }
+
+    @Override
+    public void abortCarpool(Carpooling carpooling) {
 
     }
 
@@ -101,7 +124,18 @@ public class CommunicationStub implements CommInterface {
     }
 
     @Override
+    public void observeTravel(PassengerTravel passengerTravel) {
+
+    }
+
+    @Override
+    public void unobserveTravel(PassengerTravel passengerTravel) {
+
+    }
+
+    @Override
     public List<Carpooling> getTravelState(PassengerTravel passengerTravel) {
+        counter = counter > 60 ? 0 : counter + 1 ;
         List<Carpooling> returnList = new ArrayList<>();
         DateFormat format = new SimpleDateFormat("y/M/d H:m");
 
@@ -112,8 +146,13 @@ public class CommunicationStub implements CommInterface {
         carpooling.setPickupPoint(new LatLng(43.61 , 1.45));
         carpooling.setDropoffPoint(new LatLng(43.66 , 1.44));
         carpooling.setState(Carpooling.CarpoolingState.POTENTIAL);
+        carpooling.setFare(3.25f);
         try {
-            carpooling.setPickupTime(format.parse("2016/08/01 8:51"));
+            if (counter > 15) {
+                carpooling.setPickupTime(format.parse("2016/08/01 8:53"));
+            }else {
+                carpooling.setPickupTime(format.parse("2016/08/01 8:51"));
+            }
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -124,8 +163,15 @@ public class CommunicationStub implements CommInterface {
         carpooling.setPickupPoint(new LatLng(43.62 , 1.46));
         carpooling.setDropoffPoint(new LatLng(43.65 , 1.42));
         carpooling.setState(Carpooling.CarpoolingState.POTENTIAL);
+        carpooling.setFare(3.30f);
         try {
-            carpooling.setPickupTime(format.parse("2016/08/01 8:52"));
+            if (counter > 40) {
+                carpooling.setPickupTime(format.parse("2016/08/01 8:52"));
+            } else if (counter > 30) {
+                carpooling.setPickupTime(format.parse("2016/08/01 8:53"));
+            } else {
+                carpooling.setPickupTime(format.parse("2016/08/01 8:52"));
+            }
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -136,25 +182,45 @@ public class CommunicationStub implements CommInterface {
         carpooling.setPickupPoint(new LatLng(43.63 , 1.47));
         carpooling.setDropoffPoint(new LatLng(43.64 , 1.40));
         carpooling.setState(Carpooling.CarpoolingState.POTENTIAL);
+        carpooling.setFare(3.50f);
         try {
-            carpooling.setPickupTime(format.parse("2016/08/01 8:53"));
+            if (counter > 50) {
+                carpooling.setPickupTime(format.parse("2016/08/01 8:54"));
+            }
+            else {
+                carpooling.setPickupTime(format.parse("2016/08/01 8:53"));
+            }
         } catch (ParseException e) {
             e.printStackTrace();
         }
         returnList.add(carpooling);
         //---------------------------------------------------------------
-
-        returnList.add(carpooling);
         return returnList;
     }
 
     @Override
-    public void observeTravel(PassengerTravel passengerTravel) {
+    public List<Carpooling> getCourseState(DriverCourse driverCourse) {
+        counter++;
 
+        List<Carpooling> returnList = new ArrayList<>();
+        DateFormat format = new SimpleDateFormat("y/M/d H:m");
+
+        Carpooling carpooling = new Carpooling();
+
+        //---------------------------------------------------------------
+        carpooling.setId(1);
+        carpooling.setPickupPoint(new LatLng(43.61 , 1.45));
+        carpooling.setDropoffPoint(new LatLng(43.66 , 1.44));
+        carpooling.setState(Carpooling.CarpoolingState.IN_DEMAND);
+        carpooling.setFare(3.25f);
+        try {
+
+            carpooling.setPickupTime(format.parse("2016/08/01 8:51"));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        if (counter > 15) {returnList.add(carpooling);}
+        return returnList;
     }
 
-    @Override
-    public void unobserveTravel(PassengerTravel passengerTravel) {
-
-    }
 }
