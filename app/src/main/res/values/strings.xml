@@ -7,8 +7,14 @@
     <string name="title_activity_passenger_map">PassengerMap</string>
     <string name="writeDestination">Je saisis ma destination</string>
     <string name="validTravelConf">OK</string>
-    <string name="permissionsRationale">La localisation est indispensable à l\'utilisation de l\'application.</string>
-    <string name="permissionsDisabled">Vous pouvez réactiver la localisation dans la configuration des applications</string>
+    <string name="permissionsRationale">La localisation et l\'accès aux services de téléphonie sont indispensables à l\'utilisation de l\'application.</string>
+    <string name="permissionsDisabled">Vous pouvez réactiver ces services dans la configuration des applications</string>
     <string name="ok">OK</string>
     <string name="cancel">Quitter</string>
+    <string name="tooFarMsg">Vous allez trop loin, GoFast n\'est pas approprié à votre usage</string>
+    <string name="tooCloseMsg">Votre destination est trop proche, allez à pied</string>
+    <string name="titleAbortCourseDialog">Annulation du trajet</string>
+    <string name="textAbortCourseDialog">Êtes-vous sûr de vouloir annuler votre trajet ?</string>
+    <string name="yes">Oui</string>
+    <string name="no">Non</string>
 </resources>
