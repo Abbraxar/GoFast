@@ -13,6 +13,7 @@ import android.util.Log;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.PolyUtil;
 import com.i3cnam.gofast.communication.CommInterface;
+import com.i3cnam.gofast.communication.Communication;
 import com.i3cnam.gofast.communication.CommunicationStub;
 import com.i3cnam.gofast.geo.DirectionsService;
 import com.i3cnam.gofast.geo.GPSTracker;
@@ -82,7 +83,7 @@ public class CourseManagementService extends Service {
         Log.d("CourseManagementService", driverCourse.getParametersString());
 
         // init the comunication module for the service
-        serverCom = new CommunicationStub();
+        serverCom = new Communication();
 
         // launch the thread for the management of the course
         new Thread(new ObserveCourse()).start();

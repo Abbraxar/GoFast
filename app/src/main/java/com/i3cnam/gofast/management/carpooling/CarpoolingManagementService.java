@@ -86,7 +86,7 @@ public class CarpoolingManagementService extends Service {
         Log.d(TAG_LOG, passengerTravel.getParametersString());
 
         // create communication module
-        serverCom = new CommunicationStub();
+        serverCom = new Communication();
 
         // launch observer thread
         observeTravel = new Thread(new ObserveTravel());

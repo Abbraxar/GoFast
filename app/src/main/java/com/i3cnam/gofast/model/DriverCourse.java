@@ -1,6 +1,7 @@
 package com.i3cnam.gofast.model;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.maps.android.PolyUtil;
 
 import java.io.IOException;
@@ -91,6 +92,28 @@ public class DriverCourse implements Serializable{
     public List<LatLng> getPath() {
         return PolyUtil.decode(encodedPoints);
     }
+
+    /**
+     * Calculates the minimal rectangle including the path
+     * @return
+     */
+    public LatLngBounds getBounds() {
+        // init bounds with origin point
+        double northest = origin.getCoordinates().latitude;
+        double southest = origin.getCoordinates().latitude;
+        double westest = origin.getCoordinates().longitude;
+        double eastest = origin.getCoordinates().longitude;
+
+        for (LatLng onePoint : getPath()) {
+            // for each point in the path, update bounds if larger than current
+            northest = Math.max(northest, onePoint.latitude);
+            southest = Math.min(southest, onePoint.latitude);
+            westest = Math.max(westest, onePoint.longitude);
+            eastest = Math.min(eastest, onePoint.longitude);
+        }
+        return new LatLngBounds(new LatLng(northest,westest),new LatLng(southest,eastest));
+    }
+
 
     public String getParametersString() {
         String returnString = "driver=" + getDriver().getNickname();

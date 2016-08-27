@@ -110,7 +110,7 @@ public class Communication implements CommInterface {
 
         // prepare the string for the request
         StringBuilder sb = new StringBuilder(SERVER_IP + FIND_MATCHES);
-        sb.append("?travel_id" + travel.getId());
+        sb.append("?travel_id=" + travel.getId());
 
         // call the service and obtain a response
         String rawJSON = useService(sb.toString());
@@ -338,6 +338,22 @@ public class Communication implements CommInterface {
 
     }
 
+
+    /**
+     * Parses a JSON object into a Carpooling object.
+     * This object must be like following:
+     *
+         {
+             "id": "1",
+             "pickup_point" : {"lat":43.61,"long":1.45},
+             "dropoff_point" : {"lat":43.65,"long":1.41},
+             "pickup_time": "08:51",
+             "fare": "3.25",
+             "state": "POTENTIAL"
+         }
+     * @param jsonCarpooling the json object
+     * @return
+     */
     private static Carpooling parseCarpoolingJsonObject(JSONObject jsonCarpooling) {
 
         Carpooling carpooling = new Carpooling();

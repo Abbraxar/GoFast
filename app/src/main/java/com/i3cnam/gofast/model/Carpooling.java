@@ -105,7 +105,6 @@ public class Carpooling implements Serializable {
             if (((Carpooling)obj).getId() == id &&
                     ((Carpooling)obj).getPickupPoint().equals(getPickupPoint()) &&
                     ((Carpooling)obj).getDropoffPoint().equals(getDropoffPoint()) &&
-                    ((Carpooling)obj).getPickupTime().equals(getPickupTime()) &&
                     ((Carpooling)obj).getFare() == getFare() &&
                     ((Carpooling)obj).getState().equals(getState())) {
                 // partial result
@@ -117,11 +116,19 @@ public class Carpooling implements Serializable {
                 else {
                     if (!((Carpooling)obj).getPassengerTravel().equals(getPassengerTravel())) isEqual = false;
                 }
+                //----------------------------------
                 if (((Carpooling)obj).getDriverCourse() == null) {
                     if (getDriverCourse() != null) isEqual = false;
                 }
                 else {
                     if (!((Carpooling)obj).getDriverCourse().equals(getDriverCourse())) isEqual = false;
+                }
+                //----------------------------------
+                if (((Carpooling)obj).getPickupTime() == null) {
+                    if (getPickupTime() != null) isEqual = false;
+                }
+                else {
+                    if (!((Carpooling)obj).getPickupTime().equals(getPickupTime())) isEqual = false;
                 }
             }
         }

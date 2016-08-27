@@ -1,7 +1,5 @@
 package com.i3cnam.gofast.model;
 
-import com.google.android.gms.maps.model.LatLng;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;

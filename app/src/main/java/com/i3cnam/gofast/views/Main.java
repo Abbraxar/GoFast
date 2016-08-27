@@ -1,6 +1,7 @@
 package com.i3cnam.gofast.views;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -9,6 +10,9 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.telephony.TelephonyManager;
+
+import android.util.Log;
 import android.view.View;
 
 import com.i3cnam.gofast.R;
@@ -33,6 +37,12 @@ public class Main extends AppCompatActivity {
 
         // check permissions
         checkAndRequestPermissions();
+
+        TelephonyManager tMgr = (TelephonyManager)this.getSystemService(Context.TELEPHONY_SERVICE);
+        String mPhoneNumber = tMgr.getLine1Number();
+        Log.d("",mPhoneNumber);
+
+
     }
 
     @Override
