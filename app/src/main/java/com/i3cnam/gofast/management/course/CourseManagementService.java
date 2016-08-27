@@ -8,25 +8,25 @@ import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.PolyUtil;
 import com.i3cnam.gofast.communication.CommInterface;
 import com.i3cnam.gofast.communication.Communication;
-import com.i3cnam.gofast.communication.CommunicationStub;
 import com.i3cnam.gofast.geo.DirectionsService;
 import com.i3cnam.gofast.geo.GPSTracker;
-import systr.cartographie.Operations;
-
-import com.i3cnam.gofast.management.carpooling.CarpoolListEncapsulated;
 import com.i3cnam.gofast.model.Carpooling;
 import com.i3cnam.gofast.model.DriverCourse;
+import com.i3cnam.gofast.model.User;
 import com.i3cnam.gofast.views.Navigate;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import systr.cartographie.Operations;
 
 public class CourseManagementService extends Service {
 
@@ -62,38 +62,64 @@ public class CourseManagementService extends Service {
 
     @Override
     public void onCreate() {
+        Log.d(TAG_LOG, "CREATED");
+
         super.onCreate();
         broadcastCourseIntent = new Intent(BROADCAST_UPDATE_COURSE_ACTION);
         broadcastCarpoolingIntent = new Intent(BROADCAST_UPDATE_CARPOOLING_ACTION);
     }
 
     @Override
+    public void onDestroy() {
+        Log.d(TAG_LOG, "DESTROY");
+        super.onDestroy();
+    }
+
+    @Override
     public IBinder onBind(Intent intent) {
-        Log.d("CourseManagementService", "Service Course BOUND");
+        Log.d(TAG_LOG, "BOUND");
         return myBinder;
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d("CourseManagementService", "Service START");
+        Log.d(TAG_LOG, "START");
 
-        // get the driver course from the intent bundle
-        Bundle bundle = intent.getExtras();
-        driverCourse = (DriverCourse)(bundle.getSerializable(Navigate.COURSE));
-        Log.d("CourseManagementService", driverCourse.getParametersString());
+        if (driverCourse == null) {
+            // get the driver course from the intent bundle
+            Bundle bundle = intent.getExtras();
+            driverCourse = (DriverCourse)(bundle.getSerializable(Navigate.COURSE));
+            Log.d(TAG_LOG, driverCourse.getParametersString());
 
-        // init the comunication module for the service
-        serverCom = new Communication();
+            // init the communication module for the service
+            serverCom = new Communication();
 
-        // launch the thread for the management of the course
-        new Thread(new ObserveCourse()).start();
+            // get course from bdd if course is not provided by intent nor service
+            if (driverCourse.getDestination() == null) {
+                driverCourse = serverCom.getDriverCourse(User.getMe());
+            }
 
-        // start the navigation listener
-        new GPSForNavigation(this);
+            // launch the thread for the management of the course
+            new Thread(new ObserveCourse()).start();
+
+            // start the navigation listener
+            new GPSForNavigation(this);
+        }
+
+        NotificationCompat.Builder b = new NotificationCompat.Builder(this);
+
+        b.setOngoing(true);
+
+        b.setContentTitle("salut")
+                .setContentText("blabla")
+                .setSmallIcon(android.R.drawable.stat_sys_download)
+                .setTicker("ssss");
+
+        startForeground(1337, b.build());
 
         // We want this service to continue running until it is explicitly
         // stopped, so return sticky.
-        return START_STICKY;
+        return START_NOT_STICKY;
     }
 
     /**
@@ -101,7 +127,7 @@ public class CourseManagementService extends Service {
      * @return true if the user deviated from the path
      */
     private boolean courseChanged() {
-        Log.d("CourseManagementService","COURSE CHANGED?");
+        Log.d(TAG_LOG, "COURSE CHANGED?");
         boolean returnValue = true;
         // TODO
         List<LatLng> actualPath = driverCourse.getPath();
@@ -122,7 +148,7 @@ public class CourseManagementService extends Service {
             if ( delta < 50 ) {
                 // less than 50 m gap, we consider that the user is not deviated
                 returnValue = false;
-                Log.d("CourseManagementService", delta + " m");
+                Log.d(TAG_LOG, delta + " m");
                 // update path
                 // remove previous points
                 for (j = 0 ; j <= i ; j++) {
@@ -134,7 +160,7 @@ public class CourseManagementService extends Service {
                 driverCourse.setEncodedPoints(PolyUtil.encode(actualPath));
             }
             if (minDist > delta) {
-                Log.d("CourseManagementService", "min; " + delta + " m");
+                Log.d(TAG_LOG, "min; " + delta + " m");
                 minDist = delta;
             }
             i++;
@@ -146,7 +172,7 @@ public class CourseManagementService extends Service {
      * update the path for the new position
      */
     private void recalculatePath() {
-        Log.d("CourseManagementService","RECALCULANDO");
+        Log.d(TAG_LOG, "RECALCULANDO");
         // compute new path
         DirectionsService directions = new DirectionsService();
         directions.setOrigin(driverCourse.getActualPosition());
@@ -176,9 +202,8 @@ public class CourseManagementService extends Service {
      * Broadcast the course update
      */
     private void sendCourseUpdate() {
-        Log.d("BroadcastService", "entered sendCourseUpdate");
+        Log.d(TAG_LOG, "entered sendCourseUpdate");
 
-        broadcastCourseIntent.putExtra("COURSE", driverCourse);
         sendBroadcast(broadcastCourseIntent);
     }
 
@@ -186,9 +211,8 @@ public class CourseManagementService extends Service {
      * Broadcast the carpooling update
      */
     private void sendCarpoolUpdate() {
-        Log.d("BroadcastService", "entered sendCarpoolUpdate");
+        Log.d(TAG_LOG, "entered sendCarpoolUpdate");
 
-        broadcastCarpoolingIntent.putExtra("CARPOOL", new CarpoolListEncapsulated(requestedCarpoolings));
         sendBroadcast(broadcastCarpoolingIntent);
     }
 
@@ -212,6 +236,14 @@ public class CourseManagementService extends Service {
     public void abortCarpooling(Carpooling carpooling) {
         carpoolingToAbort = carpooling;
         new AsynchronousAbortCarpool().execute();
+    }
+
+    public DriverCourse getDriverCourse() {
+        return driverCourse;
+    }
+
+    public List<Carpooling> getRequestedCarpoolings() {
+        return requestedCarpoolings;
     }
 
     /*
@@ -241,23 +273,25 @@ public class CourseManagementService extends Service {
     private class ProcessLocationChanged implements Runnable {
         Location newLocation;
 
+        private static final String TAG_LOG = "ProcessLocationChanged";
+
         public ProcessLocationChanged(Location newLocation) {
             this.newLocation = newLocation;
         }
         @Override
         public void run() {
-            Log.d("GPSForNavigation","LOCATION CHANGED");
+            Log.d(TAG_LOG,"LOCATION CHANGED");
             // store the new position and the time
             driverCourse.setActualPosition(new LatLng(newLocation.getLatitude(), newLocation.getLongitude()));
             driverCourse.setPositioningTime(new Date());
             // verify if user has deviated and consequently recalculate the path
             if (courseChanged()) {
                 recalculatePath();
-                Log.d("GPSForNavigation","COURSE POSITION UPDATE");
+                Log.d(TAG_LOG,"COURSE POSITION UPDATE");
                 serverCom.updateCourse(driverCourse);
             }
             else {
-                Log.d("GPSForNavigation","SENDING POSITION UPDATE");
+                Log.d(TAG_LOG,"SENDING POSITION UPDATE");
                 serverCom.updatePosition(driverCourse);
             }
             sendCourseUpdate();
@@ -271,13 +305,15 @@ public class CourseManagementService extends Service {
     private class ObserveCourse implements Runnable {
         List<Carpooling> lastList;
 
+        private static final String TAG_LOG = "ObserveCourse";
+
         @Override
         public void run() {
             // first declare the course on the server
             int courseID = serverCom.declareCourse(driverCourse);
             // set the returned id to the object
             driverCourse.setId(courseID);
-            Log.d("CourseManagementService", "the course was declared with ID: " + courseID);
+            Log.d(TAG_LOG, "the course was declared with ID: " + courseID);
 
             // then do one query every second
             while (true) {
@@ -289,8 +325,8 @@ public class CourseManagementService extends Service {
                 }
 
                 // do the query
-                serverCom.observeCourse(driverCourse);
-                lastList = serverCom.getCourseState(driverCourse);
+                serverCom.observeCarpoolCourse(driverCourse);
+                lastList = serverCom.getCarpoolCourseState(driverCourse);
                 // compare results
                 if (searchStateChanges()) {
                     requestedCarpoolings = lastList;

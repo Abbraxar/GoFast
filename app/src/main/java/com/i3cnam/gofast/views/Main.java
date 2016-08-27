@@ -3,6 +3,7 @@ package com.i3cnam.gofast.views;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -25,10 +26,13 @@ import java.util.Map;
 public class Main extends AppCompatActivity {
     public final static String USER_TYPE = "com.i3cnam.gofast.USER_TYPE";
     public final static int PERMISSIONS_REQUEST_LOCATION = 1;
+    public final static int PERMISSIONS_TELEPHONY = 2;
 
     // flag which is a workaround for Android bug https://code.google.com/p/android/issues/detail?id=23761
     // more info on http://stackoverflow.com/questions/33264031/calling-dialogfragments-show-from-within-onrequestpermissionsresult-causes
     private boolean stateWorkaroundFlagShowRationaleFragment = false;
+
+    private final static String TAG_LOG = "Main view";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,11 +42,28 @@ public class Main extends AppCompatActivity {
         // check permissions
         checkAndRequestPermissions();
 
-        TelephonyManager tMgr = (TelephonyManager)this.getSystemService(Context.TELEPHONY_SERVICE);
-        String mPhoneNumber = tMgr.getLine1Number();
-        Log.d("",mPhoneNumber);
+        // go to last activity if needed
+        Class<?> activityClass;
 
+        try {
+            SharedPreferences prefs = getSharedPreferences("X", MODE_PRIVATE);
+            activityClass = Class.forName(
+                    prefs.getString("lastActivity", Main.class.getName())
+            );
+        } catch(ClassNotFoundException ex) {
+            activityClass = Main.class;
+        }
 
+        if(activityClass != Main.class) {
+            startActivity(new Intent(this, activityClass));
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        Log.d(TAG_LOG, "DESTROY");
+
+        super.onDestroy();
     }
 
     @Override
@@ -65,15 +86,24 @@ public class Main extends AppCompatActivity {
     public  boolean checkAndRequestPermissions() {
         int fineLocationPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
         int coarseLocationPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
-        List<String> listPermissionsNeeded = new ArrayList<>();
+        int telephonyPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE);
+        List<String> listPermissionsLocation = new ArrayList<>();
+        List<String> listPermissionsTel = new ArrayList<>();
         if (fineLocationPermission != PackageManager.PERMISSION_GRANTED) {
-            listPermissionsNeeded.add(Manifest.permission.ACCESS_FINE_LOCATION);
+            listPermissionsLocation.add(Manifest.permission.ACCESS_FINE_LOCATION);
         }
         if (coarseLocationPermission != PackageManager.PERMISSION_GRANTED) {
-            listPermissionsNeeded.add(Manifest.permission.ACCESS_FINE_LOCATION);
+            listPermissionsLocation.add(Manifest.permission.ACCESS_COARSE_LOCATION);
         }
-        if (!listPermissionsNeeded.isEmpty()) {
-            ActivityCompat.requestPermissions(this,listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]), PERMISSIONS_REQUEST_LOCATION);
+        if (telephonyPermission != PackageManager.PERMISSION_GRANTED) {
+            listPermissionsTel.add(Manifest.permission.READ_PHONE_STATE);
+        }
+        if (!listPermissionsLocation.isEmpty()) {
+            ActivityCompat.requestPermissions(this,listPermissionsLocation.toArray(new String[listPermissionsLocation.size()]), PERMISSIONS_REQUEST_LOCATION);
+            return false;
+        }
+        if (!listPermissionsTel.isEmpty()) {
+            ActivityCompat.requestPermissions(this,listPermissionsTel.toArray(new String[listPermissionsTel.size()]), PERMISSIONS_TELEPHONY);
             return false;
         }
         return true;
@@ -82,11 +112,12 @@ public class Main extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String permissions[], @NonNull int[] grantResults) {
+
+        Map<String, Integer> perms = new HashMap<>();
         switch (requestCode) {
-            case PERMISSIONS_REQUEST_LOCATION: {
-                Map<String, Integer> perms = new HashMap<>();
+            case PERMISSIONS_REQUEST_LOCATION:
                 // Initialize the map with both permissions
-                perms.put(Manifest.permission.ACCESS_COARSE_LOCATION, PackageManager.PERMISSION_GRANTED);
+                perms.put(Manifest.permission.READ_PHONE_STATE, PackageManager.PERMISSION_GRANTED);
                 perms.put(Manifest.permission.ACCESS_FINE_LOCATION, PackageManager.PERMISSION_GRANTED);
                 // Fill with actual results from user
                 if (grantResults.length > 0) {
@@ -110,7 +141,29 @@ public class Main extends AppCompatActivity {
                     }
                 }
                 break;
-            }
+            case PERMISSIONS_TELEPHONY:
+                // Initialize the map with both permissions
+                perms.put(Manifest.permission.READ_PHONE_STATE, PackageManager.PERMISSION_GRANTED);
+                // Fill with actual results from user
+                if (grantResults.length > 0) {
+                    for (int i = 0; i < permissions.length; i++) {
+                        perms.put(permissions[i], grantResults[i]);
+                    }
+                    // Check for permissions
+                    if (perms.get(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+                        // Permission denied
+                        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_PHONE_STATE)) {
+                            // Show a permission explanation to the user
+                            stateWorkaroundFlagShowRationaleFragment = true;
+                        }
+                        // Permission is denied and never ask again is checked
+                        else {
+                            // TODO: handle this case (say user can enable permissions from his settings and quit app)
+                            finish();
+                        }
+                    }
+                }
+                break;
         }
     }
 
