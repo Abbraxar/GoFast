@@ -7,6 +7,8 @@ import com.i3cnam.gofast.geo.GeoConstants;
 import com.i3cnam.gofast.model.Carpooling;
 import com.i3cnam.gofast.model.DriverCourse;
 import com.i3cnam.gofast.model.PassengerTravel;
+import com.i3cnam.gofast.model.Place;
+import com.i3cnam.gofast.model.User;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -28,8 +30,8 @@ import java.util.List;
  */
 public class Communication implements CommInterface {
 
-    static final String SERVER_IP = "http://10.0.2.2:9090"; // serveur local
-//    static final String SERVER_IP = "http://92.222.82.175:9090/"; // serveur OVH
+//    static final String SERVER_IP = "http://10.0.2.2:9090"; // serveur local
+    static final String SERVER_IP = "http://92.222.82.175:9090"; // serveur OVH
     static final String DECLARE_COURSE = "/declare_course";
     static final String DECLARE_TRAVEL = "/declare_travel";
     static final String FIND_MATCHES = "/find_matches";
@@ -39,7 +41,9 @@ public class Communication implements CommInterface {
     static final String REFUSE_CARPOOL = "/refuse_carpooling";
     static final String ABORT_CARPOOL = "/abort_carpooling";
     static final String GET_TRAVEL = "/get_travel";
+    static final String GET_USER_TRAVEL = "/get_user_travel";
     static final String GET_COURSE = "/get_course";
+    static final String GET_USER_COURSE = "/get_user_course";
     static final String UPDATE_POSITION = "/update_position";
     static final String UPDATE_COURSE = "/update_course";
 
@@ -217,27 +221,27 @@ public class Communication implements CommInterface {
     }
 
     @Override
-    public void observeCourse(DriverCourse driverCourse) {
+    public void observeCarpoolCourse(DriverCourse driverCourse) {
 
     }
 
     @Override
-    public void unobserveCourse(DriverCourse driverCourse) {
+    public void unobserveCarpoolCourse(DriverCourse driverCourse) {
 
     }
 
     @Override
-    public void observeTravel(PassengerTravel passengerTravel) {
+    public void observeCarpoolTravel(PassengerTravel passengerTravel) {
 
     }
 
     @Override
-    public void unobserveTravel(PassengerTravel passengerTravel) {
+    public void unobserveCarpoolTravel(PassengerTravel passengerTravel) {
 
     }
 
     @Override
-    public List<Carpooling> getTravelState(PassengerTravel travel) {
+    public List<Carpooling> getCarpoolTravelState(PassengerTravel travel) {
         // prepare the return variable
         List<Carpooling> matchesList = new ArrayList<>();
 
@@ -270,7 +274,7 @@ public class Communication implements CommInterface {
     }
 
     @Override
-    public List<Carpooling> getCourseState(DriverCourse driverCourse) {
+    public List<Carpooling> getCarpoolCourseState(DriverCourse driverCourse) {
         // prepare the return variable
         List<Carpooling> requestedCarpoolings = new ArrayList<>();
 
@@ -300,6 +304,133 @@ public class Communication implements CommInterface {
             Log.e(LOG_TAG, "Cannot process JSON results", e);
         }
         return requestedCarpoolings;
+    }
+
+    @Override
+    public DriverCourse getDriverCourse(User driver) {
+        // prepare the return variable
+        DriverCourse driverCourse = new DriverCourse();
+
+        // prepare the string for the request
+        StringBuilder sb = new StringBuilder(SERVER_IP + GET_USER_COURSE);
+        sb.append("?id=" + driver.getNickname());
+
+        // call the service and obtain a response
+        String rawJSON = useService(sb.toString());
+
+        try {
+            // Create a JSON object hierarchy from the results
+            JSONObject jsonObject = new JSONObject(rawJSON);
+
+            // id
+            driverCourse.setId(jsonObject.getInt("id"));
+
+            // driver
+            driverCourse.setDriver(driver);
+
+            // origin
+            JSONObject origJSONObj = jsonObject.getJSONObject("origin");
+            Place origin = new Place(
+                new LatLng(
+                    Double.parseDouble(origJSONObj.getString("lat")),
+                    Double.parseDouble(origJSONObj.getString("long"))
+                )
+            );
+            origin.setPlaceName(origJSONObj.getString("place_name"));
+            origin.setPlaceId(origJSONObj.getString("place_id"));
+            driverCourse.setOrigin(origin);
+
+            // destination
+            JSONObject destJSONObj = jsonObject.getJSONObject("destination");
+            Place destination = new Place(
+                new LatLng(
+                    Double.parseDouble(destJSONObj.getString("lat")),
+                    Double.parseDouble(destJSONObj.getString("long"))
+                )
+            );
+            destination.setPlaceName(destJSONObj.getString("place_name"));
+            destination.setPlaceId(destJSONObj.getString("place_id"));
+            driverCourse.setDestination(destination);
+
+            // encoded points
+            driverCourse.setEncodedPoints(jsonObject.getString("encoded_points"));
+
+            // actual position
+            JSONObject posJSONObj = jsonObject.getJSONObject("actual_position");
+            driverCourse.setActualPosition(
+                new LatLng(
+                    Double.parseDouble(posJSONObj.getString("encoded_points")),
+                    Double.parseDouble(posJSONObj.getString("encoded_points"))
+                )
+            );
+
+            // pickup time
+            String pickupTime = jsonObject.getString("pickup_time");
+            try {
+                driverCourse.setPositioningTime(format.parse(pickupTime));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+        } catch (JSONException e) {
+            Log.e(LOG_TAG, "Cannot process JSON results", e);
+        }
+        return driverCourse;
+    }
+
+    @Override
+    public PassengerTravel getPassengerTravel(User passenger) {
+        // prepare the return variable
+        PassengerTravel passengerTravel = new PassengerTravel();
+
+        // prepare the string for the request
+        StringBuilder sb = new StringBuilder(SERVER_IP + GET_USER_TRAVEL);
+        sb.append("?id=" + passenger.getNickname());
+
+        // call the service and obtain a response
+        String rawJSON = useService(sb.toString());
+
+        try {
+            // Create a JSON object hierarchy from the results
+            JSONObject jsonObject = new JSONObject(rawJSON);
+
+            // id
+            passengerTravel.setId(jsonObject.getInt("id"));
+
+            // driver
+            passengerTravel.setPassenger(passenger);
+
+            // origin
+            JSONObject origJSONObj = jsonObject.getJSONObject("origin");
+            Place origin = new Place(
+                new LatLng(
+                    Double.parseDouble(origJSONObj.getString("lat")),
+                    Double.parseDouble(origJSONObj.getString("long"))
+                )
+            );
+            origin.setPlaceName(origJSONObj.getString("place_name"));
+            origin.setPlaceId(origJSONObj.getString("place_id"));
+            passengerTravel.setOrigin(origin);
+
+            // destination
+            JSONObject destJSONObj = jsonObject.getJSONObject("destination");
+            Place destination = new Place(
+                new LatLng(
+                    Double.parseDouble(destJSONObj.getString("lat")),
+                    Double.parseDouble(destJSONObj.getString("long"))
+                )
+            );
+            destination.setPlaceName(destJSONObj.getString("place_name"));
+            destination.setPlaceId(destJSONObj.getString("place_id"));
+            passengerTravel.setDestination(destination);
+
+            // radius
+            passengerTravel.setRadius(jsonObject.getInt("radius"));
+
+        } catch (JSONException e) {
+            Log.e(LOG_TAG, "Cannot process JSON results", e);
+        }
+        return passengerTravel;
     }
 
 
@@ -392,5 +523,4 @@ public class Communication implements CommInterface {
 
         return carpooling;
     }
-
 }

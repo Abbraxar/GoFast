@@ -4,6 +4,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.i3cnam.gofast.model.Carpooling;
 import com.i3cnam.gofast.model.DriverCourse;
 import com.i3cnam.gofast.model.PassengerTravel;
+import com.i3cnam.gofast.model.User;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -114,27 +115,27 @@ public class CommunicationStub implements CommInterface {
     }
 
     @Override
-    public void observeCourse(DriverCourse driverCourse) {
+    public void observeCarpoolCourse(DriverCourse driverCourse) {
 
     }
 
     @Override
-    public void unobserveCourse(DriverCourse driverCourse) {
+    public void unobserveCarpoolCourse(DriverCourse driverCourse) {
 
     }
 
     @Override
-    public void observeTravel(PassengerTravel passengerTravel) {
+    public void observeCarpoolTravel(PassengerTravel passengerTravel) {
 
     }
 
     @Override
-    public void unobserveTravel(PassengerTravel passengerTravel) {
+    public void unobserveCarpoolTravel(PassengerTravel passengerTravel) {
 
     }
 
     @Override
-    public List<Carpooling> getTravelState(PassengerTravel passengerTravel) {
+    public List<Carpooling> getCarpoolTravelState(PassengerTravel passengerTravel) {
         counter = counter > 60 ? 0 : counter + 1 ;
         List<Carpooling> returnList = new ArrayList<>();
         DateFormat format = new SimpleDateFormat("y/M/d H:m");
@@ -199,7 +200,7 @@ public class CommunicationStub implements CommInterface {
     }
 
     @Override
-    public List<Carpooling> getCourseState(DriverCourse driverCourse) {
+    public List<Carpooling> getCarpoolCourseState(DriverCourse driverCourse) {
         counter++;
 
         List<Carpooling> returnList = new ArrayList<>();
@@ -221,6 +222,22 @@ public class CommunicationStub implements CommInterface {
         }
         if (counter > 15) {returnList.add(carpooling);}
         return returnList;
+    }
+
+    @Override
+    public DriverCourse getDriverCourse(User driver) {
+        // prepare the return variable
+        DriverCourse driverCourse = new DriverCourse();
+
+        return driverCourse;
+    }
+
+    @Override
+    public PassengerTravel getPassengerTravel(User passenger) {
+        // prepare the return variable
+        PassengerTravel passengerTravel = new PassengerTravel();
+
+        return passengerTravel;
     }
 
 }

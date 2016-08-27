@@ -3,6 +3,7 @@ package com.i3cnam.gofast.communication;
 import com.i3cnam.gofast.model.Carpooling;
 import com.i3cnam.gofast.model.DriverCourse;
 import com.i3cnam.gofast.model.PassengerTravel;
+import com.i3cnam.gofast.model.User;
 
 import java.util.List;
 
@@ -77,39 +78,48 @@ public interface CommInterface {
      * Request to keep informed about the carpooling of the course
      * @param driverCourse the course to be observed
      */
-    void observeCourse(DriverCourse driverCourse);
+    void observeCarpoolCourse(DriverCourse driverCourse);
 
     /**
      * Stop keeping informed about the carpooling of the course
      * @param driverCourse the course to be unobserved
      */
-    void unobserveCourse(DriverCourse driverCourse);
+    void unobserveCarpoolCourse(DriverCourse driverCourse);
 
     /**
      * Request to keep informed about the carpooling of the travel
      * @param passengerTravel the travel to be observed
      */
-    void observeTravel(PassengerTravel passengerTravel);
+    void observeCarpoolTravel(PassengerTravel passengerTravel);
 
     /**
      * Stop keeping informed about the carpooling of the travel
      * @param passengerTravel the travel to be unobserved
      */
-    void unobserveTravel(PassengerTravel passengerTravel);
+    void unobserveCarpoolTravel(PassengerTravel passengerTravel);
 
     /**
      * Returns the carpooling of the travel
      * @param passengerTravel the travel to be observed
      */
-    List<Carpooling> getTravelState(PassengerTravel passengerTravel);
+    List<Carpooling> getCarpoolTravelState(PassengerTravel passengerTravel);
 
 
     /**
      * Returns the carpooling of the course
      * @param driverCourse the travel to be observed
      */
-    List<Carpooling> getCourseState(DriverCourse driverCourse);
+    List<Carpooling> getCarpoolCourseState(DriverCourse driverCourse);
 
+    /**
+     * Returns current course for user.
+     * @param driver the user to get course from
+     */
+    DriverCourse getDriverCourse(User driver);
 
-
+    /**
+     * Returns current travel for user.
+     * @param passenger the user to get course from
+     */
+    PassengerTravel getPassengerTravel(User passenger);
 }
