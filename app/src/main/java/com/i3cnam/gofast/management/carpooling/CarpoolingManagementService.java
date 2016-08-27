@@ -10,7 +10,6 @@ import android.util.Log;
 
 import com.i3cnam.gofast.communication.CommInterface;
 import com.i3cnam.gofast.communication.Communication;
-import com.i3cnam.gofast.communication.CommunicationStub;
 import com.i3cnam.gofast.model.Carpooling;
 import com.i3cnam.gofast.model.PassengerTravel;
 import com.i3cnam.gofast.views.CarpoolingList;
@@ -52,27 +51,24 @@ public class CarpoolingManagementService extends Service {
     }
 
     @Override
-    public IBinder onBind(Intent arg0)
-    {
+    public IBinder onBind(Intent intent) {
         System.out.println("Service Carpool BOUND");
         return myBinder;
     }
 
 
     @Override
-    public void onCreate()
-    {
-        super.onCreate();
+    public void onCreate() {
         Log.d(TAG_LOG, "Service CREATE");
         broadcastIntent = new Intent(BROADCAST_ACTION);
+        super.onCreate();
     }
 
 
     @Override
-    public void onDestroy()
-    {
+    public void onDestroy() {
         Log.d(TAG_LOG, "Service DESTROY");
-
+        super.onDestroy();
     }
 
 
@@ -159,8 +155,8 @@ public class CarpoolingManagementService extends Service {
                 }
 
                 // do the query
-                serverCom.observeTravel(passengerTravel);
-                lastList = serverCom.getTravelState(passengerTravel);
+                serverCom.observeCarpoolTravel(passengerTravel);
+                lastList = serverCom.getCarpoolTravelState(passengerTravel);
                 // compare results
                 if (searchStateChanges()) {
                     carpoolingPossibilities = lastList;
