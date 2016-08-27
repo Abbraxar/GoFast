@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -30,6 +31,8 @@ public class EnterDestination extends Activity implements OnItemClickListener {
     private Place selectedPlace;
     private String userType;
 
+    private final static String TAG_LOG = "EnterDestination view";
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,6 +57,13 @@ public class EnterDestination extends Activity implements OnItemClickListener {
         autoCompView.setAdapter(new GooglePlacesAutocompleteAdapter(this, R.layout.list_item));
         autoCompView.setOnItemClickListener(this);
         autocompleteAdapter = (GooglePlacesAutocompleteAdapter)autoCompView.getAdapter();
+    }
+
+    @Override
+    protected void onDestroy() {
+        Log.d(TAG_LOG, "DESTROY");
+
+        super.onDestroy();
     }
 
     public void onItemClick(AdapterView adapterView, View view, int position, long id) {

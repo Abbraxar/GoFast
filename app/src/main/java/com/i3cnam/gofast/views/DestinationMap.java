@@ -138,12 +138,12 @@ public class DestinationMap extends FragmentActivity implements OnMapReadyCallba
         Log.d(TAG_LOG, Double.toString(straightLineDistance));
         String redText = null;
         if (straightLineDistance > 100000) {
-            redText = "Vous allez trop loin, GoFast n'est pas approprié à votre usage";
+            redText = getString(R.string.tooFarMsg);
         }
 
         if (userType.equals("passenger")) {
            if(straightLineDistance < (2 * radius)) {
-               redText = "Votre destination est trop proche, allez à pied";
+               redText = getString(R.string.tooCloseMsg);
             }
         }
         if (redText != null) {
