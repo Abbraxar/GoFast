@@ -69,7 +69,7 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
             // instanciate driver course
             driverCourse.setOrigin((Place) bundle.getSerializable(DestinationMap.ORIGIN));
             driverCourse.setDestination((Place) bundle.getSerializable(EnterDestination.DESTINATION));
-            driverCourse.setDriver(User.getMe());
+            driverCourse.setDriver(User.getMe(this));
             driverCourse.setEncodedPoints(intent.getStringExtra(DestinationMap.ENCODED_POINTS));
         }
 

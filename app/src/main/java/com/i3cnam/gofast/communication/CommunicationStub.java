@@ -240,4 +240,14 @@ public class CommunicationStub implements CommInterface {
         return passengerTravel;
     }
 
+    @Override
+    public String declareUser(User user) {
+        return null;
+    }
+
+    @Override
+    public String retrieveAccount(String phoneNumber) {
+        return null;
+    }
+
 }

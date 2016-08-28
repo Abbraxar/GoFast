@@ -17,4 +17,10 @@
     <string name="textAbortCourseDialog">Êtes-vous sûr de vouloir annuler votre trajet ?</string>
     <string name="yes">Oui</string>
     <string name="no">Non</string>
+    <string name="choiceNicknameText">Choisisez votre pseudo GoFast</string>
+    <string name="telephoneLabel">Votre téléphone:</string>
+    <string name="accountFound">, votre compte a été retrouvé dans GoFast! Appuyez sur OK pour continuer</string>
+    <string name="empyNicknameMsg">S\'il vous plaît, choisissez un pseudo pour GoFast</string>
+    <string name="nicknameTaken1">Désolé, le pseudo \'</string>
+    <string name="nicknameTaken">\' est déjà pris</string>
 </resources>

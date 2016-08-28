@@ -1,5 +1,8 @@
 package com.i3cnam.gofast.model;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -11,6 +14,15 @@ import java.io.Serializable;
 public class User implements Serializable{
     private String nickname; // it is the id
     private String phoneNumber;
+
+    public User() {
+        super();
+    }
+
+    public User(String nickname, String phoneNumber) {
+        this.nickname = nickname;
+        this.phoneNumber = phoneNumber;
+    }
 
     public String getNickname() {
         return nickname;
@@ -28,10 +40,13 @@ public class User implements Serializable{
         this.phoneNumber = phoneNumber;
     }
 
-    public static User getMe(){
+    public static User getMe(Context context){
         User me = new User();
-        me.nickname = "titi42";
-        me.phoneNumber = "+33629386194";
+        // recover user account
+        SharedPreferences prefs = context.getSharedPreferences("X", Context.MODE_PRIVATE);
+        me.nickname = prefs.getString("userNickname",null);
+        me.phoneNumber = prefs.getString("userPhoneNumber",null);
+        if (me.nickname == null) {me = null;}
         return me;
     }
 

@@ -46,6 +46,8 @@ public class CourseManagementService extends Service {
     private Carpooling carpoolingToRefuse;
     private Carpooling carpoolingToAbort;
 
+    private Context thisContext;
+
     private final String TAG_LOG = "Course Service"; // tag for log messages
 
 
@@ -67,6 +69,7 @@ public class CourseManagementService extends Service {
         super.onCreate();
         broadcastCourseIntent = new Intent(BROADCAST_UPDATE_COURSE_ACTION);
         broadcastCarpoolingIntent = new Intent(BROADCAST_UPDATE_CARPOOLING_ACTION);
+        thisContext = this;
     }
 
     @Override
@@ -93,11 +96,6 @@ public class CourseManagementService extends Service {
 
             // init the communication module for the service
             serverCom = new Communication();
-
-            // get course from bdd if course is not provided by intent nor service
-            if (driverCourse.getDestination() == null) {
-                driverCourse = serverCom.getDriverCourse(User.getMe());
-            }
 
             // launch the thread for the management of the course
             new Thread(new ObserveCourse()).start();
@@ -309,11 +307,19 @@ public class CourseManagementService extends Service {
 
         @Override
         public void run() {
-            // first declare the course on the server
-            int courseID = serverCom.declareCourse(driverCourse);
-            // set the returned id to the object
-            driverCourse.setId(courseID);
-            Log.d(TAG_LOG, "the course was declared with ID: " + courseID);
+            // first declare the course on the server or
+            // recover course from the server if course is not provided by intent nor service
+            if (driverCourse.getDestination() == null) {
+                // recover course from the server
+                driverCourse = serverCom.getDriverCourse(User.getMe(thisContext));
+            }
+            else {
+                // declare the course on the server
+                int courseID = serverCom.declareCourse(driverCourse);
+                // set the returned id to the object
+                driverCourse.setId(courseID);
+                Log.d(TAG_LOG, "the course was declared with ID: " + courseID);
+            }
 
             // then do one query every second
             while (true) {
