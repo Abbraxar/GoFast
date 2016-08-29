@@ -105,6 +105,11 @@ public class CommunicationStub implements CommInterface {
     }
 
     @Override
+    public void abortCourse(DriverCourse course) {
+
+    }
+
+    @Override
     public void updatePosition(DriverCourse driverCourse) {
 
     }

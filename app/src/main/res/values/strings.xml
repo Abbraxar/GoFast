@@ -14,7 +14,7 @@
     <string name="tooFarMsg">Vous allez trop loin, GoFast n\'est pas approprié à votre usage</string>
     <string name="tooCloseMsg">Votre destination est trop proche, allez à pied</string>
     <string name="titleAbortCourseDialog">Annulation du trajet</string>
-    <string name="textAbortCourseDialog">Êtes-vous sûr de vouloir annuler votre trajet ?</string>
+    <string name="textAbortCourseDialog">Êtes-vous sûr de vouloir abandonner votre trajet ?</string>
     <string name="yes">Oui</string>
     <string name="no">Non</string>
     <string name="choiceNicknameText">Choisisez votre pseudo GoFast</string>
@@ -23,4 +23,5 @@
     <string name="empyNicknameMsg">S\'il vous plaît, choisissez un pseudo pour GoFast</string>
     <string name="nicknameTaken1">Désolé, le pseudo \'</string>
     <string name="nicknameTaken">\' est déjà pris</string>
+    <string name="courseInProgress">Trajet en cours</string>
 </resources>

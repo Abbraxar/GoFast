@@ -48,6 +48,7 @@ public class Communication implements CommInterface {
     static final String UPDATE_COURSE = "/update_course";
     static final String DECLARE_USER = "/declare_user";
     static final String RETIEVE_ACCOUNT = "/retrieve_account";
+    static final String ABORT_COURSE = "/abort_course";
 
     private static final String LOG_TAG = "Server Communication";
     private static final DateFormat format = new SimpleDateFormat("y/M/d H:m");
@@ -196,6 +197,16 @@ public class Communication implements CommInterface {
 
     }
 
+    @Override
+    public void abortCourse(DriverCourse course) {
+        // prepare the string for the request
+        StringBuilder sb = new StringBuilder(SERVER_IP + ABORT_COURSE);
+        sb.append("?course_id=" + course.getId());
+
+        // call the service and obtain a response
+        String rawJSON = useService(sb.toString());
+    }
+
 
     @Override
     public void updatePosition(DriverCourse driverCourse) {
@@ -315,7 +326,7 @@ public class Communication implements CommInterface {
 
         // prepare the string for the request
         StringBuilder sb = new StringBuilder(SERVER_IP + GET_USER_COURSE);
-        sb.append("?id=" + driver.getNickname());
+        sb.append("?user_id=" + driver.getNickname());
 
         // call the service and obtain a response
         String rawJSON = useService(sb.toString());
@@ -326,7 +337,6 @@ public class Communication implements CommInterface {
 
             // id
             driverCourse.setId(jsonObject.getInt("id"));
-
             // driver
             driverCourse.setDriver(driver);
 
@@ -358,20 +368,25 @@ public class Communication implements CommInterface {
             driverCourse.setEncodedPoints(jsonObject.getString("encoded_points"));
 
             // actual position
-            JSONObject posJSONObj = jsonObject.getJSONObject("actual_position");
-            driverCourse.setActualPosition(
-                new LatLng(
-                    Double.parseDouble(posJSONObj.getString("encoded_points")),
-                    Double.parseDouble(posJSONObj.getString("encoded_points"))
-                )
-            );
+            if (jsonObject.has("actual_position")) {
+                JSONObject posJSONObj = jsonObject.getJSONObject("actual_position");
+                driverCourse.setActualPosition(
+                        new LatLng(
+                                Double.parseDouble(posJSONObj.getString("lat")),
+                                Double.parseDouble(posJSONObj.getString("long"))
+                        )
+                );
+            }
 
             // pickup time
-            String pickupTime = jsonObject.getString("pickup_time");
-            try {
-                driverCourse.setPositioningTime(format.parse(pickupTime));
-            } catch (ParseException e) {
-                e.printStackTrace();
+            if (jsonObject.has("pickup_time")) {
+
+                String pickupTime = jsonObject.getString("pickup_time");
+                try {
+                    driverCourse.setPositioningTime(format.parse(pickupTime));
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
             }
 
         } catch (JSONException e) {

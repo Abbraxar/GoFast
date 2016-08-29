@@ -63,6 +63,12 @@ public interface CommInterface {
     void abortCarpool(Carpooling carpooling);
 
     /**
+     * Abort a requested course
+     * @param course the carpool aborted
+     */
+    void abortCourse(DriverCourse course);
+
+    /**
      * Updates the new position of the car
      * @param driverCourse the travel to be updated
      */

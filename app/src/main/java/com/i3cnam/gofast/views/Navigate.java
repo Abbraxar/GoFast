@@ -16,11 +16,13 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
@@ -45,8 +47,11 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
     Polyline pathPolyline;
     Marker homeMarker;
     Marker destinationMarker;
-    DriverCourse driverCourse;
+    // finally we dont need it
+//    DriverCourse driverCourse;
     boolean restartByMain = false;
+    boolean mapIsReady = false; // for synchronisation
+    boolean courseIsInitialised = false; // for synchronisation
 
     private final static String TAG_LOG = "Navigate view";
 
@@ -64,7 +69,7 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
 
-        driverCourse = new DriverCourse();
+        DriverCourse driverCourse = new DriverCourse();
         if (bundle != null) {
             // instanciate driver course
             driverCourse.setOrigin((Place) bundle.getSerializable(DestinationMap.ORIGIN));
@@ -89,6 +94,10 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
             .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
+                    myService.abortCourse();
+//                    stopService(new Intent(context, CourseManagementService.class));
+                    myService.stopSelf();
+
                     restartByMain = true;
                     Intent intent = new Intent(context, Main.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -122,7 +131,7 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
             CourseManagementService.LocalBinder binder = (CourseManagementService.LocalBinder) service;
             myService = binder.getService();
             isBound = true;
-            driverCourse = myService.getDriverCourse();
+            initMap();
         }
 
         @Override
@@ -143,6 +152,11 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
     protected void onResume() {
         Log.d(TAG_LOG, "RESUME");
 
+        // for the course init
+        IntentFilter initFilter = new IntentFilter();
+        initFilter.addAction(CourseManagementService.BROADCAST_INIT_COURSE_ACTION);
+        registerReceiver(broadcastCourseInitReceiver, initFilter);
+
         // for the course changes
         IntentFilter courseFilter = new IntentFilter();
         courseFilter.addAction(CourseManagementService.BROADCAST_UPDATE_COURSE_ACTION);
@@ -161,6 +175,7 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
         Log.d(TAG_LOG, "PAUSE");
         unregisterReceiver(broadcastCarpoolingReceiver);
         unregisterReceiver(broadcastCourseReceiver);
+        unregisterReceiver(broadcastCourseInitReceiver);
 
         // save current activity as last activity opened
         SharedPreferences prefs = getSharedPreferences("X", MODE_PRIVATE);
@@ -192,6 +207,16 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
         myService.abortCarpooling(myService.getRequestedCarpoolings().get(0));
     }
 
+
+
+    private BroadcastReceiver broadcastCourseInitReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // update the boolean and attempt to init the map
+            courseIsInitialised = true;
+            initMap();
+        }
+    };
 
 
     private BroadcastReceiver broadcastCourseReceiver = new BroadcastReceiver() {
@@ -236,21 +261,68 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        LatLng actualPosition = driverCourse.getOrigin().getCoordinates();
-        Place destination = driverCourse.getDestination();
-
-        // set the ORIGIN marker
-        homeMarker = googleMap.addMarker(new MarkerOptions().position(actualPosition).title(getResources().getString(R.string.origin_title)));
-        // set the destination marker
-        destinationMarker = mMap.addMarker(new MarkerOptions().position(destination.getCoordinates())
-                .title(getResources().getString(R.string.destination_title))
-                .snippet(destination.getPlaceName()));
-        destinationMarker.showInfoWindow();
-
-        // draw the path
-        List<LatLng> pathPoints = PolyUtil.decode(driverCourse.getEncodedPoints());
-        pathPolyline = mMap.addPolyline(new PolylineOptions());
-        pathPolyline.setPoints(pathPoints);
-        homeMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.driver_50));
+        // update the boolean and attempt to init the map
+        mapIsReady = true;
+        initMap();
     }
+
+
+    public void initMap(){
+        Log.d("NAV", (isBound ? "bound" : "not bound"));
+        Log.d("NAV", (mapIsReady ? "mapIsReady" : "not mapIsReady"));
+        Log.d("NAV", (courseIsInitialised ? "courseIsInitialised" : "not courseIsInitialised"));
+        if (mapIsReady && courseIsInitialised && isBound) {
+            if (myService.getDriverCourse().getDestination() != null) {
+                Log.d("NAV", ("deiver course not null"));
+                DriverCourse course = myService.getDriverCourse();
+                LatLng actualPosition = course.getOrigin().getCoordinates();
+                Place destination = course.getDestination();
+                Place origin = course.getOrigin();
+
+                Log.d("NAV", ("draw origin"));
+
+                // set the ORIGIN marker
+                homeMarker = mMap.addMarker(new MarkerOptions().position(actualPosition).title(getResources().getString(R.string.origin_title)));
+                // set the destination marker
+                destinationMarker = mMap.addMarker(new MarkerOptions().position(destination.getCoordinates())
+                        .title(getResources().getString(R.string.destination_title))
+                        .snippet(destination.getPlaceName()));
+                destinationMarker.showInfoWindow();
+
+                Log.d("NAV", ("draw path"));
+
+                // draw the path
+                List<LatLng> pathPoints = PolyUtil.decode(course.getEncodedPoints());
+                pathPolyline = mMap.addPolyline(new PolylineOptions());
+                pathPolyline.setPoints(pathPoints);
+                homeMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.driver_50));
+
+                // zoom map
+                double northest = Math.max(destination.getCoordinates().latitude, origin.getCoordinates().latitude);
+                double southest = Math.min(destination.getCoordinates().latitude, origin.getCoordinates().latitude);
+                double westest = Math.max(destination.getCoordinates().longitude, origin.getCoordinates().longitude);
+                double eastest = Math.min(destination.getCoordinates().longitude, origin.getCoordinates().longitude);
+
+                double latMargin = Math.abs(northest - southest) * 0.2;
+                double longMargin = Math.abs(westest - eastest) * 0.2;
+
+                LatLngBounds mapBounds = new LatLngBounds( new LatLng(southest - latMargin, eastest - longMargin),
+                        new LatLng(northest + latMargin, westest + longMargin));
+                // set the camera to the calculated bounds
+                mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(mapBounds, 0));
+
+            }
+            else {
+                Log.d("NAV", ("deiver course null"));
+                // si malgré tout on n'a pas d'objet course, on quite la vue
+                restartByMain = true;
+                myService.stopSelf();
+                Intent intent = new Intent(this, Main.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+            }
+
+        }
+    }
+
 }
