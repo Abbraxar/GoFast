@@ -1,7 +1,6 @@
 package com.i3cnam.gofast.views;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -11,8 +10,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.telephony.TelephonyManager;
-
 import android.util.Log;
 import android.view.View;
 
@@ -84,6 +81,7 @@ public class Main extends AppCompatActivity {
      * @return true if application has permissions
      */
     public  boolean checkAndRequestPermissions() {
+
         int fineLocationPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
         int coarseLocationPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
         int telephonyPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE);
