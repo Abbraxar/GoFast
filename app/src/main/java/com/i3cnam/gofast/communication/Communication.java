@@ -40,6 +40,7 @@ public class Communication implements CommInterface {
     static final String ACCEPT_CARPOOL = "/accept_carpooling";
     static final String REFUSE_CARPOOL = "/refuse_carpooling";
     static final String ABORT_CARPOOL = "/abort_carpooling";
+    static final String ABORT_TRAVEL = "/abort_travel";
     static final String GET_TRAVEL = "/get_travel";
     static final String GET_USER_TRAVEL = "/get_user_travel";
     static final String GET_COURSE = "/get_course";
@@ -202,6 +203,16 @@ public class Communication implements CommInterface {
         // prepare the string for the request
         StringBuilder sb = new StringBuilder(SERVER_IP + ABORT_COURSE);
         sb.append("?course_id=" + course.getId());
+
+        // call the service and obtain a response
+        String rawJSON = useService(sb.toString());
+    }
+
+    @Override
+    public void abortTravel(PassengerTravel travel) {
+        // prepare the string for the request
+        StringBuilder sb = new StringBuilder(SERVER_IP + ABORT_TRAVEL);
+        sb.append("?travel_id=" + travel.getId());
 
         // call the service and obtain a response
         String rawJSON = useService(sb.toString());

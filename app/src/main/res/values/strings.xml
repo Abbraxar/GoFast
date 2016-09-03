@@ -15,6 +15,8 @@
     <string name="tooCloseMsg">Votre destination est trop proche, allez à pied</string>
     <string name="titleAbortCourseDialog">Annulation du trajet</string>
     <string name="textAbortCourseDialog">Êtes-vous sûr de vouloir abandonner votre trajet ?</string>
+    <string name="titleAbortTravelDialog">Annulation du déplacement</string>
+    <string name="textAbortTravelDialog">Êtes-vous sûr de vouloir abandonner votre déplacement ?</string>
     <string name="yes">Oui</string>
     <string name="no">Non</string>
     <string name="choiceNicknameText">Choisisez votre pseudo GoFast</string>
@@ -24,6 +26,7 @@
     <string name="nicknameTaken1">Désolé, le pseudo \'</string>
     <string name="nicknameTaken">\' est déjà pris</string>
     <string name="courseInProgress">Trajet en cours</string>
+    <string name="travelInProgress">Déplacement en cours</string>
     <string name="refuseCarpool">Refuser</string>
     <string name="acceptCarpool">Accepter</string>
     <string name="carpoolingDemandText">Vous avez une demande de covoiturage</string>
@@ -34,4 +37,6 @@
     <string name="canceledCarpoolText">" a annulé le covoiturage demandé"</string>
     <string name="conflictText">" a levé un litige pour ce covoiturage"</string>
     <string name="conflictTitle">Litige</string>
+    <string name="btDetailsTxt">Details</string>
+    <string name="btRequestTxt">Demander</string>
 </resources>

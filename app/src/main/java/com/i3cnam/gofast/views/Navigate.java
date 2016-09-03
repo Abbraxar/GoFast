@@ -188,11 +188,8 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
         carpoolingFilter.addAction(CourseManagementService.BROADCAST_UPDATE_CARPOOLING_ACTION);
         registerReceiver(broadcastCarpoolingReceiver, carpoolingFilter);
 
-        // update view with last data
-        handleCarpoolingChanges();
-
         // save current activity as last activity opened
-        SharedPreferences prefs = getSharedPreferences("X", MODE_PRIVATE);
+        SharedPreferences prefs = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString("lastActivity", getClass().getName());
         editor.commit();
@@ -213,9 +210,7 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
 
     @Override
     public void onBackPressed() {
-        final Context context = this;
-
-        new AlertDialog.Builder(this)
+          new AlertDialog.Builder(this)
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .setTitle(R.string.titleAbortCourseDialog)
                 .setMessage(R.string.textAbortCourseDialog)
@@ -353,6 +348,7 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
             // update the boolean and attempt to init the map
             courseIsInitialised = true;
             initMap();
+            handleCarpoolingChanges();
         }
     };
 
@@ -620,7 +616,7 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
         myService.stopSelf();
 
         // save main activity as activity to restart
-        SharedPreferences prefs = getSharedPreferences("X", MODE_PRIVATE);
+        SharedPreferences prefs = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
         editor.remove("lastActivity");
         editor.commit();

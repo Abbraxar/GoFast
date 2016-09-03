@@ -119,27 +119,6 @@ public class CourseManagementService extends Service {
             sendCourseInit();
         }
 
-        /*Intent showTaskIntent = new Intent(getApplicationContext(), Main.class);
-        showTaskIntent.setAction(Intent.ACTION_MAIN);
-        showTaskIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-        showTaskIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-        PendingIntent contentIntent = PendingIntent.getActivity(
-                getApplicationContext(),
-                0,
-                showTaskIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
-
-        Notification notification = new Notification.Builder(getApplicationContext())
-                .setContentTitle(getString(R.string.app_name))
-                .setContentText(getString(R.string.courseInProgress))
-                .setSmallIcon(R.drawable.driver_100)
-                .setContentIntent(contentIntent)
-                .setOngoing(true)
-                .build();
-
-        startForeground(1337, notification);*/
-
         Log.d(TAG_LOG, "Build notification");
         NotificationCompat.Builder b = new NotificationCompat.Builder(this);
 
@@ -161,8 +140,6 @@ public class CourseManagementService extends Service {
 
         startForeground(1337, b.build());
 
-        // We want this service to continue running until it is explicitly
-        // stopped, so return sticky.
         return START_NOT_STICKY;
     }
 

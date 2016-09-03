@@ -56,7 +56,7 @@ public class ConfigureAccount extends AppCompatActivity {
     }
 
     private void writeSharedPreferences(String nickname, String phoneNumber){
-        SharedPreferences prefs = getSharedPreferences("X", MODE_PRIVATE);
+        SharedPreferences prefs = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString("userNickname", nickname);
         editor.putString("userPhoneNumber", phoneNumber);

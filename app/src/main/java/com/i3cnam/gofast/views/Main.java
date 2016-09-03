@@ -49,12 +49,11 @@ public class Main extends AppCompatActivity {
             Log.d("nickname", User.getMe(this).getNickname());
             Log.d("phone", User.getMe(this).getPhoneNumber());
 
-            SharedPreferences prefs = getSharedPreferences("X", MODE_PRIVATE);
+            SharedPreferences prefs = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
             // go to last activity if needed
             Class<?> activityClass;
 
             try {
-                //            SharedPreferences prefs = getSharedPreferences("X", MODE_PRIVATE);
                 activityClass = Class.forName(
                         prefs.getString("lastActivity", Main.class.getName())
                 );

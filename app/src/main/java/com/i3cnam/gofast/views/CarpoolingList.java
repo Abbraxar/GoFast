@@ -4,65 +4,49 @@ package com.i3cnam.gofast.views;
  * Created by nadege on 08/07/16.
  */
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
+import android.app.ListActivity;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
-import android.view.View;
-import android.widget.ExpandableListAdapter;
-import android.widget.ExpandableListView;
+import android.widget.Adapter;
+import android.widget.ArrayAdapter;
+import android.widget.ListAdapter;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.i3cnam.gofast.R;
-import com.i3cnam.gofast.communication.CommInterface;
-import com.i3cnam.gofast.communication.CommunicationStub;
-import com.i3cnam.gofast.management.carpooling.CarpoolListEncapsulated;
 import com.i3cnam.gofast.management.carpooling.CarpoolingManagementService;
 import com.i3cnam.gofast.management.carpooling.CarpoolingManagementService.LocalBinder;
-import com.i3cnam.gofast.management.course.CourseManagementService;
 import com.i3cnam.gofast.model.Carpooling;
-import com.i3cnam.gofast.model.DriverCourse;
 import com.i3cnam.gofast.model.PassengerTravel;
 import com.i3cnam.gofast.model.Place;
 import com.i3cnam.gofast.model.User;
 
+import java.util.ArrayList;
+import java.util.List;
 
-public class CarpoolingList extends FragmentActivity implements OnMapReadyCallback {
 
-    /** variables globales */
-    private GoogleMap mMap;
+public class CarpoolingList extends ListActivity {
+
+    /** globals */
     public final static String TRAVEL = "com.i3cnam.gofast.TRAVEL";
     private PassengerTravel passengerTravel;
     CarpoolingManagementService myService;
     boolean isBound = false;
-    private List<Carpooling> possibilities; // list of carpooling possibilities
-    // pour la liste
-    ExpandableListAdapter listAdapter;
-    ExpandableListView expListView;
-    List<String> listDataHeader;
-    HashMap<String, List<String>> listDataChild;
 
     private final String TAG_LOG = "Carpooling View";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_carpooling_list);
 
         // get all the data of the intent and create a new travel object
         passengerTravel = new PassengerTravel();
@@ -70,10 +54,12 @@ public class CarpoolingList extends FragmentActivity implements OnMapReadyCallba
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
 
-        passengerTravel.setOrigin((Place)bundle.getSerializable(DestinationMap.ORIGIN));
-        passengerTravel.setDestination((Place)bundle.getSerializable(EnterDestination.DESTINATION));
-        passengerTravel.setPassenger(User.getMe(this));
-        passengerTravel.setRadius(intent.getIntExtra(EnterDestination.RADIUS,500));
+        if (bundle != null) {
+            passengerTravel.setOrigin((Place) bundle.getSerializable(DestinationMap.ORIGIN));
+            passengerTravel.setDestination((Place) bundle.getSerializable(EnterDestination.DESTINATION));
+            passengerTravel.setPassenger(User.getMe(this));
+            passengerTravel.setRadius(intent.getIntExtra(EnterDestination.RADIUS, 500));
+        }
 
         // new intent for publication:
         Intent serviceIntent = new Intent(this, CarpoolingManagementService.class);
@@ -85,38 +71,13 @@ public class CarpoolingList extends FragmentActivity implements OnMapReadyCallba
         startService(serviceIntent);
         Log.d(TAG_LOG, "Bind Service");
         bindService(serviceIntent, myConnection, Context.BIND_AUTO_CREATE);
-
-        // test du stub communication
-        CommInterface serverCom = new CommunicationStub();
-        System.out.println("Send request");
-        possibilities = serverCom.findCarpoolingPossibilities(passengerTravel);
-        System.out.println("Request sent");
-
-        for (Carpooling onePossibility: possibilities) {
-            System.out.println("====================== C A R P O O L I N G ======================");
-            System.out.println(onePossibility.getPickupPoint());
-            System.out.println(onePossibility.getDropoffPoint());
-            System.out.println(onePossibility.getPickupTime());
-        }
-
-
-        // Renvoi vers le ExpandableListView de activity_passenger_result
-       expListView = (ExpandableListView) findViewById(R.id.covoitResult);
-
-        // preparing list data
-        prepareListData();
-
-        listAdapter = new PassengerResultExpandableListAdapter(this, listDataHeader, listDataChild);
-
-        // setting list adapter
-        expListView.setAdapter(listAdapter);
     }
 
 
     @Override
     protected void onStart() {
         super.onStart();
-        Log.d(TAG_LOG, "ON_START");
+        Log.d(TAG_LOG, "START");
         // tester l'appel au service
 //        myService.requestCarpool();
     }
@@ -124,19 +85,53 @@ public class CarpoolingList extends FragmentActivity implements OnMapReadyCallba
 
     @Override
     protected void onResume() {
+        Log.d(TAG_LOG, "RESUME");
+
         IntentFilter filter = new IntentFilter();
         filter.addAction(CarpoolingManagementService.BROADCAST_ACTION);
         registerReceiver(broadcastReceiver, filter);
+
+        // save current activity as last activity opened
+        SharedPreferences prefs = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString("lastActivity", getClass().getName());
+        editor.commit();
+
         super.onResume();
     }
 
     @Override
     protected void onPause() {
+        Log.d(TAG_LOG, "PAUSE");
+
         unregisterReceiver(broadcastReceiver);
         super.onPause();
     }
 
+    @Override
+    protected void onDestroy() {
+        Log.d(TAG_LOG, "DESTROY");
 
+        unbindService(myConnection);
+        super.onDestroy();
+    }
+
+    @Override
+    public void onBackPressed() {
+        new AlertDialog.Builder(this)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setTitle(R.string.titleAbortTravelDialog)
+                .setMessage(R.string.textAbortTravelDialog)
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        myService.abortTravel();
+                        stopServiceAndCloseAvtivity();
+                    }
+                })
+                .setNegativeButton(R.string.no, null)
+                .show();
+    }
 
     /** Defines callbacks for service binding, passed to bindService() */
     private ServiceConnection myConnection = new ServiceConnection() {
@@ -162,41 +157,14 @@ public class CarpoolingList extends FragmentActivity implements OnMapReadyCallba
      * Preparing the list data
      */
     private void prepareListData() {
-        listDataHeader = new ArrayList<>();
-        listDataChild = new HashMap<>();
+        List<Carpooling> carpoolings = myService.getCarpoolingPossibilities();
+        ListAdapter adapter =  new CarpoolingPassengerArrayAdapter(this, R.layout.list_item_carpooling_passenger, carpoolings);
 
-        // Adding child data
-        listDataHeader.add("Covoiturage 1");
-        listDataHeader.add("Covoiturage 2");
-        listDataHeader.add("Covoiturage 3");
-
-        // Adding child data
-        List<String> covoiturage1 = new ArrayList<>();
-        covoiturage1.add("map à venir");
-
-        List<String> covoiturage2 = new ArrayList<>();
-        covoiturage2.add("map à venir");
-
-
-        List<String> covoiturage3 = new ArrayList<>();
-        covoiturage3.add("map à venir");
-
-        listDataChild.put(listDataHeader.get(0), covoiturage1); // Header, Child data
-        listDataChild.put(listDataHeader.get(1), covoiturage2);
-        listDataChild.put(listDataHeader.get(2), covoiturage3);
-    }
-
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        setListAdapter(adapter);
     }
 
     /** Boutons de tests */
+    /*
     public void requestCarpool(View view) {
         Log.d(TAG_LOG, "requestCarpool");
         myService.requestCarpool(possibilities.get(0));
@@ -211,7 +179,13 @@ public class CarpoolingList extends FragmentActivity implements OnMapReadyCallba
         Log.d(TAG_LOG, "abortCarpooling");
         myService.abortCarpooling(possibilities.get(0));
     }
+    */
 
+    /*
+    ------------------------------------------------------------------------------------------------
+        BROADCAST RECEIVERS:
+    ------------------------------------------------------------------------------------------------
+    */
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -219,24 +193,28 @@ public class CarpoolingList extends FragmentActivity implements OnMapReadyCallba
             Log.d("BroadcastReceiver", "Broadcast received");
             Toast.makeText(getApplicationContext(), "Broadcast received", Toast.LENGTH_SHORT).show();
 
-            Bundle bundle = intent.getExtras();
-            CarpoolListEncapsulated carpoolListEncapsulated = (CarpoolListEncapsulated)(bundle.getSerializable("UPDATED_CARPOOLING"));
-            possibilities = carpoolListEncapsulated.list;
-            // TODO
-            // DO SOMETHING
-            String s;
-            for (Carpooling c : possibilities) {
-                s = "Carpooling " + c.getId() + "\n" +
-                        "pick up: " + c.getPickupPoint() + "\n" +
-                        "drop off: " + c.getDropoffPoint() + "\n" +
-                        "time: " + c.getPickupTime() + "\n" +
-                        "state: " + c.getState() + "\n" +
-                        "fare: " + c.getFare() + "\n";
-
-                Log.d("BroadcastReceiver", s);
-                Toast.makeText(getApplicationContext(), s, Toast.LENGTH_SHORT).show();
-            }
+            prepareListData();
         }
     };
 
+    /*
+    ------------------------------------------------------------------------------------------------
+    */
+
+    private void stopServiceAndCloseAvtivity() {
+        // stop service
+        myService.stopForeground(true);
+        myService.stopSelf();
+
+        // save main activity as activity to restart
+        SharedPreferences prefs = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.remove("lastActivity");
+        editor.commit();
+
+        // open main activity
+        Intent intent = new Intent(this, Main.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+    }
 }

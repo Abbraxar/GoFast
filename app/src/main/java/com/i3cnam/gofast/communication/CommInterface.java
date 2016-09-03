@@ -64,9 +64,15 @@ public interface CommInterface {
 
     /**
      * Abort a requested course
-     * @param course the carpool aborted
+     * @param course the course aborted
      */
     void abortCourse(DriverCourse course);
+
+    /**
+     * Abort a requested travel
+     * @param travel the travel aborted
+     */
+    void abortTravel(PassengerTravel travel);
 
     /**
      * Updates the new position of the car
