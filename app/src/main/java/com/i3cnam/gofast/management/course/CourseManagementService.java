@@ -26,6 +26,7 @@ import com.i3cnam.gofast.model.DriverCourse;
 import com.i3cnam.gofast.model.User;
 import com.i3cnam.gofast.views.Main;
 import com.i3cnam.gofast.views.Navigate;
+import com.i3cnam.gofast.views.notifications.NewRequestNotification;
 
 import java.net.ConnectException;
 import java.util.ArrayList;
@@ -225,6 +226,11 @@ public class CourseManagementService extends Service {
     private void sendCourseUpdate() {
         Log.d(TAG_LOG, "entered sendCourseUpdate");
 
+        for (Carpooling c : requestedCarpoolings) {
+            if (c.getState().equals(Carpooling.CarpoolingState.IN_DEMAND)) {
+                new NewRequestNotification().notify(this, "salut", 1);
+            }
+        }
         sendBroadcast(broadcastCourseIntent);
     }
 
