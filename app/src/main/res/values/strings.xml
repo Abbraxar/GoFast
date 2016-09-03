@@ -39,4 +39,5 @@
     <string name="conflictTitle">Litige</string>
     <string name="btDetailsTxt">Details</string>
     <string name="btRequestTxt">Demander</string>
+    <string name="title_activity_guide_passenger">Map</string>
 </resources>

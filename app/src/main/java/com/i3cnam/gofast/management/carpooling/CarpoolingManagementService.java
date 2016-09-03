@@ -14,15 +14,13 @@ import android.util.Log;
 import com.i3cnam.gofast.R;
 import com.i3cnam.gofast.communication.CommInterface;
 import com.i3cnam.gofast.communication.Communication;
-import com.i3cnam.gofast.communication.CommunicationStub;
 import com.i3cnam.gofast.model.Carpooling;
-import com.i3cnam.gofast.model.DriverCourse;
 import com.i3cnam.gofast.model.PassengerTravel;
 import com.i3cnam.gofast.model.User;
 import com.i3cnam.gofast.views.CarpoolingList;
 import com.i3cnam.gofast.views.Main;
-import com.i3cnam.gofast.views.Navigate;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -30,11 +28,12 @@ import java.util.List;
  */
 public class CarpoolingManagementService extends Service {
 
-    private List<Carpooling> carpoolingPossibilities;
+    private List<Carpooling> carpoolingPossibilities = new ArrayList<>();
     private final IBinder myBinder = new LocalBinder();
     private CommInterface serverCom;
     private PassengerTravel passengerTravel;
     private Thread observeTravel;
+    private ObserveTravel myTravelObserver;
 
     // temporary global variables to communicate between threads:
     private Carpooling carpoolingToRequest;
@@ -44,6 +43,8 @@ public class CarpoolingManagementService extends Service {
     // test pour le broadcast
     public static final String BROADCAST_ACTION = "com.i3cnam.gofast.UPDATE_CARPOOLING";
     private Intent broadcastIntent;
+    public static  final String BROADCAST_TRAVEL_INIT_ACTION = "com.i3cnam.gofast.INIT_TRAVEL";
+    private Intent broadcastTravelInitIntent;
 
     private CarpoolingManagementService thisService; // to access from other classes
 
@@ -72,6 +73,7 @@ public class CarpoolingManagementService extends Service {
     public void onCreate() {
         Log.d(TAG_LOG, "CREATE");
         broadcastIntent = new Intent(BROADCAST_ACTION);
+        broadcastTravelInitIntent = new Intent(BROADCAST_TRAVEL_INIT_ACTION);
         thisService = this;
         super.onCreate();
     }
@@ -97,12 +99,13 @@ public class CarpoolingManagementService extends Service {
             serverCom = new Communication();
 
             // launch observer thread
-            observeTravel = new Thread(new ObserveTravel());
+            myTravelObserver = new ObserveTravel();
+            observeTravel = new Thread(myTravelObserver);
             observeTravel.start();
         }
         else {
             // broadcast course init to the activity
-            // sendCourseInit();
+            sendTravelInit();
         }
 
         Log.d(TAG_LOG, "Build notification");
@@ -127,6 +130,24 @@ public class CarpoolingManagementService extends Service {
         startForeground(1337, b.build());
 
         return START_NOT_STICKY;
+    }
+
+    /*
+    ------------------------------------------------------------------------------------------------
+        BROADCAST METHODS:
+        They represent state changes of the TRAVEL AND CARPOOLING
+        They are received by the activity to show the changes
+        If the activity is not visible, the generate a notification
+    ------------------------------------------------------------------------------------------------
+     */
+
+    /**
+     * Broadcast the course update
+     */
+    private void sendTravelInit() {
+        Log.d(TAG_LOG, "entered sendTravelInit");
+
+        sendBroadcast(broadcastTravelInitIntent);
     }
 
     /**
@@ -159,7 +180,6 @@ public class CarpoolingManagementService extends Service {
     public void abortCarpooling(Carpooling carpooling) {
         carpoolingToAbort = carpooling;
         new AsynchronousAbortCarpool().execute();
-        observeTravel.stop();
     }
 
     public void abortTravel() {
@@ -199,7 +219,7 @@ public class CarpoolingManagementService extends Service {
             }
 
             // broadcast course to the activity
-            // sendCourseInit();
+            sendTravelInit();
 
             // if the id is 0, the course has not been registered into database, abort
             if (passengerTravel.getId() == 0) {
@@ -207,6 +227,7 @@ public class CarpoolingManagementService extends Service {
                 passengerTravel = new PassengerTravel();
             }
             else {
+                serverCom.findCarpoolingPossibilities(passengerTravel);
                 // then do one query every second
                 while (running) {
                     // wait one second
@@ -298,6 +319,7 @@ public class CarpoolingManagementService extends Service {
         protected String doInBackground(String... urls) {
             Log.d(TAG_LOG, "Travel aborted");
             Log.d(TAG_LOG, passengerTravel.getParametersString());
+            myTravelObserver.terminate();
             serverCom.abortTravel(passengerTravel);
             return null;
         }

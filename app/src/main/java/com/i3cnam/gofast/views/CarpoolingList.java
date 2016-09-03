@@ -17,9 +17,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
-import android.view.View;
-import android.widget.Adapter;
-import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.Toast;
 
@@ -31,7 +28,6 @@ import com.i3cnam.gofast.model.PassengerTravel;
 import com.i3cnam.gofast.model.Place;
 import com.i3cnam.gofast.model.User;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -40,10 +36,11 @@ public class CarpoolingList extends ListActivity {
     /** globals */
     public final static String TRAVEL = "com.i3cnam.gofast.TRAVEL";
     private PassengerTravel passengerTravel;
-    CarpoolingManagementService myService;
-    boolean isBound = false;
+    private CarpoolingManagementService myService;
+    protected boolean isBound = false;
+    protected boolean isTravelInit = false;
 
-    private final String TAG_LOG = "Carpooling View";
+    private final String TAG_LOG = "CarpoolingList";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,13 +87,19 @@ public class CarpoolingList extends ListActivity {
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(CarpoolingManagementService.BROADCAST_ACTION);
-        registerReceiver(broadcastReceiver, filter);
+        registerReceiver(broadcastCarpoolingReceiver, filter);
+
+        IntentFilter filterTravelInit = new IntentFilter();
+        filterTravelInit.addAction(CarpoolingManagementService.BROADCAST_TRAVEL_INIT_ACTION);
+        registerReceiver(broadcastTravelInitReceiver, filterTravelInit);
 
         // save current activity as last activity opened
         SharedPreferences prefs = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString("lastActivity", getClass().getName());
         editor.commit();
+
+        prepareListData();
 
         super.onResume();
     }
@@ -105,7 +108,8 @@ public class CarpoolingList extends ListActivity {
     protected void onPause() {
         Log.d(TAG_LOG, "PAUSE");
 
-        unregisterReceiver(broadcastReceiver);
+        unregisterReceiver(broadcastCarpoolingReceiver);
+        unregisterReceiver(broadcastTravelInitReceiver);
         super.onPause();
     }
 
@@ -127,7 +131,7 @@ public class CarpoolingList extends ListActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         myService.abortTravel();
-                        stopServiceAndCloseAvtivity();
+                        stopServiceAndCloseActivity();
                     }
                 })
                 .setNegativeButton(R.string.no, null)
@@ -143,6 +147,7 @@ public class CarpoolingList extends ListActivity {
             LocalBinder binder = (LocalBinder) service;
             myService = binder.getService();
             isBound = true;
+            prepareListData();
         }
 
         @Override
@@ -151,17 +156,18 @@ public class CarpoolingList extends ListActivity {
         }
     };
 
-
-
-
     /*
      * Preparing the list data
      */
     private void prepareListData() {
-        List<Carpooling> carpoolings = myService.getCarpoolingPossibilities();
-        ListAdapter adapter =  new CarpoolingPassengerArrayAdapter(this, R.layout.list_item_carpooling_passenger, carpoolings);
+        Log.d(TAG_LOG, "prepareListData: enter function. bound: " + isBound + ", init: " + isTravelInit);
+        if(isBound && isTravelInit) {
+            Log.d(TAG_LOG, "prepareListData: set adapter");
+            List<Carpooling> carpoolings = myService.getCarpoolingPossibilities();
+            ListAdapter adapter =  new CarpoolingPassengerArrayAdapter(this, R.layout.list_item_carpooling_passenger, carpoolings);
 
-        setListAdapter(adapter);
+            setListAdapter(adapter);
+        }
     }
 
     /** Boutons de tests */
@@ -188,12 +194,25 @@ public class CarpoolingList extends ListActivity {
     ------------------------------------------------------------------------------------------------
     */
 
-    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver broadcastCarpoolingReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.d("BroadcastReceiver", "Broadcast received");
+            Log.d(TAG_LOG, "Broadcast carpool received");
             Toast.makeText(getApplicationContext(), "Broadcast received", Toast.LENGTH_SHORT).show();
 
+            prepareListData();
+
+            searchForAcceptedCarpool();
+
+        }
+    };
+
+    private BroadcastReceiver broadcastTravelInitReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG_LOG, "Broadcast travel received");
+            isTravelInit = true;
             prepareListData();
         }
     };
@@ -202,7 +221,18 @@ public class CarpoolingList extends ListActivity {
     ------------------------------------------------------------------------------------------------
     */
 
-    private void stopServiceAndCloseAvtivity() {
+
+    private void searchForAcceptedCarpool() {
+        for (Carpooling c : myService.getCarpoolingPossibilities()) {
+            if (c.getState().equals(Carpooling.CarpoolingState.IN_PROGRESS)) {
+                Intent intent = new Intent(this,GuidePassenger.class);
+
+            }
+        }
+    }
+
+
+    private void stopServiceAndCloseActivity() {
         // stop service
         myService.stopForeground(true);
         myService.stopSelf();

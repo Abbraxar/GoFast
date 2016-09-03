@@ -413,7 +413,7 @@ public class Communication implements CommInterface {
 
         // prepare the string for the request
         StringBuilder sb = new StringBuilder(SERVER_IP + GET_USER_TRAVEL);
-        sb.append("?id=" + passenger.getNickname());
+        sb.append("?user_id=" + passenger.getNickname());
 
         // call the service and obtain a response
         String rawJSON = useService(sb.toString());
