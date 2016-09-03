@@ -38,7 +38,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="25dp" />
 
-    <TextView
+    <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
@@ -46,7 +46,8 @@
         android:id="@+id/phoneNumberField"
         android:layout_below="@+id/textView2"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="15dp" />
+        android:layout_marginTop="15dp"
+        android:inputType="phone" />
 
     <Button
         android:layout_width="wrap_content"

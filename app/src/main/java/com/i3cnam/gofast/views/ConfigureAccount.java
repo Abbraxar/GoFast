@@ -31,7 +31,7 @@ public class ConfigureAccount extends AppCompatActivity {
         TelephonyManager tMgr = (TelephonyManager)this.getSystemService(Context.TELEPHONY_SERVICE);
         mPhoneNumber = tMgr.getLine1Number();
         // get the telephone number field
-        TextView phoneNumberField = (TextView) findViewById(R.id.phoneNumberField);
+        EditText phoneNumberField = (EditText) findViewById(R.id.phoneNumberField);
         // fill the telephone number field
         phoneNumberField.setText(mPhoneNumber);
         // get the nickname field

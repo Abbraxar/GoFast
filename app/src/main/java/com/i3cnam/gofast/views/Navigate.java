@@ -607,6 +607,7 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
 
     private void stopServiceAndCloseAvtivity() {
         // stop service
+        myService.stopForeground(true);
         myService.stopSelf();
 
         // save main activity as activity to restart

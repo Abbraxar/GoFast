@@ -1,5 +1,6 @@
 package com.i3cnam.gofast.management.course;
 
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
@@ -23,6 +24,7 @@ import com.i3cnam.gofast.geo.GPSTracker;
 import com.i3cnam.gofast.model.Carpooling;
 import com.i3cnam.gofast.model.DriverCourse;
 import com.i3cnam.gofast.model.User;
+import com.i3cnam.gofast.views.Main;
 import com.i3cnam.gofast.views.Navigate;
 
 import java.net.ConnectException;
@@ -39,7 +41,7 @@ public class CourseManagementService extends Service {
     private DriverCourse driverCourse;
     private List<Carpooling> requestedCarpoolings = new ArrayList<>();
 
-    // test pour le broadcast
+    // test for broadcast
     public static final String BROADCAST_INIT_COURSE_ACTION = "com.i3cnam.gofast.INIT_COURSE";
     public static final String BROADCAST_UPDATE_COURSE_ACTION = "com.i3cnam.gofast.UPDATE_COURSE";
     public static final String BROADCAST_UPDATE_CARPOOLING_ACTION = "com.i3cnam.gofast.UPDATE_CARPOOLING";
@@ -53,6 +55,7 @@ public class CourseManagementService extends Service {
     private Carpooling carpoolingToAbort;
 
     private ObserveCourse myCourseObserver;
+    private GPSForNavigation navGPS;
     private CourseManagementService thisService; // to access from other classes
 
     private final String TAG_LOG = "Course Service"; // tag for log messages
@@ -109,25 +112,46 @@ public class CourseManagementService extends Service {
             new Thread(myCourseObserver).start();
 
             // start the navigation listener
-            new GPSForNavigation(this);
+            navGPS = new GPSForNavigation(this);
         }
         else {
             // broadcast course init to the activity
             sendCourseInit();
         }
 
+        /*Intent showTaskIntent = new Intent(getApplicationContext(), Main.class);
+        showTaskIntent.setAction(Intent.ACTION_MAIN);
+        showTaskIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        showTaskIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        PendingIntent contentIntent = PendingIntent.getActivity(
+                getApplicationContext(),
+                0,
+                showTaskIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Notification notification = new Notification.Builder(getApplicationContext())
+                .setContentTitle(getString(R.string.app_name))
+                .setContentText(getString(R.string.courseInProgress))
+                .setSmallIcon(R.drawable.driver_100)
+                .setContentIntent(contentIntent)
+                .setOngoing(true)
+                .build();
+
+        startForeground(1337, notification);*/
+
+        Log.d(TAG_LOG, "Build notification");
         NotificationCompat.Builder b = new NotificationCompat.Builder(this);
 
         b.setOngoing(true);
 
         b.setContentTitle("GoFast")
                 .setContentText(getString(R.string.courseInProgress))
-                .setSmallIcon(R.drawable.driver_100)
-                .setTicker("ssss");
+                .setSmallIcon(R.drawable.driver_100);
 
-        Intent resultIntent = new Intent(this, Navigate.class);
+        Intent resultIntent = new Intent(this, Main.class);
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-        stackBuilder.addParentStack(Navigate.class);
+        stackBuilder.addParentStack(Main.class);
 
         stackBuilder.addNextIntent(resultIntent);
         PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -457,6 +481,7 @@ public class CourseManagementService extends Service {
             Log.d(TAG_LOG, "Course aborted");
             myCourseObserver.terminate();
             serverCom.abortCourse(driverCourse);
+            navGPS.stopUsingGPS();
             return null;
         }
     }
