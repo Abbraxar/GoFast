@@ -1,5 +1,6 @@
 package com.i3cnam.gofast.views;
 
+import android.app.Fragment;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -8,12 +9,19 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -29,6 +37,7 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.android.PolyUtil;
 import com.i3cnam.gofast.R;
+import com.i3cnam.gofast.geo.PlacesService;
 import com.i3cnam.gofast.management.course.CourseManagementService;
 import com.i3cnam.gofast.model.Carpooling;
 import com.i3cnam.gofast.model.DriverCourse;
@@ -44,16 +53,35 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
     CourseManagementService myService;
     boolean isBound = false;
     GoogleMap mMap;
+    SupportMapFragment mapFragment;
     Polyline pathPolyline;
     Marker homeMarker;
     Marker destinationMarker;
+    ProgressBar waitingSignal;
+    RelativeLayout newDemandDialog;
+    RelativeLayout ongoingCarpoolsLayout;
+    ImageView showOnoingCarpoolsButton;
+    Marker requestedCarpoolPickupMarker;
+    Marker requestedCarpoolDropoffMarker;
     // finally we dont need it
 //    DriverCourse driverCourse;
-    boolean restartByMain = false;
+//    boolean restartByMain = false;
+
+    Carpooling newRequestedCarpool;
+
+    List<Integer> acceptedCarpools;
+    List<Integer> conflictCarpools;
+    List<Integer> achievedCarpools;
+    List<Marker> pickUpPointMarkers;
+    List<Marker> dropoffPointMarkers;
+
+    boolean ongoingCarpoolsVisible = false;
+
     boolean mapIsReady = false; // for synchronisation
     boolean courseIsInitialised = false; // for synchronisation
 
     private final static String TAG_LOG = "Navigate view";
+    Context thisContext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +89,7 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
         setContentView(R.layout.activity_navigate);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+        mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
@@ -75,38 +103,25 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
             driverCourse.setOrigin((Place) bundle.getSerializable(DestinationMap.ORIGIN));
             driverCourse.setDestination((Place) bundle.getSerializable(EnterDestination.DESTINATION));
             driverCourse.setDriver(User.getMe(this));
+            driverCourse.setActualPosition(driverCourse.getOrigin().getCoordinates());
+            driverCourse.setPositioningTime(new java.util.Date());
             driverCourse.setEncodedPoints(intent.getStringExtra(DestinationMap.ENCODED_POINTS));
         }
+
+        // wait signal
+        waitingSignal = (ProgressBar) findViewById(R.id.waiting);
+        waitingSignal.setVisibility(View.VISIBLE);
+        showOnoingCarpoolsButton = (ImageView) findViewById(R.id.hitchingImg);
+//        showOnoingCarpoolsButton.setVisibility(View.INVISIBLE);
+
+        //get context for other classes
+        thisContext = this;
 
         // launch and bind CourseManagementService
         launchAndBindCourseManagementService(driverCourse);
 
     }
 
-    @Override
-    public void onBackPressed() {
-        final Context context = this;
-
-        new AlertDialog.Builder(this)
-            .setIcon(android.R.drawable.ic_dialog_alert)
-            .setTitle(R.string.titleAbortCourseDialog)
-            .setMessage(R.string.textAbortCourseDialog)
-            .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    myService.abortCourse();
-//                    stopService(new Intent(context, CourseManagementService.class));
-                    myService.stopSelf();
-
-                    restartByMain = true;
-                    Intent intent = new Intent(context, Main.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    startActivity(intent);
-                }
-            })
-            .setNegativeButton(R.string.no, null)
-            .show();
-    }
 
     private void launchAndBindCourseManagementService(DriverCourse driverCourse)  {
         // new intent for publication:
@@ -140,6 +155,12 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
         }
     };
 
+
+    /*
+    ------------------------------------------------------------------------------------------------
+        ACTIVITY STATE CHANGES:
+    ------------------------------------------------------------------------------------------------
+     */
     @Override
     protected void onDestroy() {
         Log.d(TAG_LOG, "DESTROY");
@@ -167,6 +188,13 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
         carpoolingFilter.addAction(CourseManagementService.BROADCAST_UPDATE_CARPOOLING_ACTION);
         registerReceiver(broadcastCarpoolingReceiver, carpoolingFilter);
 
+
+        // save current activity as last activity opened
+        SharedPreferences prefs = getSharedPreferences("X", MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString("lastActivity", getClass().getName());
+        editor.commit();
+
         super.onResume();
     }
 
@@ -177,30 +205,64 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
         unregisterReceiver(broadcastCourseReceiver);
         unregisterReceiver(broadcastCourseInitReceiver);
 
-        // save current activity as last activity opened
-        SharedPreferences prefs = getSharedPreferences("X", MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        if (restartByMain) {
-            editor.remove("lastActivity");
-        }
-        else {
-            editor.putString("lastActivity", getClass().getName());
-        }
-        editor.commit();
-
         super.onPause();
     }
 
-    /** Boutons de test */
-    public void acceptCarpool(View view) {
-        Log.d(TAG_LOG, "acceptCarpool");
-        myService.acceptCarpooling(myService.getRequestedCarpoolings().get(0));
+
+    @Override
+    public void onBackPressed() {
+        final Context context = this;
+
+        new AlertDialog.Builder(this)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setTitle(R.string.titleAbortCourseDialog)
+                .setMessage(R.string.textAbortCourseDialog)
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        myService.abortCourse();
+//                    stopService(new Intent(context, CourseManagementService.class));
+                        stopServiceAndCloseAvtivity();
+
+                    }
+                })
+                .setNegativeButton(R.string.no, null)
+                .show();
     }
 
+
+    /*
+    ------------------------------------------------------------------------------------------------
+        USER ACTIONS ON CARPOOLS:
+    ------------------------------------------------------------------------------------------------
+     */
+    /** Action : pressed Accept button */
+    public void acceptCarpool(View view) {
+        Log.d(TAG_LOG, "acceptCarpool");
+        // do the action to accept the carpooling
+        myService.acceptCarpooling(newRequestedCarpool);
+
+        // hide dialog
+        newDemandDialog.setVisibility(View.INVISIBLE);
+
+        // add to accepted list
+        acceptedCarpools.add(newRequestedCarpool.getId());
+    }
+
+    /** Action : pressed Refuse button */
     public void refuseCarpool(View view) {
         Log.d(TAG_LOG, "refuseCarpool");
-        myService.refuseCarpooling(myService.getRequestedCarpoolings().get(0));
+        // do the action to refuse the carpooling
+        myService.refuseCarpooling(newRequestedCarpool);
+
+        // hide dialog
+        newDemandDialog.setVisibility(View.INVISIBLE);
+
+        // remove markers
+        requestedCarpoolPickupMarker.remove();
+        requestedCarpoolDropoffMarker.remove();
     }
+
 
     public void abortCarpooling(View view) {
         Log.d(TAG_LOG, "abortCarpooling");
@@ -209,6 +271,80 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
 
 
 
+    /*
+    ------------------------------------------------------------------------------------------------
+        OTHER USER ACTIONS :
+    ------------------------------------------------------------------------------------------------
+     */
+    public void showOngoingCarpools(View view) {
+        Log.d(TAG_LOG, "showOngoingCarpools");
+        // change state of visibility
+        ongoingCarpoolsVisible = !ongoingCarpoolsVisible;
+        // get layer
+        ongoingCarpoolsLayout = (RelativeLayout) findViewById(R.id.ongoingCarpoolsLayout);
+
+        if (ongoingCarpoolsVisible) {
+            TextView oneTextView = new TextView(this);
+
+
+            // Create LayoutParams for it // Note 200 200 is width, height in pixels
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(new RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.WRAP_CONTENT,
+                    RelativeLayout.LayoutParams.WRAP_CONTENT));
+            // Align bottom-right, and add bottom-margin
+            params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+            params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+            params.bottomMargin = 30;
+            oneTextView.setLayoutParams(params);
+            oneTextView.setText("premier covoiturage");
+            oneTextView.setBackgroundColor(Color.WHITE);
+//            oneTextView.setGravity(Gravity.BOTTOM);
+//        oneTextView.setTextAppearance(android.R.attr.textAppearanceMedium);
+            Log.d(TAG_LOG, "text view created");
+            ongoingCarpoolsLayout.addView(oneTextView);
+            Log.d(TAG_LOG, "text view inserted");
+
+            TextView otherTextView = new TextView(this);
+
+            // Create LayoutParams for it // Note 200 200 is width, height in pixels
+            RelativeLayout.LayoutParams params2 = new RelativeLayout.LayoutParams(new RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.WRAP_CONTENT,
+                    RelativeLayout.LayoutParams.WRAP_CONTENT));
+            // Align bottom-right, and add bottom-margin
+            params2.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+            params2.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+            params2.bottomMargin = 60;
+            otherTextView.setLayoutParams(params2);
+            otherTextView.setText("deuxieme covoiturage");
+            otherTextView.setBackgroundColor(Color.WHITE);
+//            oneTextView.setGravity(Gravity.BOTTOM);
+//        oneTextView.setTextAppearance(android.R.attr.textAppearanceMedium);
+            Log.d(TAG_LOG, "text view created");
+            ongoingCarpoolsLayout.addView(otherTextView);
+            Log.d(TAG_LOG, "text view inserted");
+
+        }
+        else {
+            // remove all text views
+            for (int i = 0 ; i < ongoingCarpoolsLayout.getChildCount() ; i++) {
+                if (ongoingCarpoolsLayout.getChildAt(i) instanceof TextView) {
+                    ongoingCarpoolsLayout.removeViewAt(i);
+                    i--;
+                }
+            }
+        }
+
+    }
+
+
+    /*
+    ------------------------------------------------------------------------------------------------
+        BROADCAST RECEIVERS:
+    ------------------------------------------------------------------------------------------------
+     */
+    /**
+     * Event : The course object has been initialised into service
+     */
     private BroadcastReceiver broadcastCourseInitReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -219,6 +355,9 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
     };
 
 
+    /**
+     * Event : The position of the user has benn updated ; the path has been updated
+     */
     private BroadcastReceiver broadcastCourseReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -233,6 +372,9 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
         }
     };
 
+    /**
+     * Event : at least one carpooling has changed
+     */
     private BroadcastReceiver broadcastCarpoolingReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -240,8 +382,6 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
             Log.d("BroadcastReceiver", "Broadcast received");
             Toast.makeText(getApplicationContext(), "Carpooling received", Toast.LENGTH_SHORT).show();
 
-            // TODO
-            // DO SOMETHING
             String s;
             for (Carpooling c : myService.getRequestedCarpoolings()) {
                 s = "Carpooling " + c.getId() + "\n" +
@@ -253,10 +393,148 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
 
                 Log.d("BroadcastReceiver", s);
                 Toast.makeText(getApplicationContext(), s, Toast.LENGTH_SHORT).show();
+
+                if (c.getState().equals(Carpooling.CarpoolingState.IN_DEMAND)) {
+                    // NEW CARPOOL DEMAND
+                    newRequestedCarpool = c;
+                    // instantiate dialog
+                    newDemandDialog = (RelativeLayout) findViewById(R.id.carpoolingDemandDialog);
+                    // show dialog
+                    newDemandDialog.setVisibility(View.VISIBLE);
+
+                    // add markers (pick up and drop off)
+                    requestedCarpoolPickupMarker = mMap.addMarker(new MarkerOptions().
+                            position(c.getPickupPoint()).title(getString(R.string.pickupLabel)));
+
+                    requestedCarpoolDropoffMarker = mMap.addMarker(new MarkerOptions().
+                            position(c.getDropoffPoint()).title(getString(R.string.dropoffLabel)));
+
+                    // try to find places names
+                    new TryToCompleteMarkerName(requestedCarpoolPickupMarker,
+                            (TextView) findViewById(R.id.carpoolingPickupText),
+                            getString(R.string.pickupLabel))
+                            .execute(requestedCarpoolPickupMarker.getPosition());
+                    new TryToCompleteMarkerName(requestedCarpoolDropoffMarker,
+                            (TextView) findViewById(R.id.carpoolingDropoffText),
+                            getString(R.string.dropoffLabel))
+                            .execute(requestedCarpoolDropoffMarker.getPosition());
+
+                    // set markers green
+                    requestedCarpoolPickupMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                    requestedCarpoolDropoffMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                }
+                else if (c.getState().equals(Carpooling.CarpoolingState.IN_PROGRESS)) {
+                    if (!acceptedCarpools.contains(c.getId())) {
+                        // add to list
+                        acceptedCarpools.add(c.getId());
+                        pickUpPointMarkers.add(mMap.addMarker(new MarkerOptions().
+                                position(c.getPickupPoint()).title(c.getPassenger().getNickname() + getString(R.string.pickupLabel))));
+                        dropoffPointMarkers.add(mMap.addMarker(new MarkerOptions().
+                                position(c.getDropoffPoint()).title(c.getPassenger().getNickname() + getString(R.string.dropoffLabel))));
+                        /*
+                        // try to find places names
+                        new TryToCompleteMarkerName(requestedCarpoolPickupMarker,
+                                (TextView) findViewById(R.id.carpoolingPickupText),
+                                getString(R.string.pickupLabel))
+                                .execute(requestedCarpoolPickupMarker.getPosition());
+                        new TryToCompleteMarkerName(requestedCarpoolDropoffMarker,
+                                (TextView) findViewById(R.id.carpoolingDropoffText),
+                                getString(R.string.dropoffLabel))
+                                .execute(requestedCarpoolDropoffMarker.getPosition());
+
+                        // set markers green
+                        requestedCarpoolPickupMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                        requestedCarpoolDropoffMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                        */
+                    }
+
+                }
+                else if (c.getState().equals(Carpooling.CarpoolingState.CONFLICT)) {
+                    if (!conflictCarpools.contains(c.getId())) {
+                        conflictCarpools.add(c.getId());
+                        if (acceptedCarpools.contains(c.getId())) {
+                            // notifier
+
+                            new AlertDialog.Builder(thisContext)
+                                    .setIcon(android.R.drawable.ic_dialog_alert)
+                                    .setTitle(R.string.canceledCarpoolTitle)
+                                    .setMessage(c.getPassenger().getNickname() +  getString(R.string.canceledCarpoolText))
+                                    .setPositiveButton(R.string.ok, null)
+                                    .show();
+
+                            int index = acceptedCarpools.indexOf(c.getId());
+                            Marker oneMarker = pickUpPointMarkers.get(index);
+                            oneMarker.remove();
+                            oneMarker = dropoffPointMarkers.get(index);
+                            oneMarker.remove();
+
+                            acceptedCarpools.remove(index);
+                            pickUpPointMarkers.remove(index);
+                            dropoffPointMarkers.remove(index);
+
+                        }
+                        else if (achievedCarpools.contains(c.getId())) {
+                            // notifier
+
+
+                            new AlertDialog.Builder(thisContext)
+                                    .setIcon(android.R.drawable.ic_dialog_alert)
+                                    .setTitle(R.string.conflictTitle)
+                                    .setMessage(c.getPassenger().getNickname() + getString(R.string.conflictText))
+                                    .setPositiveButton(R.string.ok, null)
+                                    .show();
+
+
+                            achievedCarpools.remove(c.getId());
+                        }
+                    }
+                }
+                else if (c.getState().equals(Carpooling.CarpoolingState.ACHIEVED)) {
+                    if (!achievedCarpools.contains(c.getId())) {
+                        achievedCarpools.add(c.getId());
+                    }
+
+                    if (acceptedCarpools.contains(c.getId())) {
+                        // notifier
+
+                        new AlertDialog.Builder(thisContext)
+                                .setIcon(android.R.drawable.ic_dialog_info)
+                                .setTitle("Covoiturage terminé")
+                                .setMessage(c.getPassenger().getNickname() + " a fini don covoiturage")
+                                .setPositiveButton(R.string.ok, null)
+                                .show();
+
+                        int index = acceptedCarpools.indexOf(c.getId());
+                        Marker oneMarker = pickUpPointMarkers.get(index);
+                        oneMarker.remove();
+                        oneMarker = dropoffPointMarkers.get(index);
+                        oneMarker.remove();
+
+                        acceptedCarpools.remove(index);
+                        pickUpPointMarkers.remove(index);
+                        dropoffPointMarkers.remove(index);
+
+                    }
+
+
+                }
+/*
+                // show or hide button
+                if (acceptedCarpools.size() > 0) {
+                    showOnoingCarpoolsButton.setVisibility(View.VISIBLE);
+                }
+                else {
+                    showOnoingCarpoolsButton.setVisibility(View.INVISIBLE);
+                }
+*/
             }
         }
     };
 
+
+    /*
+    ------------------------------------------------------------------------------------------------
+    */
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -266,12 +544,18 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
         initMap();
     }
 
-
+    /**
+     * Init map method :
+     * Il will only be activated while mapIsReady AND courseIsInitialised AND isBound variables are true
+     */
     public void initMap(){
         Log.d("NAV", (isBound ? "bound" : "not bound"));
         Log.d("NAV", (mapIsReady ? "mapIsReady" : "not mapIsReady"));
         Log.d("NAV", (courseIsInitialised ? "courseIsInitialised" : "not courseIsInitialised"));
         if (mapIsReady && courseIsInitialised && isBound) {
+            // stop waiting
+            waitingSignal.setVisibility(View.INVISIBLE);
+
             if (myService.getDriverCourse().getDestination() != null) {
                 Log.d("NAV", ("deiver course not null"));
                 DriverCourse course = myService.getDriverCourse();
@@ -315,14 +599,53 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
             else {
                 Log.d("NAV", ("deiver course null"));
                 // si malgré tout on n'a pas d'objet course, on quite la vue
-                restartByMain = true;
-                myService.stopSelf();
-                Intent intent = new Intent(this, Main.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
-            }
 
+                stopServiceAndCloseAvtivity();
+            }
         }
     }
 
+    private void stopServiceAndCloseAvtivity() {
+        // stop service
+        myService.stopSelf();
+
+        // save main activity as activity to restart
+        SharedPreferences prefs = getSharedPreferences("X", MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.remove("lastActivity");
+        editor.commit();
+
+        // open main activity
+        Intent intent = new Intent(this, Main.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+    }
+
+
+    /**
+     * Abort a carpool in a new thread
+     */
+    private class TryToCompleteMarkerName extends AsyncTask<LatLng, String,String> {
+        Marker marker;
+        TextView textView;
+        String type;
+        Place myPlace;
+
+        public TryToCompleteMarkerName(Marker marker, TextView textView, String type) {
+            this.marker = marker;
+            this.textView = textView;
+            this.type = type;
+        }
+
+        protected String doInBackground(LatLng... latLngs) {
+            Log.d(TAG_LOG, "Carpooling accepted");
+            this.myPlace = PlacesService.getPlaceByCoordinates(latLngs[0]);
+            return null;
+        }
+
+        protected void onPostExecute(String result) {
+            marker.setSnippet(myPlace.getPlaceName());
+            textView.setText(type + ": " + myPlace.getPlaceName());
+        }
+    }
 }

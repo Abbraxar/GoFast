@@ -6,4 +6,150 @@
     android:layout_height="match_parent"
     tools:context=".views.Navigate">
 
+
+    <RelativeLayout
+        android:visibility="invisible"
+        android:id="@+id/carpoolingDemandDialog"
+        android:layout_width="match_parent"
+        android:layout_height="330px"
+        android:background="#99000000">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="#ffffff"
+            android:text="@string/carpoolingDemandText"
+            android:id="@+id/carpoolingDemandText"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="#ffffff"
+            android:text="@string/carpoolingDemandText"
+            android:id="@+id/carpoolingPickupText"
+            android:layout_below="@+id/carpoolingDemandText"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="5dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="#ffffff"
+            android:text="@string/carpoolingDemandText"
+            android:id="@+id/carpoolingDropoffText"
+            android:layout_below="@+id/carpoolingPickupText"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="5dp" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/acceptCarpool"
+            android:id="@+id/buttonAccept"
+            android:onClick="acceptCarpool"
+            android:background="#44bb44"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginLeft="25dip"
+            android:layout_marginBottom="10dip"
+            android:minHeight="0dp" android:minWidth="0dp"
+            android:padding="15px"
+            />
+
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/refuseCarpool"
+            android:id="@+id/buttonRefuse"
+            android:onClick="refuseCarpool"
+            android:background="#ee4444"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginRight="25dip"
+            android:layout_marginBottom="10dip"
+            android:minHeight="0dp" android:minWidth="0dp"
+            android:padding="15px"
+            />
+
+
+    </RelativeLayout>
+
+    <ProgressBar
+        android:id="@+id/waiting"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:indeterminate="true" />
+
+    <RelativeLayout
+        android:id="@+id/ongoingCarpoolsLayout"
+        android:layout_width="match_parent"
+        android:layout_height="330px"
+        android:layout_gravity="bottom"
+        android:background="#00000000">
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="#000000"
+            android:text="titi42 RDV: Pont des Minimes - 8:24"
+            android:background="#ffffff"
+            android:id="@+id/ongoingCarpool"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="10dp" />
+
+    </RelativeLayout>
+
+<!--
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="#000000"
+        android:text="titi42 RDV: Pont des Minimes - 8:24"
+        android:background="#ffffff"
+        android:id="@+id/ongoingCarpool2"
+        android:layout_gravity="bottom|right"
+        android:layout_marginTop="10dp" />
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="#000000"
+        android:text="titi42 RDV: Pont des Minimes - 8:24"
+        android:background="#ffffff"
+        android:id="@+id/ongoingCarpool3"
+        android:layout_gravity="bottom|right"
+        android:layout_marginTop="10dp" />
+-->
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/hitchingImg"
+        android:contextClickable="false"
+        android:clickable="true"
+        android:src="@drawable/carpooling_request"
+        android:layout_gravity="bottom|left"
+        android:layout_margin="15dp"
+        android:onClick="showOngoingCarpools" />
+    <!--
+                android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+
+
+    -->
 </fragment>

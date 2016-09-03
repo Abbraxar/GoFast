@@ -25,6 +25,7 @@ import com.i3cnam.gofast.model.DriverCourse;
 import com.i3cnam.gofast.model.User;
 import com.i3cnam.gofast.views.Navigate;
 
+import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -121,7 +122,7 @@ public class CourseManagementService extends Service {
 
         b.setContentTitle("GoFast")
                 .setContentText(getString(R.string.courseInProgress))
-                .setSmallIcon(R.drawable.driver)
+                .setSmallIcon(R.drawable.driver_100)
                 .setTicker("ssss");
 
         Intent resultIntent = new Intent(this, Navigate.class);
@@ -344,19 +345,20 @@ public class CourseManagementService extends Service {
         }
         @Override
         public void run() {
+
             // first declare the course on the server or
             // recover course from the server if course is not provided by intent nor service
             if (driverCourse.getDestination() == null) {
                 // recover course from the server
                 driverCourse = serverCom.getDriverCourse(User.getMe(thisService));
-            }
-            else {
+            } else {
                 // declare the course on the server
                 int courseID = serverCom.declareCourse(driverCourse);
                 // set the returned id to the object
                 driverCourse.setId(courseID);
                 Log.d(TAG_LOG, "the course was declared with ID: " + courseID);
             }
+
             // broadcast course to the activity
             sendCourseInit();
 

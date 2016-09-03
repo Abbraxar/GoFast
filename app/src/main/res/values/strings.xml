@@ -24,4 +24,14 @@
     <string name="nicknameTaken1">Désolé, le pseudo \'</string>
     <string name="nicknameTaken">\' est déjà pris</string>
     <string name="courseInProgress">Trajet en cours</string>
+    <string name="refuseCarpool">Refuser</string>
+    <string name="acceptCarpool">Accepter</string>
+    <string name="carpoolingDemandText">Vous avez une demande de covoiturage</string>
+    <string name="pickupLabel">RDV</string>
+    <string name="dropoffLabel">Depot</string>
+    <string name="serverUnavailable">GoFast ne peut pas se connecter au serveur, ressayez plus tard</string>
+    <string name="canceledCarpoolTitle">Covoiturage annulé</string>
+    <string name="canceledCarpoolText">" a annulé le covoiturage demandé"</string>
+    <string name="conflictText">" a levé un litige pour ce covoiturage"</string>
+    <string name="conflictTitle">Litige</string>
 </resources>
