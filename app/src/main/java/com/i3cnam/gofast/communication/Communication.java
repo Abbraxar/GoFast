@@ -30,8 +30,8 @@ import java.util.List;
  */
 public class Communication implements CommInterface {
 
-//    static final String SERVER_IP = "http://10.0.2.2:9090"; // serveur local
-    static final String SERVER_IP = "http://92.222.82.175:9090"; // serveur OVH
+    static final String SERVER_IP = "http://10.0.2.2:9090"; // serveur local
+//    static final String SERVER_IP = "http://92.222.82.175:9090"; // serveur OVH
     static final String DECLARE_COURSE = "/declare_course";
     static final String DECLARE_TRAVEL = "/declare_travel";
     static final String FIND_MATCHES = "/find_matches";
@@ -46,6 +46,9 @@ public class Communication implements CommInterface {
     static final String GET_USER_COURSE = "/get_user_course";
     static final String UPDATE_POSITION = "/update_position";
     static final String UPDATE_COURSE = "/update_course";
+    static final String DECLARE_USER = "/declare_user";
+    static final String RETIEVE_ACCOUNT = "/retrieve_account";
+    static final String ABORT_COURSE = "/abort_course";
 
     private static final String LOG_TAG = "Server Communication";
     private static final DateFormat format = new SimpleDateFormat("y/M/d H:m");
@@ -194,6 +197,16 @@ public class Communication implements CommInterface {
 
     }
 
+    @Override
+    public void abortCourse(DriverCourse course) {
+        // prepare the string for the request
+        StringBuilder sb = new StringBuilder(SERVER_IP + ABORT_COURSE);
+        sb.append("?course_id=" + course.getId());
+
+        // call the service and obtain a response
+        String rawJSON = useService(sb.toString());
+    }
+
 
     @Override
     public void updatePosition(DriverCourse driverCourse) {
@@ -313,7 +326,7 @@ public class Communication implements CommInterface {
 
         // prepare the string for the request
         StringBuilder sb = new StringBuilder(SERVER_IP + GET_USER_COURSE);
-        sb.append("?id=" + driver.getNickname());
+        sb.append("?user_id=" + driver.getNickname());
 
         // call the service and obtain a response
         String rawJSON = useService(sb.toString());
@@ -324,7 +337,6 @@ public class Communication implements CommInterface {
 
             // id
             driverCourse.setId(jsonObject.getInt("id"));
-
             // driver
             driverCourse.setDriver(driver);
 
@@ -356,20 +368,25 @@ public class Communication implements CommInterface {
             driverCourse.setEncodedPoints(jsonObject.getString("encoded_points"));
 
             // actual position
-            JSONObject posJSONObj = jsonObject.getJSONObject("actual_position");
-            driverCourse.setActualPosition(
-                new LatLng(
-                    Double.parseDouble(posJSONObj.getString("encoded_points")),
-                    Double.parseDouble(posJSONObj.getString("encoded_points"))
-                )
-            );
+            if (jsonObject.has("actual_position")) {
+                JSONObject posJSONObj = jsonObject.getJSONObject("actual_position");
+                driverCourse.setActualPosition(
+                        new LatLng(
+                                Double.parseDouble(posJSONObj.getString("lat")),
+                                Double.parseDouble(posJSONObj.getString("long"))
+                        )
+                );
+            }
 
             // pickup time
-            String pickupTime = jsonObject.getString("pickup_time");
-            try {
-                driverCourse.setPositioningTime(format.parse(pickupTime));
-            } catch (ParseException e) {
-                e.printStackTrace();
+            if (jsonObject.has("pickup_time")) {
+
+                String pickupTime = jsonObject.getString("pickup_time");
+                try {
+                    driverCourse.setPositioningTime(format.parse(pickupTime));
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
             }
 
         } catch (JSONException e) {
@@ -522,5 +539,60 @@ public class Communication implements CommInterface {
         }
 
         return carpooling;
+    }
+
+
+    @Override
+    public String declareUser(User user) {
+        // the return variable
+        String returnStatus = "";
+        // prepare the string for the request
+        String url = new String(SERVER_IP + DECLARE_USER);
+        url += "?nickname=" + user.getNickname() + "&phone_number=" + user.getPhoneNumber();
+
+        // call the service and obtain a response
+        String rawJSON = useService(url);
+
+        try {
+            // Create a JSON object hierarchy from the results
+            JSONObject jsonObject = new JSONObject(rawJSON);
+
+            // get the status
+            returnStatus = jsonObject.getString("status");
+            if (returnStatus.equals("existing")) {
+                returnStatus += ":" + jsonObject.getString("nickname");
+            }
+        } catch (JSONException e) {
+            Log.e(LOG_TAG, "Cannot process JSON results", e);
+        }
+
+        return returnStatus;
+    }
+
+    @Override
+    public String retrieveAccount(String phoneNumber) {
+        // the return variable
+        String returnNickname = null;
+        // prepare the string for the request
+        String url = new String(SERVER_IP + RETIEVE_ACCOUNT);
+        url += "?phone_number=" + phoneNumber;
+
+        // call the service and obtain a response
+        String rawJSON = useService(url);
+
+        try {
+            // Create a JSON object hierarchy from the results
+            JSONObject jsonObject = new JSONObject(rawJSON);
+
+            // get the status
+            if(jsonObject.getString("status").equals("existing")) {
+                returnNickname = jsonObject.getString("nickname");
+            }
+
+        } catch (JSONException e) {
+            Log.e(LOG_TAG, "Cannot process JSON results", e);
+        }
+
+        return returnNickname;
     }
 }

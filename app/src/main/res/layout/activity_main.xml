@@ -3,42 +3,48 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.i3cnam.gofast.views.Main">
+    tools:context="com.i3cnam.gofast.views.Main"
+    android:padding="50dp">
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/i_am_passenger"
-        android:textColor="#24278e"
+        android:textColor="#ffffff"
+        android:background="@color/colorPrimaryDark"
         android:id="@+id/btPassenger"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="0dp"
         android:layout_alignParentTop="true"
         android:layout_alignStart="@+id/btDriver"
         android:layout_alignEnd="@+id/btDriver"
         android:onClick="selectUserType"
-        android:drawableTop="@drawable/pedestrian"
-        android:paddingTop="32sp"
-        android:drawablePadding="-15sp"
+        android:drawableTop="@drawable/pedestrian_100"
+        android:paddingTop="10sp"
+        android:paddingBottom="10sp"
+        android:paddingRight="5sp"
+        android:paddingLeft="5sp"
+        android:drawablePadding="0sp"
         android:tag="passenger" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/i_am_driver"
-        android:textColor="#24278e"
+        android:textColor="#ffffff"
+        android:background="@color/colorPrimaryDark"
         android:id="@+id/btDriver"
         android:layout_below="@+id/btPassenger"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="20dp"
         android:onClick="selectUserType"
-        android:drawableTop="@drawable/driver"
-        android:paddingTop="32sp"
-        android:drawablePadding="-15sp"
+        android:drawableTop="@drawable/driver_100"
+        android:paddingTop="10sp"
+        android:paddingBottom="10sp"
+        android:paddingRight="5sp"
+        android:paddingLeft="5sp"
+        android:drawablePadding="0sp"
         android:tag="driver" />
-
 
 </RelativeLayout>

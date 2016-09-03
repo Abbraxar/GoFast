@@ -14,7 +14,24 @@
     <string name="tooFarMsg">Vous allez trop loin, GoFast n\'est pas approprié à votre usage</string>
     <string name="tooCloseMsg">Votre destination est trop proche, allez à pied</string>
     <string name="titleAbortCourseDialog">Annulation du trajet</string>
-    <string name="textAbortCourseDialog">Êtes-vous sûr de vouloir annuler votre trajet ?</string>
+    <string name="textAbortCourseDialog">Êtes-vous sûr de vouloir abandonner votre trajet ?</string>
     <string name="yes">Oui</string>
     <string name="no">Non</string>
+    <string name="choiceNicknameText">Choisisez votre pseudo GoFast</string>
+    <string name="telephoneLabel">Votre téléphone:</string>
+    <string name="accountFound">, votre compte a été retrouvé dans GoFast! Appuyez sur OK pour continuer</string>
+    <string name="empyNicknameMsg">S\'il vous plaît, choisissez un pseudo pour GoFast</string>
+    <string name="nicknameTaken1">Désolé, le pseudo \'</string>
+    <string name="nicknameTaken">\' est déjà pris</string>
+    <string name="courseInProgress">Trajet en cours</string>
+    <string name="refuseCarpool">Refuser</string>
+    <string name="acceptCarpool">Accepter</string>
+    <string name="carpoolingDemandText">Vous avez une demande de covoiturage</string>
+    <string name="pickupLabel">RDV</string>
+    <string name="dropoffLabel">Depot</string>
+    <string name="serverUnavailable">GoFast ne peut pas se connecter au serveur, ressayez plus tard</string>
+    <string name="canceledCarpoolTitle">Covoiturage annulé</string>
+    <string name="canceledCarpoolText">" a annulé le covoiturage demandé"</string>
+    <string name="conflictText">" a levé un litige pour ce covoiturage"</string>
+    <string name="conflictTitle">Litige</string>
 </resources>

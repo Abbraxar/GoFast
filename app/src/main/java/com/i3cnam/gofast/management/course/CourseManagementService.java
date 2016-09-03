@@ -1,5 +1,6 @@
 package com.i3cnam.gofast.management.course;
 
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -9,10 +10,12 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.PolyUtil;
+import com.i3cnam.gofast.R;
 import com.i3cnam.gofast.communication.CommInterface;
 import com.i3cnam.gofast.communication.Communication;
 import com.i3cnam.gofast.geo.DirectionsService;
@@ -22,6 +25,7 @@ import com.i3cnam.gofast.model.DriverCourse;
 import com.i3cnam.gofast.model.User;
 import com.i3cnam.gofast.views.Navigate;
 
+import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -36,15 +40,20 @@ public class CourseManagementService extends Service {
     private List<Carpooling> requestedCarpoolings = new ArrayList<>();
 
     // test pour le broadcast
+    public static final String BROADCAST_INIT_COURSE_ACTION = "com.i3cnam.gofast.INIT_COURSE";
     public static final String BROADCAST_UPDATE_COURSE_ACTION = "com.i3cnam.gofast.UPDATE_COURSE";
     public static final String BROADCAST_UPDATE_CARPOOLING_ACTION = "com.i3cnam.gofast.UPDATE_CARPOOLING";
     private Intent broadcastCourseIntent;
+    private Intent broadcastInitIntent;
     private Intent broadcastCarpoolingIntent;
 
     // temporary global variables to communicate between threads:
     private Carpooling carpoolingToAccept;
     private Carpooling carpoolingToRefuse;
     private Carpooling carpoolingToAbort;
+
+    private ObserveCourse myCourseObserver;
+    private CourseManagementService thisService; // to access from other classes
 
     private final String TAG_LOG = "Course Service"; // tag for log messages
 
@@ -65,8 +74,10 @@ public class CourseManagementService extends Service {
         Log.d(TAG_LOG, "CREATED");
 
         super.onCreate();
+        broadcastInitIntent = new Intent(BROADCAST_INIT_COURSE_ACTION);
         broadcastCourseIntent = new Intent(BROADCAST_UPDATE_COURSE_ACTION);
         broadcastCarpoolingIntent = new Intent(BROADCAST_UPDATE_CARPOOLING_ACTION);
+        thisService = this;
     }
 
     @Override
@@ -89,31 +100,40 @@ public class CourseManagementService extends Service {
             // get the driver course from the intent bundle
             Bundle bundle = intent.getExtras();
             driverCourse = (DriverCourse)(bundle.getSerializable(Navigate.COURSE));
-            Log.d(TAG_LOG, driverCourse.getParametersString());
 
             // init the communication module for the service
             serverCom = new Communication();
 
-            // get course from bdd if course is not provided by intent nor service
-            if (driverCourse.getDestination() == null) {
-                driverCourse = serverCom.getDriverCourse(User.getMe());
-            }
-
             // launch the thread for the management of the course
-            new Thread(new ObserveCourse()).start();
+            myCourseObserver = (new ObserveCourse());
+            new Thread(myCourseObserver).start();
 
             // start the navigation listener
             new GPSForNavigation(this);
+        }
+        else {
+            // broadcast course init to the activity
+            sendCourseInit();
         }
 
         NotificationCompat.Builder b = new NotificationCompat.Builder(this);
 
         b.setOngoing(true);
 
-        b.setContentTitle("salut")
-                .setContentText("blabla")
-                .setSmallIcon(android.R.drawable.stat_sys_download)
+        b.setContentTitle("GoFast")
+                .setContentText(getString(R.string.courseInProgress))
+                .setSmallIcon(R.drawable.driver_100)
                 .setTicker("ssss");
+
+        Intent resultIntent = new Intent(this, Navigate.class);
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        stackBuilder.addParentStack(Navigate.class);
+
+        stackBuilder.addNextIntent(resultIntent);
+        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        b.setContentIntent(resultPendingIntent);
+
 
         startForeground(1337, b.build());
 
@@ -208,6 +228,15 @@ public class CourseManagementService extends Service {
     }
 
     /**
+     * Broadcast the course initialisation
+     */
+    private void sendCourseInit() {
+        Log.d(TAG_LOG, "entered sendCourseInit");
+
+        sendBroadcast(broadcastInitIntent);
+    }
+
+    /**
      * Broadcast the carpooling update
      */
     private void sendCarpoolUpdate() {
@@ -236,6 +265,10 @@ public class CourseManagementService extends Service {
     public void abortCarpooling(Carpooling carpooling) {
         carpoolingToAbort = carpooling;
         new AsynchronousAbortCarpool().execute();
+    }
+
+    public void abortCourse() {
+        new AsynchronousAbortCourse().execute();
     }
 
     public DriverCourse getDriverCourse() {
@@ -300,37 +333,58 @@ public class CourseManagementService extends Service {
 
 
     /**
-     * Process location change in a new thread
+     * Process course observe in a new thread
      */
     private class ObserveCourse implements Runnable {
         List<Carpooling> lastList;
-
+        private volatile boolean running = true;
         private static final String TAG_LOG = "ObserveCourse";
 
+        public void terminate(){
+            running = false;
+        }
         @Override
         public void run() {
-            // first declare the course on the server
-            int courseID = serverCom.declareCourse(driverCourse);
-            // set the returned id to the object
-            driverCourse.setId(courseID);
-            Log.d(TAG_LOG, "the course was declared with ID: " + courseID);
 
-            // then do one query every second
-            while (true) {
-                // wait one second
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+            // first declare the course on the server or
+            // recover course from the server if course is not provided by intent nor service
+            if (driverCourse.getDestination() == null) {
+                // recover course from the server
+                driverCourse = serverCom.getDriverCourse(User.getMe(thisService));
+            } else {
+                // declare the course on the server
+                int courseID = serverCom.declareCourse(driverCourse);
+                // set the returned id to the object
+                driverCourse.setId(courseID);
+                Log.d(TAG_LOG, "the course was declared with ID: " + courseID);
+            }
 
-                // do the query
-                serverCom.observeCarpoolCourse(driverCourse);
-                lastList = serverCom.getCarpoolCourseState(driverCourse);
-                // compare results
-                if (searchStateChanges()) {
-                    requestedCarpoolings = lastList;
-                    sendCarpoolUpdate();
+            // broadcast course to the activity
+            sendCourseInit();
+
+            // if the id is 0, the course has not been registered into database, abort
+            if (driverCourse.getId() == 0) {
+                // with an empty object, the view will restart
+                driverCourse = new DriverCourse();
+            }
+            else {
+                // then do one query every second
+                while (running) {
+                    // wait one second
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    // do the query
+                    serverCom.observeCarpoolCourse(driverCourse);
+                    lastList = serverCom.getCarpoolCourseState(driverCourse);
+                    // compare results
+                    if (searchStateChanges()) {
+                        requestedCarpoolings = lastList;
+                        sendCarpoolUpdate();
+                    }
                 }
             }
         }
@@ -358,7 +412,6 @@ public class CourseManagementService extends Service {
             }
             return false;
         }
-
 
     }
 
@@ -392,6 +445,18 @@ public class CourseManagementService extends Service {
         protected String doInBackground(String... urls) {
             Log.d(TAG_LOG, "Carpooling aborted");
             serverCom.abortCarpool(carpoolingToAbort);
+            return null;
+        }
+    }
+
+    /**
+     * Abort a carpool in a new thread
+     */
+    private class AsynchronousAbortCourse extends AsyncTask<String, String,String> {
+        protected String doInBackground(String... urls) {
+            Log.d(TAG_LOG, "Course aborted");
+            myCourseObserver.terminate();
+            serverCom.abortCourse(driverCourse);
             return null;
         }
     }

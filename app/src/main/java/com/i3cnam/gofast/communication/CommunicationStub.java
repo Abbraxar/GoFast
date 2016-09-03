@@ -105,6 +105,11 @@ public class CommunicationStub implements CommInterface {
     }
 
     @Override
+    public void abortCourse(DriverCourse course) {
+
+    }
+
+    @Override
     public void updatePosition(DriverCourse driverCourse) {
 
     }
@@ -238,6 +243,16 @@ public class CommunicationStub implements CommInterface {
         PassengerTravel passengerTravel = new PassengerTravel();
 
         return passengerTravel;
+    }
+
+    @Override
+    public String declareUser(User user) {
+        return null;
+    }
+
+    @Override
+    public String retrieveAccount(String phoneNumber) {
+        return null;
     }
 
 }

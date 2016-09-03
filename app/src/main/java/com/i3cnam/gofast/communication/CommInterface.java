@@ -63,6 +63,12 @@ public interface CommInterface {
     void abortCarpool(Carpooling carpooling);
 
     /**
+     * Abort a requested course
+     * @param course the carpool aborted
+     */
+    void abortCourse(DriverCourse course);
+
+    /**
      * Updates the new position of the car
      * @param driverCourse the travel to be updated
      */
@@ -122,4 +128,20 @@ public interface CommInterface {
      * @param passenger the user to get course from
      */
     PassengerTravel getPassengerTravel(User passenger);
+
+
+    /**
+     * Declares a new user into the system
+     * @param user
+     * @return "ok" if done "taken" if nickname is already taken "existing" if user already exists
+     */
+    String declareUser(User user);
+
+
+    /**
+     * Research the phone number into the system
+     * @param phoneNumber
+     * @return nullstring if not found, nickname of user if found
+     */
+    String retrieveAccount(String phoneNumber);
 }

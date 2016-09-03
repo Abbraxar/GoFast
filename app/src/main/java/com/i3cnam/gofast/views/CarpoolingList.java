@@ -72,7 +72,7 @@ public class CarpoolingList extends FragmentActivity implements OnMapReadyCallba
 
         passengerTravel.setOrigin((Place)bundle.getSerializable(DestinationMap.ORIGIN));
         passengerTravel.setDestination((Place)bundle.getSerializable(EnterDestination.DESTINATION));
-        passengerTravel.setPassenger(User.getMe());
+        passengerTravel.setPassenger(User.getMe(this));
         passengerTravel.setRadius(intent.getIntExtra(EnterDestination.RADIUS,500));
 
         // new intent for publication:

@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.View;
 
 import com.i3cnam.gofast.R;
+import com.i3cnam.gofast.model.User;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,20 +40,31 @@ public class Main extends AppCompatActivity {
         // check permissions
         checkAndRequestPermissions();
 
-        // go to last activity if needed
-        Class<?> activityClass;
-
-        try {
-            SharedPreferences prefs = getSharedPreferences("X", MODE_PRIVATE);
-            activityClass = Class.forName(
-                    prefs.getString("lastActivity", Main.class.getName())
-            );
-        } catch(ClassNotFoundException ex) {
-            activityClass = Main.class;
+        // recover user account
+        if (User.getMe(this) == null) {
+            Log.d("user","not found");
+            startActivity(new Intent(this, ConfigureAccount.class));
         }
+        else {
+            Log.d("nickname", User.getMe(this).getNickname());
+            Log.d("phone", User.getMe(this).getPhoneNumber());
 
-        if(activityClass != Main.class) {
-            startActivity(new Intent(this, activityClass));
+            SharedPreferences prefs = getSharedPreferences("X", MODE_PRIVATE);
+            // go to last activity if needed
+            Class<?> activityClass;
+
+            try {
+                //            SharedPreferences prefs = getSharedPreferences("X", MODE_PRIVATE);
+                activityClass = Class.forName(
+                        prefs.getString("lastActivity", Main.class.getName())
+                );
+            } catch (ClassNotFoundException ex) {
+                activityClass = Main.class;
+            }
+
+            if (activityClass != Main.class) {
+                startActivity(new Intent(this, activityClass));
+            }
         }
     }
 
