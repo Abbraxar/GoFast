@@ -94,7 +94,7 @@ public class CarpoolingManagementService extends Service {
             passengerTravel = (PassengerTravel)(bundle.getSerializable(CarpoolingList.TRAVEL));
 
             // init the communication module for the service
-            serverCom = new CommunicationStub();
+            serverCom = new Communication();
 
             // launch observer thread
             observeTravel = new Thread(new ObserveTravel());

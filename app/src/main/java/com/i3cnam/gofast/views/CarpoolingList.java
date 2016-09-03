@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.View;
 import android.widget.Adapter;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
@@ -164,12 +165,12 @@ public class CarpoolingList extends ListActivity {
     }
 
     /** Boutons de tests */
-    /*
-    public void requestCarpool(View view) {
+    public void requestCarpool(int position) {
         Log.d(TAG_LOG, "requestCarpool");
-        myService.requestCarpool(possibilities.get(0));
+        myService.requestCarpool(myService.getCarpoolingPossibilities().get(position));
     }
 
+    /*
     public void cancelRequest(View view) {
         Log.d(TAG_LOG, "cancelRequest");
         myService.cancelRequest(possibilities.get(0));
