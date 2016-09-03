@@ -44,6 +44,7 @@ import com.i3cnam.gofast.model.DriverCourse;
 import com.i3cnam.gofast.model.Place;
 import com.i3cnam.gofast.model.User;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -69,9 +70,9 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
 
     Carpooling newRequestedCarpool;
 
-    List<Integer> acceptedCarpools;
-    List<Integer> conflictCarpools;
-    List<Integer> achievedCarpools;
+    List<Integer> acceptedCarpools = new ArrayList<>();
+    List<Integer> conflictCarpools = new ArrayList<>();
+    List<Integer> achievedCarpools = new ArrayList<>();
     List<Marker> pickUpPointMarkers;
     List<Marker> dropoffPointMarkers;
 
