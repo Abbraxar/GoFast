@@ -4,46 +4,40 @@ package com.i3cnam.gofast.views;
  * Created by nadege on 08/07/16.
  */
 
-import android.app.ListActivity;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
-import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.i3cnam.gofast.R;
 import com.i3cnam.gofast.management.carpooling.CarpoolingManagementService;
-import com.i3cnam.gofast.management.carpooling.CarpoolingManagementService.LocalBinder;
 import com.i3cnam.gofast.model.Carpooling;
 import com.i3cnam.gofast.model.PassengerTravel;
 import com.i3cnam.gofast.model.Place;
 import com.i3cnam.gofast.model.User;
 import com.i3cnam.gofast.tools.activityRestarter.ActivityRestarterImpl;
+import com.i3cnam.gofast.views.abstractViews.TravelServiceConnectedActivity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
-public class CarpoolingList extends ListActivity {
-
-    /** globals */
-    public final static String TRAVEL = "com.i3cnam.gofast.TRAVEL";
-    private CarpoolingManagementService myService;
-    protected boolean isBound = false;
-    protected boolean isTravelInit = false;
+public class CarpoolingList extends TravelServiceConnectedActivity {
 
     private final String TAG_LOG = "CarpoolingList";
+    private ListView myListView;
+    private CarpoolingPassengerArrayAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_carpooling_list);
 
         // get all the data of the intent and create a new travel object
         PassengerTravel passengerTravel = new PassengerTravel();
@@ -58,24 +52,17 @@ public class CarpoolingList extends ListActivity {
             passengerTravel.setRadius(intent.getIntExtra(EnterDestination.RADIUS, 500));
         }
 
-        // new intent for publication:
-        Intent serviceIntent = new Intent(this, CarpoolingManagementService.class);
-        // new bundle
-        Bundle serviceBundle = new Bundle();
-        serviceBundle.putSerializable(TRAVEL, passengerTravel);
-        serviceIntent.putExtras(serviceBundle);
-        // start service with th intent and bind it
-        startService(serviceIntent);
-        Log.d(TAG_LOG, "Bind Service");
-        bindService(serviceIntent, myConnection, Context.BIND_AUTO_CREATE);
+        myListView = (ListView) findViewById(R.id.carpoolsListView);
+        adapter =  new CarpoolingPassengerArrayAdapter(this, R.layout.list_item_carpooling_passenger, new ArrayList<Carpooling>());
+        myListView.setAdapter(adapter);
+
+        launchAndBindService(passengerTravel);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         Log.d(TAG_LOG, "START");
-        // tester l'appel au service
-//        myService.requestCarpool();
     }
 
     @Override
@@ -132,35 +119,15 @@ public class CarpoolingList extends ListActivity {
                 .show();
     }
 
-    /** Defines callbacks for service binding, passed to bindService() */
-    private ServiceConnection myConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName className,
-                                       IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
-            LocalBinder binder = (LocalBinder) service;
-            myService = binder.getService();
-            isBound = true;
-            prepareListData();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            isBound = false;
-        }
-    };
-
     /*
      * Preparing the list data
      */
     private void prepareListData() {
-        Log.d(TAG_LOG, "prepareListData: enter function. bound: " + isBound + ", init: " + isTravelInit);
-        if(isBound && isTravelInit) {
+        Log.d(TAG_LOG, "prepareListData: enter function. bound: " + isBound + ", init: " + isDataInit);
+        if(isBound && isDataInit) {
             Log.d(TAG_LOG, "prepareListData: set adapter");
             List<Carpooling> carpoolings = myService.getCarpoolingPossibilities();
-            ListAdapter adapter =  new CarpoolingPassengerArrayAdapter(this, R.layout.list_item_carpooling_passenger, carpoolings);
-
-            setListAdapter(adapter);
+            adapter.setCarpoolings(carpoolings);
         }
     }
 
@@ -206,7 +173,7 @@ public class CarpoolingList extends ListActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d(TAG_LOG, "Broadcast travel received");
-            isTravelInit = true;
+            isDataInit = true;
             prepareListData();
         }
     };
@@ -225,17 +192,8 @@ public class CarpoolingList extends ListActivity {
     }
 
 
-    private void stopServiceAndCloseActivity() {
-        // stop service
-        myService.stopForeground(true);
-        myService.stopSelf();
-
-        // save main activity as activity to restart
-        ActivityRestarterImpl.getInstance().clearActivityToRestart();
-
-        // open main activity
-        Intent intent = new Intent(this, Main.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(intent);
+    @Override
+    protected void afterServiceConnected() {
+        prepareListData();
     }
 }

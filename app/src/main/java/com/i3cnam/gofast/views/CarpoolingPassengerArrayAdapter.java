@@ -19,9 +19,9 @@ import java.util.List;
  * Created by Alix on 03/09/2016.
  */
 public class CarpoolingPassengerArrayAdapter extends ArrayAdapter<Carpooling> {
-    List<Carpooling> carpoolings;
-    DateFormat formatDate = new SimpleDateFormat("HH:mm");
-    final CarpoolingList context;
+    private List<Carpooling> carpoolings;
+    private final static DateFormat formatDate = new SimpleDateFormat("HH:mm");
+    private final CarpoolingList context;
 
     public CarpoolingPassengerArrayAdapter(CarpoolingList context, int resource, List<Carpooling> carpoolings) {
         super(context, resource, carpoolings);
@@ -69,5 +69,10 @@ public class CarpoolingPassengerArrayAdapter extends ArrayAdapter<Carpooling> {
         });
 
         return rowView;
+    }
+
+    public void setCarpoolings(List<Carpooling> carpoolings) {
+        this.carpoolings = carpoolings;
+        this.notifyDataSetChanged();
     }
 }

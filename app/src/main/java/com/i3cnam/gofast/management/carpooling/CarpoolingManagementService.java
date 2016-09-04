@@ -19,6 +19,7 @@ import com.i3cnam.gofast.model.PassengerTravel;
 import com.i3cnam.gofast.model.User;
 import com.i3cnam.gofast.views.CarpoolingList;
 import com.i3cnam.gofast.views.Main;
+import com.i3cnam.gofast.views.abstractViews.TravelServiceConnectedActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,7 +94,7 @@ public class CarpoolingManagementService extends Service {
         if (passengerTravel == null) {
             // get the driver course from the intent bundle
             Bundle bundle = intent.getExtras();
-            passengerTravel = (PassengerTravel)(bundle.getSerializable(CarpoolingList.TRAVEL));
+            passengerTravel = (PassengerTravel)(bundle.getSerializable(TravelServiceConnectedActivity.PRIMARY_DATA));
 
             // init the communication module for the service
             serverCom = new Communication();

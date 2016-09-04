@@ -4,14 +4,13 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
-import com.i3cnam.gofast.R;
 import com.i3cnam.gofast.management.course.CourseManagementService;
+import com.i3cnam.gofast.tools.activityRestarter.ActivityRestarterImpl;
 import com.i3cnam.gofast.views.Main;
 
 import java.io.Serializable;
@@ -66,10 +65,7 @@ public abstract class CourseServiceConnectedActivity extends AppCompatActivity {
         }
 
         // save main activity as activity to restart
-        SharedPreferences prefs = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.remove("lastActivity");
-        editor.apply();
+        ActivityRestarterImpl.getInstance().clearActivityToRestart();
 
         // open main activity
         Intent intent = new Intent(this, Main.class);

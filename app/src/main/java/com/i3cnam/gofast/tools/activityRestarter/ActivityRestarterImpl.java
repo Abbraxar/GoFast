@@ -16,7 +16,7 @@ public class ActivityRestarterImpl implements ActivityRestarter {
     // reference to singleton
     private static volatile ActivityRestarterImpl mInstance = null;
 
-    private final static String defaultActivityToRestart = "Main";
+    private final static Class defaultActivityToRestart = Main.class;
     private final static String lastActivityKey  = "last_activity";
 
     private SharedPreferences prefs;
@@ -75,11 +75,14 @@ public class ActivityRestarterImpl implements ActivityRestarter {
         Class<?> activityClass;
         try {
             activityClass = Class.forName(
-                    this.prefs.getString(this.lastActivityKey, this.defaultActivityToRestart));
+                    this.prefs.getString(this.lastActivityKey, defaultActivityToRestart.getName()));
         } catch (ClassNotFoundException ex) {
-            activityClass = Main.class;
+            activityClass = defaultActivityToRestart;
         }
 
-        context.startActivity(new Intent(context, activityClass));
+        if(activityClass != defaultActivityToRestart) {
+            Intent intent = new Intent(context, activityClass).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
+        }
     }
 }

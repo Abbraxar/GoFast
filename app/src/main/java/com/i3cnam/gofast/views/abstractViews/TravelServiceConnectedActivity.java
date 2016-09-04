@@ -12,6 +12,7 @@ import android.util.Log;
 
 import com.i3cnam.gofast.R;
 import com.i3cnam.gofast.management.carpooling.CarpoolingManagementService;
+import com.i3cnam.gofast.tools.activityRestarter.ActivityRestarterImpl;
 import com.i3cnam.gofast.views.Main;
 
 import java.io.Serializable;
@@ -66,10 +67,7 @@ public abstract class TravelServiceConnectedActivity extends AppCompatActivity {
         }
 
         // save main activity as activity to restart
-        SharedPreferences prefs = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.remove("lastActivity");
-        editor.apply();
+        ActivityRestarterImpl.getInstance().clearActivityToRestart();
 
         // open main activity
         Intent intent = new Intent(this, Main.class);
