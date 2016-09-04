@@ -16,7 +16,7 @@ public class GeneralForegroundNotification {
      */
     private static final int NOTIFICATION_NUMBER = 1;
 
-    public static void notify(final Service serviceContext) {
+    public static void notify(final Service serviceContext, int smallIcon) {
         final Resources res = serviceContext.getResources();
 
         final String title = res.getString(R.string.app_name);
@@ -30,7 +30,7 @@ public class GeneralForegroundNotification {
 
                 // Set required fields, including the small icon, the
                 // notification title, and text.
-                .setSmallIcon(R.drawable.ic_stat_general_foreground)
+                .setSmallIcon(smallIcon)
                 .setContentTitle(title)
                 .setContentText(text)
 

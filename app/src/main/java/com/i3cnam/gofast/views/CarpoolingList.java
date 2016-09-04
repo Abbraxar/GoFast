@@ -60,12 +60,6 @@ public class CarpoolingList extends TravelServiceConnectedActivity {
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        Log.d(TAG_LOG, "START");
-    }
-
-    @Override
     protected void onResume() {
         Log.d(TAG_LOG, "RESUME");
 
@@ -92,14 +86,6 @@ public class CarpoolingList extends TravelServiceConnectedActivity {
         unregisterReceiver(broadcastCarpoolingReceiver);
         unregisterReceiver(broadcastTravelInitReceiver);
         super.onPause();
-    }
-
-    @Override
-    protected void onDestroy() {
-        Log.d(TAG_LOG, "DESTROY");
-
-        unbindService(myConnection);
-        super.onDestroy();
     }
 
     @Override

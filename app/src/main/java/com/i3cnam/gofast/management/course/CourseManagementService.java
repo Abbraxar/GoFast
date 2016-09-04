@@ -13,6 +13,7 @@ import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.PolyUtil;
+import com.i3cnam.gofast.R;
 import com.i3cnam.gofast.communication.CommInterface;
 import com.i3cnam.gofast.communication.Communication;
 import com.i3cnam.gofast.geo.DirectionsService;
@@ -105,7 +106,7 @@ public class CourseManagementService extends Service {
         }
 
         Log.d(TAG_LOG, "Build notification");
-        GeneralForegroundNotification.notify(this);
+        GeneralForegroundNotification.notify(this, R.drawable.ic_general_notification_vehicule);
 
         return START_NOT_STICKY;
     }
