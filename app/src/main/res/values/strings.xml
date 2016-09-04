@@ -55,4 +55,7 @@
 
     <string name="action_share">Share</string>
     <string name="action_reply">Reply</string>
+    <string name="fareLabel">Tarif</string>
+    <string name="timeLabel">Heure</string>
+    <string name="passengerLabel">Passager</string>
 </resources>

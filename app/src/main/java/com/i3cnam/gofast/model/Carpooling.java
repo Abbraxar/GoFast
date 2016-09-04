@@ -1,5 +1,7 @@
 package com.i3cnam.gofast.model;
 
+import android.util.Log;
+
 import com.google.android.gms.maps.model.LatLng;
 
 import java.io.IOException;
@@ -110,6 +112,7 @@ public class Carpooling implements Serializable {
                 // partial result
                 isEqual = true;
                 // nullable members :
+                /*
                 if (((Carpooling)obj).getPassengerTravel() == null) {
                     if (getPassengerTravel() != null) isEqual = false;
                 }
@@ -123,6 +126,7 @@ public class Carpooling implements Serializable {
                 else {
                     if (!((Carpooling)obj).getDriverCourse().equals(getDriverCourse())) isEqual = false;
                 }
+                */
                 //----------------------------------
                 if (((Carpooling)obj).getPickupTime() == null) {
                     if (getPickupTime() != null) isEqual = false;

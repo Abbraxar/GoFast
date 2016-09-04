@@ -30,8 +30,8 @@ import java.util.List;
  */
 public class Communication implements CommInterface {
 
-    // static final String SERVER_IP = "http://10.0.2.2:9090"; // serveur local
-    static final String SERVER_IP = "http://92.222.82.175:9090"; // serveur OVH
+    static final String SERVER_IP = "http://10.0.2.2:9090"; // serveur local
+    //static final String SERVER_IP = "http://92.222.82.175:9090"; // serveur OVH
     static final String DECLARE_COURSE = "/declare_course";
     static final String DECLARE_TRAVEL = "/declare_travel";
     static final String FIND_MATCHES = "/find_matches";
@@ -544,6 +544,13 @@ public class Communication implements CommInterface {
 
             float fare = (float) jsonCarpooling.getDouble("fare");
             carpooling.setFare(fare);
+
+            carpooling.setDriverCourse(new DriverCourse());
+            carpooling.setPassengerTravel(new PassengerTravel());
+
+            carpooling.getDriverCourse().setDriver(new User(jsonCarpooling.getString("driver"),""));
+            carpooling.getPassengerTravel().setPassenger(new User(jsonCarpooling.getString("passenger"),""));
+
         }
         catch (JSONException e) {
             Log.e(LOG_TAG, "Cannot process JSON results", e);

@@ -43,11 +43,19 @@ public class CarpoolingPassengerArrayAdapter extends ArrayAdapter<Carpooling> {
         TextView pickupTime = (TextView) rowView.findViewById(R.id.pickupTime);
         TextView fare = (TextView) rowView.findViewById(R.id.fare);
 
-        // pickupInfo.setText(carpoolings.get(position).getPickupPoint());
-        pickupInfo.setText("pickupInfo: Ici, là ou ailleurs" + c.getId());
-        dropOffInfo.setText("dropOffInfo: 19 rue claudius rougenet " + c.getId());
-        pickupTime.setText(formatDate.format(c.getPickupTime()) + " " + c.getId());
-        fare.setText("3 pesos " + c.getId());
+        pickupTime.setText(formatDate.format(c.getPickupTime()));
+        fare.setText("€ " + c.getFare());
+
+        new TryToCompletePlaceName(null,
+                pickupInfo,
+                null)
+                .execute(c.getPickupPoint());
+
+
+        new TryToCompletePlaceName(null,
+                dropOffInfo,
+                null)
+                .execute(c.getDropoffPoint());
 
         Button btRequest = (Button) rowView.findViewById(R.id.btRequest);
         Button btDetails = (Button) rowView.findViewById(R.id.btDetails);

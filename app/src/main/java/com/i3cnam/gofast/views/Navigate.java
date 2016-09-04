@@ -1,6 +1,5 @@
 package com.i3cnam.gofast.views;
 
-import android.app.Fragment;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -9,14 +8,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -37,13 +34,15 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.android.PolyUtil;
 import com.i3cnam.gofast.R;
-import com.i3cnam.gofast.geo.PlacesService;
 import com.i3cnam.gofast.management.course.CourseManagementService;
 import com.i3cnam.gofast.model.Carpooling;
 import com.i3cnam.gofast.model.DriverCourse;
 import com.i3cnam.gofast.model.Place;
 import com.i3cnam.gofast.model.User;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -69,11 +68,11 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
 
     Carpooling newRequestedCarpool;
 
-    List<Integer> acceptedCarpools;
-    List<Integer> conflictCarpools;
-    List<Integer> achievedCarpools;
-    List<Marker> pickUpPointMarkers;
-    List<Marker> dropoffPointMarkers;
+    List<Integer> acceptedCarpools = new ArrayList<>();
+    List<Integer> conflictCarpools = new ArrayList<>();
+    List<Integer> achievedCarpools = new ArrayList<>();
+    List<Marker> pickUpPointMarkers = new ArrayList<>();
+    List<Marker> dropoffPointMarkers = new ArrayList<>();
 
     boolean ongoingCarpoolsVisible = false;
 
@@ -112,7 +111,7 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
         waitingSignal = (ProgressBar) findViewById(R.id.waiting);
         waitingSignal.setVisibility(View.VISIBLE);
         showOnoingCarpoolsButton = (ImageView) findViewById(R.id.hitchingImg);
-//        showOnoingCarpoolsButton.setVisibility(View.INVISIBLE);
+        showOnoingCarpoolsButton.setVisibility(View.INVISIBLE);
 
         //get context for other classes
         thisContext = this;
@@ -281,50 +280,57 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
         ongoingCarpoolsLayout = (RelativeLayout) findViewById(R.id.ongoingCarpoolsLayout);
 
         if (ongoingCarpoolsVisible) {
-            TextView oneTextView = new TextView(this);
+
+            LayoutInflater inflater;
+            View rowView;
+            TextView passenger, pickupInfo, dropOffInfo, pickupTime, fare ;
+            DateFormat formatDate = new SimpleDateFormat("HH:mm");
+            int bottomMargin = 0;
 
 
-            // Create LayoutParams for it // Note 200 200 is width, height in pixels
-            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(new RelativeLayout.LayoutParams(
-                    RelativeLayout.LayoutParams.WRAP_CONTENT,
-                    RelativeLayout.LayoutParams.WRAP_CONTENT));
-            // Align bottom-right, and add bottom-margin
-            params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-            params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-            params.bottomMargin = 30;
-            oneTextView.setLayoutParams(params);
-            oneTextView.setText("premier covoiturage");
-            oneTextView.setBackgroundColor(Color.WHITE);
-//            oneTextView.setGravity(Gravity.BOTTOM);
-//        oneTextView.setTextAppearance(android.R.attr.textAppearanceMedium);
-            Log.d(TAG_LOG, "text view created");
-            ongoingCarpoolsLayout.addView(oneTextView);
-            Log.d(TAG_LOG, "text view inserted");
+            for (Carpooling c : myService.getRequestedCarpoolings()) {
+                if (c.getState().equals(Carpooling.CarpoolingState.IN_PROGRESS)) {
+                    inflater = (LayoutInflater) this
+                            .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    rowView = inflater.inflate(R.layout.list_item_carpooling_driver, ongoingCarpoolsLayout, false);
 
-            TextView otherTextView = new TextView(this);
+                    passenger = (TextView) rowView.findViewById(R.id.passenger);
+                    pickupInfo = (TextView) rowView.findViewById(R.id.pickupInfo);
+                    dropOffInfo = (TextView) rowView.findViewById(R.id.dropOffInfo);
+                    pickupTime = (TextView) rowView.findViewById(R.id.pickupTime);
+                    fare = (TextView) rowView.findViewById(R.id.fare);
 
-            // Create LayoutParams for it // Note 200 200 is width, height in pixels
-            RelativeLayout.LayoutParams params2 = new RelativeLayout.LayoutParams(new RelativeLayout.LayoutParams(
-                    RelativeLayout.LayoutParams.WRAP_CONTENT,
-                    RelativeLayout.LayoutParams.WRAP_CONTENT));
-            // Align bottom-right, and add bottom-margin
-            params2.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-            params2.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-            params2.bottomMargin = 60;
-            otherTextView.setLayoutParams(params2);
-            otherTextView.setText("deuxieme covoiturage");
-            otherTextView.setBackgroundColor(Color.WHITE);
-//            oneTextView.setGravity(Gravity.BOTTOM);
-//        oneTextView.setTextAppearance(android.R.attr.textAppearanceMedium);
-            Log.d(TAG_LOG, "text view created");
-            ongoingCarpoolsLayout.addView(otherTextView);
-            Log.d(TAG_LOG, "text view inserted");
+                    passenger.setText(c.getPassenger().getNickname());
+                    pickupTime.setText(formatDate.format(c.getPickupTime()));
+                    fare.setText("€ " + c.getFare());
 
+                    new TryToCompletePlaceName(null,
+                            pickupInfo,
+                            null)
+                            .execute(c.getPickupPoint());
+
+                    new TryToCompletePlaceName(null,
+                            dropOffInfo,
+                            null)
+                            .execute(c.getDropoffPoint());
+
+                    ongoingCarpoolsLayout.addView(rowView);
+                    RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(new RelativeLayout.LayoutParams(
+                            RelativeLayout.LayoutParams.WRAP_CONTENT,
+                            RelativeLayout.LayoutParams.WRAP_CONTENT));
+                    // Align bottom-right, and add bottom-margin
+                    params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+                    params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+                    params.bottomMargin = bottomMargin;
+                    rowView.setLayoutParams(params);
+                    bottomMargin += 370;
+                }
+            }
         }
         else {
             // remove all text views
             for (int i = 0 ; i < ongoingCarpoolsLayout.getChildCount() ; i++) {
-                if (ongoingCarpoolsLayout.getChildAt(i) instanceof TextView) {
+                if (ongoingCarpoolsLayout.getChildAt(i) instanceof RelativeLayout) {
                     ongoingCarpoolsLayout.removeViewAt(i);
                     i--;
                 }
@@ -393,83 +399,123 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
         Log.d("BroadcastReceiver", "Broadcast received");
         Toast.makeText(getApplicationContext(), "Carpooling received", Toast.LENGTH_SHORT).show();
 
+        Log.d("BroadcastReceiver", "myService is " + (myService == null ? "null" : "not null"));
         String s;
-        for (Carpooling c : myService.getRequestedCarpoolings()) {
-            s = "Carpooling " + c.getId() + "\n" +
-                    "pick up: " + c.getPickupPoint() + "\n" +
-                    "drop off: " + c.getDropoffPoint() + "\n" +
-                    "time: " + c.getPickupTime() + "\n" +
-                    "state: " + c.getState() + "\n" +
-                    "fare: " + c.getFare() + "\n";
+        if (isBound) {
+            for (Carpooling c : myService.getRequestedCarpoolings()) {
+                s = "Carpooling " + c.getId() + "\n" +
+                        "pick up: " + c.getPickupPoint() + "\n" +
+                        "drop off: " + c.getDropoffPoint() + "\n" +
+                        "time: " + c.getPickupTime() + "\n" +
+                        "state: " + c.getState() + "\n" +
+                        "fare: " + c.getFare() + "\n";
 
-            Log.d("BroadcastReceiver", s);
-            Toast.makeText(getApplicationContext(), s, Toast.LENGTH_SHORT).show();
+                Log.d("BroadcastReceiver", s);
+                Toast.makeText(getApplicationContext(), s, Toast.LENGTH_SHORT).show();
 
-            if (c.getState().equals(Carpooling.CarpoolingState.IN_DEMAND)) {
-                // NEW CARPOOL DEMAND
-                newRequestedCarpool = c;
-                // instantiate dialog
-                newDemandDialog = (RelativeLayout) findViewById(R.id.carpoolingDemandDialog);
-                // show dialog
-                newDemandDialog.setVisibility(View.VISIBLE);
+                if (c.getState().equals(Carpooling.CarpoolingState.IN_DEMAND)) {
+                    // NEW CARPOOL DEMAND
+                    newRequestedCarpool = c;
+                    // instantiate dialog
+                    newDemandDialog = (RelativeLayout) findViewById(R.id.carpoolingDemandDialog);
+                    // show dialog
+                    newDemandDialog.setVisibility(View.VISIBLE);
 
-                // add markers (pick up and drop off)
-                requestedCarpoolPickupMarker = mMap.addMarker(new MarkerOptions().
-                        position(c.getPickupPoint()).title(getString(R.string.pickupLabel)));
+                    // add markers (pick up and drop off)
+                    requestedCarpoolPickupMarker = mMap.addMarker(new MarkerOptions().
+                            position(c.getPickupPoint()).title(getString(R.string.pickupLabel)));
 
-                requestedCarpoolDropoffMarker = mMap.addMarker(new MarkerOptions().
-                        position(c.getDropoffPoint()).title(getString(R.string.dropoffLabel)));
+                    requestedCarpoolDropoffMarker = mMap.addMarker(new MarkerOptions().
+                            position(c.getDropoffPoint()).title(getString(R.string.dropoffLabel)));
 
-                // try to find places names
-                new TryToCompleteMarkerName(requestedCarpoolPickupMarker,
-                        (TextView) findViewById(R.id.carpoolingPickupText),
-                        getString(R.string.pickupLabel))
-                        .execute(requestedCarpoolPickupMarker.getPosition());
-                new TryToCompleteMarkerName(requestedCarpoolDropoffMarker,
-                        (TextView) findViewById(R.id.carpoolingDropoffText),
-                        getString(R.string.dropoffLabel))
-                        .execute(requestedCarpoolDropoffMarker.getPosition());
+                    // try to find places names
+                    new TryToCompletePlaceName(requestedCarpoolPickupMarker,
+                            (TextView) findViewById(R.id.carpoolingPickupText),
+                            getString(R.string.pickupLabel))
+                            .execute(requestedCarpoolPickupMarker.getPosition());
+                    new TryToCompletePlaceName(requestedCarpoolDropoffMarker,
+                            (TextView) findViewById(R.id.carpoolingDropoffText),
+                            getString(R.string.dropoffLabel))
+                            .execute(requestedCarpoolDropoffMarker.getPosition());
 
-                // set markers green
-                requestedCarpoolPickupMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-                requestedCarpoolDropoffMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-            }
-            else if (c.getState().equals(Carpooling.CarpoolingState.IN_PROGRESS)) {
-                if (!acceptedCarpools.contains(c.getId())) {
-                    // add to list
-                    acceptedCarpools.add(c.getId());
-                    pickUpPointMarkers.add(mMap.addMarker(new MarkerOptions().
-                            position(c.getPickupPoint()).title(c.getPassenger().getNickname() + getString(R.string.pickupLabel))));
-                    dropoffPointMarkers.add(mMap.addMarker(new MarkerOptions().
-                            position(c.getDropoffPoint()).title(c.getPassenger().getNickname() + getString(R.string.dropoffLabel))));
-                        /*
+                    // set markers green
+                    requestedCarpoolPickupMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                    requestedCarpoolDropoffMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                } else if (c.getState().equals(Carpooling.CarpoolingState.IN_PROGRESS)) {
+                    if (!acceptedCarpools.contains(c.getId())) {
+                        // add to list
+                        acceptedCarpools.add(c.getId());
+                        pickUpPointMarkers.add(mMap.addMarker(new MarkerOptions().
+                                position(c.getPickupPoint()).title(c.getPassenger().getNickname() + " " + getString(R.string.pickupLabel))));
+                        dropoffPointMarkers.add(mMap.addMarker(new MarkerOptions().
+                                position(c.getDropoffPoint()).title(c.getPassenger().getNickname() + " " +  getString(R.string.dropoffLabel))));
+
                         // try to find places names
-                        new TryToCompleteMarkerName(requestedCarpoolPickupMarker,
+                        new TryToCompletePlaceName(pickUpPointMarkers.get(pickUpPointMarkers.size()-1),
                                 (TextView) findViewById(R.id.carpoolingPickupText),
                                 getString(R.string.pickupLabel))
-                                .execute(requestedCarpoolPickupMarker.getPosition());
-                        new TryToCompleteMarkerName(requestedCarpoolDropoffMarker,
+                                .execute(c.getPickupPoint());
+                        new TryToCompletePlaceName(dropoffPointMarkers.get(dropoffPointMarkers.size()-1),
                                 (TextView) findViewById(R.id.carpoolingDropoffText),
                                 getString(R.string.dropoffLabel))
-                                .execute(requestedCarpoolDropoffMarker.getPosition());
+                                .execute(c.getDropoffPoint());
 
-                        // set markers green
-                        requestedCarpoolPickupMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-                        requestedCarpoolDropoffMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-                        */
-                }
+                        // set markers blue
+                        pickUpPointMarkers.get(pickUpPointMarkers.size()-1).setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+                        dropoffPointMarkers.get(dropoffPointMarkers.size()-1).setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
 
-            }
-            else if (c.getState().equals(Carpooling.CarpoolingState.CONFLICT)) {
-                if (!conflictCarpools.contains(c.getId())) {
-                    conflictCarpools.add(c.getId());
+                    }
+
+                } else if (c.getState().equals(Carpooling.CarpoolingState.CONFLICT)) {
+                    if (!conflictCarpools.contains(c.getId())) {
+                        conflictCarpools.add(c.getId());
+                        if (acceptedCarpools.contains(c.getId())) {
+                            // notifier
+
+                            new AlertDialog.Builder(thisContext)
+                                    .setIcon(android.R.drawable.ic_dialog_alert)
+                                    .setTitle(R.string.canceledCarpoolTitle)
+                                    .setMessage(c.getPassenger().getNickname() + getString(R.string.canceledCarpoolText))
+                                    .setPositiveButton(R.string.ok, null)
+                                    .show();
+
+                            int index = acceptedCarpools.indexOf(c.getId());
+                            Marker oneMarker = pickUpPointMarkers.get(index);
+                            oneMarker.remove();
+                            oneMarker = dropoffPointMarkers.get(index);
+                            oneMarker.remove();
+
+                            acceptedCarpools.remove(index);
+                            pickUpPointMarkers.remove(index);
+                            dropoffPointMarkers.remove(index);
+
+                        } else if (achievedCarpools.contains(c.getId())) {
+                            // notifier
+
+
+                            new AlertDialog.Builder(thisContext)
+                                    .setIcon(android.R.drawable.ic_dialog_alert)
+                                    .setTitle(R.string.conflictTitle)
+                                    .setMessage(c.getPassenger().getNickname() + getString(R.string.conflictText))
+                                    .setPositiveButton(R.string.ok, null)
+                                    .show();
+
+
+                            achievedCarpools.remove(c.getId());
+                        }
+                    }
+                } else if (c.getState().equals(Carpooling.CarpoolingState.ACHIEVED)) {
+                    if (!achievedCarpools.contains(c.getId())) {
+                        achievedCarpools.add(c.getId());
+                    }
+
                     if (acceptedCarpools.contains(c.getId())) {
                         // notifier
 
                         new AlertDialog.Builder(thisContext)
-                                .setIcon(android.R.drawable.ic_dialog_alert)
-                                .setTitle(R.string.canceledCarpoolTitle)
-                                .setMessage(c.getPassenger().getNickname() +  getString(R.string.canceledCarpoolText))
+                                .setIcon(android.R.drawable.ic_dialog_info)
+                                .setTitle("Covoiturage terminé")
+                                .setMessage(c.getPassenger().getNickname() + " a fini don covoiturage")
                                 .setPositiveButton(R.string.ok, null)
                                 .show();
 
@@ -484,52 +530,10 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
                         dropoffPointMarkers.remove(index);
 
                     }
-                    else if (achievedCarpools.contains(c.getId())) {
-                        // notifier
 
-
-                        new AlertDialog.Builder(thisContext)
-                                .setIcon(android.R.drawable.ic_dialog_alert)
-                                .setTitle(R.string.conflictTitle)
-                                .setMessage(c.getPassenger().getNickname() + getString(R.string.conflictText))
-                                .setPositiveButton(R.string.ok, null)
-                                .show();
-
-
-                        achievedCarpools.remove(c.getId());
-                    }
-                }
-            }
-            else if (c.getState().equals(Carpooling.CarpoolingState.ACHIEVED)) {
-                if (!achievedCarpools.contains(c.getId())) {
-                    achievedCarpools.add(c.getId());
-                }
-
-                if (acceptedCarpools.contains(c.getId())) {
-                    // notifier
-
-                    new AlertDialog.Builder(thisContext)
-                            .setIcon(android.R.drawable.ic_dialog_info)
-                            .setTitle("Covoiturage terminé")
-                            .setMessage(c.getPassenger().getNickname() + " a fini don covoiturage")
-                            .setPositiveButton(R.string.ok, null)
-                            .show();
-
-                    int index = acceptedCarpools.indexOf(c.getId());
-                    Marker oneMarker = pickUpPointMarkers.get(index);
-                    oneMarker.remove();
-                    oneMarker = dropoffPointMarkers.get(index);
-                    oneMarker.remove();
-
-                    acceptedCarpools.remove(index);
-                    pickUpPointMarkers.remove(index);
-                    dropoffPointMarkers.remove(index);
 
                 }
 
-
-            }
-/*
                 // show or hide button
                 if (acceptedCarpools.size() > 0) {
                     showOnoingCarpoolsButton.setVisibility(View.VISIBLE);
@@ -537,7 +541,8 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
                 else {
                     showOnoingCarpoolsButton.setVisibility(View.INVISIBLE);
                 }
-*/
+
+            }
         }
     }
 
@@ -627,31 +632,4 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
         startActivity(intent);
     }
 
-
-    /**
-     * Abort a carpool in a new thread
-     */
-    private class TryToCompleteMarkerName extends AsyncTask<LatLng, String,String> {
-        Marker marker;
-        TextView textView;
-        String type;
-        Place myPlace;
-
-        public TryToCompleteMarkerName(Marker marker, TextView textView, String type) {
-            this.marker = marker;
-            this.textView = textView;
-            this.type = type;
-        }
-
-        protected String doInBackground(LatLng... latLngs) {
-            Log.d(TAG_LOG, "Carpooling accepted");
-            this.myPlace = PlacesService.getPlaceByCoordinates(latLngs[0]);
-            return null;
-        }
-
-        protected void onPostExecute(String result) {
-            marker.setSnippet(myPlace.getPlaceName());
-            textView.setText(type + ": " + myPlace.getPlaceName());
-        }
-    }
 }

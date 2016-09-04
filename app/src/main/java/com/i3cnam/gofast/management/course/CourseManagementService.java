@@ -19,6 +19,7 @@ import com.google.maps.android.PolyUtil;
 import com.i3cnam.gofast.R;
 import com.i3cnam.gofast.communication.CommInterface;
 import com.i3cnam.gofast.communication.Communication;
+import com.i3cnam.gofast.communication.CommunicationStub;
 import com.i3cnam.gofast.geo.DirectionsService;
 import com.i3cnam.gofast.geo.GPSTracker;
 import com.i3cnam.gofast.model.Carpooling;

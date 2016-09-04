@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="350px"
+    android:background="#bbffffff">
+
+    <!-- First Line ************************************************************* -->
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="@string/passengerLabel"
+        android:id="@+id/passengerLabel"
+        android:textColor="@color/colorAccent"
+        android:textStyle="bold"
+        android:layout_alignBottom="@+id/passenger"
+        android:layout_alignStart="@+id/timeLabel" />
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Passenger Name"
+        android:id="@+id/passenger"
+        android:textStyle="bold"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/passengerLabel"
+        android:layout_marginLeft="10px"
+        android:textColor="#444444" />
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="@string/timeLabel"
+        android:id="@+id/timeLabel"
+        android:textColor="@color/colorAccent"
+        android:textStyle="bold"
+        android:layout_alignBottom="@+id/pickupTime"
+        android:layout_alignEnd="@+id/dropoffLabel" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="00:00"
+        android:id="@+id/pickupTime"
+        android:layout_below="@+id/passengerLabel"
+        android:layout_toEndOf="@+id/timeLabel"
+        android:layout_marginLeft="10px"
+        android:layout_marginTop="10px" />
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="@string/fareLabel"
+        android:id="@+id/fareLabel"
+        android:textColor="@color/colorAccent"
+        android:textStyle="bold"
+        android:layout_alignBottom="@+id/pickupTime"
+        android:layout_toStartOf="@+id/fare"
+        android:layout_marginRight="10px" />
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="€ 3.50"
+        android:id="@+id/fare"
+        android:layout_alignBottom="@+id/pickupTime"
+        android:layout_alignEnd="@+id/pickupInfo" />
+
+
+    <!-- Pickup ************************************************************************** -->
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="@string/pickupLabel"
+        android:id="@+id/pickupLabel"
+        android:layout_below="@+id/timeLabel"
+        android:layout_alignStart="@+id/pickupInfo"
+        android:textColor="@color/colorAccent"
+        android:textStyle="bold"
+        android:layout_marginTop="10px" />
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Information sur le lieu de RDV"
+        android:id="@+id/pickupInfo"
+        android:layout_below="@+id/pickupLabel"
+        android:layout_alignParentEnd="true" />
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="@string/dropoffLabel"
+        android:id="@+id/dropoffLabel"
+        android:layout_below="@+id/pickupInfo"
+        android:layout_alignStart="@+id/pickupInfo"
+        android:textColor="@color/colorAccent"
+        android:textStyle="bold"
+        android:layout_marginTop="10px" />
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Information sur le lieu du depot"
+        android:id="@+id/dropOffInfo"
+        android:layout_below="@+id/dropoffLabel"
+        android:layout_alignStart="@+id/pickupInfo" />
+
+
+
+    <!-- Buttons ******************************************************************************* -->
+
+
+</RelativeLayout>

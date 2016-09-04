@@ -92,22 +92,11 @@
     <RelativeLayout
         android:id="@+id/ongoingCarpoolsLayout"
         android:layout_width="match_parent"
-        android:layout_height="330px"
+        android:layout_height="match_parent"
         android:layout_gravity="bottom"
         android:background="#00000000">
 
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="#000000"
-            android:text="titi42 RDV: Pont des Minimes - 8:24"
-            android:background="#ffffff"
-            android:id="@+id/ongoingCarpool"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentEnd="true"
-            android:layout_marginTop="10dp" />
 
     </RelativeLayout>
 
@@ -144,7 +133,7 @@
         android:clickable="true"
         android:src="@drawable/carpooling_request"
         android:layout_gravity="bottom|left"
-        android:layout_margin="15dp"
+        android:layout_margin="10dp"
         android:onClick="showOngoingCarpools" />
     <!--
                 android:layout_alignParentTop="true"
