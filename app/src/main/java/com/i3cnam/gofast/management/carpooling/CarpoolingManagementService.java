@@ -177,11 +177,6 @@ public class CarpoolingManagementService extends Service {
         new AsynchronousCancelRequest().execute();
     }
 
-    public void abortCarpooling(Carpooling carpooling) {
-        carpoolingToAbort = carpooling;
-        new AsynchronousAbortCarpool().execute();
-    }
-
     public void abortTravel() {
         new AsynchronousAbortTravel().execute();
     }
@@ -296,18 +291,6 @@ public class CarpoolingManagementService extends Service {
             Log.d(TAG_LOG, "Request canceled");
             Log.d(TAG_LOG, passengerTravel.getParametersString());
             serverCom.cancelRequest(carpoolingToCancel);
-            return null;
-        }
-    }
-
-    /**
-     * Abort a carpool in a new thread
-     */
-    private class AsynchronousAbortCarpool extends AsyncTask<String, String,String> {
-        protected String doInBackground(String... urls) {
-            Log.d(TAG_LOG, "Carpooling aborted");
-            Log.d(TAG_LOG, passengerTravel.getParametersString());
-            serverCom.abortCarpool(carpoolingToAbort);
             return null;
         }
     }

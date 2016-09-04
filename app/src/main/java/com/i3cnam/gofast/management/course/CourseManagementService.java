@@ -1,7 +1,5 @@
 package com.i3cnam.gofast.management.course;
 
-import android.app.Notification;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -10,13 +8,11 @@ import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.TaskStackBuilder;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.PolyUtil;
-import com.i3cnam.gofast.R;
 import com.i3cnam.gofast.communication.CommInterface;
 import com.i3cnam.gofast.communication.Communication;
 import com.i3cnam.gofast.geo.DirectionsService;
@@ -24,11 +20,10 @@ import com.i3cnam.gofast.geo.GPSTracker;
 import com.i3cnam.gofast.model.Carpooling;
 import com.i3cnam.gofast.model.DriverCourse;
 import com.i3cnam.gofast.model.User;
-import com.i3cnam.gofast.views.Main;
-import com.i3cnam.gofast.views.Navigate;
+import com.i3cnam.gofast.views.abstractViews.CourseServiceConnectedActivity;
+import com.i3cnam.gofast.views.notifications.GeneralForegroundNotification;
 import com.i3cnam.gofast.views.notifications.NewRequestNotification;
 
-import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -38,6 +33,8 @@ import systr.cartographie.Operations;
 public class CourseManagementService extends Service {
 
     private final IBinder myBinder = new LocalBinder();
+    protected CourseManagementService thisService; // to access from other classes
+
     private CommInterface serverCom;
     private DriverCourse driverCourse;
     private List<Carpooling> requestedCarpoolings = new ArrayList<>();
@@ -57,10 +54,9 @@ public class CourseManagementService extends Service {
 
     private ObserveCourse myCourseObserver;
     private GPSForNavigation navGPS;
-    private CourseManagementService thisService; // to access from other classes
+
 
     private final String TAG_LOG = "Course Service"; // tag for log messages
-
 
     /**
      * Class used for the client Binder.  Because we know this service always
@@ -85,25 +81,13 @@ public class CourseManagementService extends Service {
     }
 
     @Override
-    public void onDestroy() {
-        Log.d(TAG_LOG, "DESTROY");
-        super.onDestroy();
-    }
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        Log.d(TAG_LOG, "BOUND");
-        return myBinder;
-    }
-
-    @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG_LOG, "START");
 
         if (driverCourse == null) {
             // get the driver course from the intent bundle
             Bundle bundle = intent.getExtras();
-            driverCourse = (DriverCourse)(bundle.getSerializable(Navigate.COURSE));
+            driverCourse = (DriverCourse)(bundle.getSerializable(CourseServiceConnectedActivity.PRIMARY_DATA));
 
             // init the communication module for the service
             serverCom = new Communication();
@@ -121,27 +105,17 @@ public class CourseManagementService extends Service {
         }
 
         Log.d(TAG_LOG, "Build notification");
-        NotificationCompat.Builder b = new NotificationCompat.Builder(this);
-
-        b.setOngoing(true);
-
-        b.setContentTitle("GoFast")
-                .setContentText(getString(R.string.courseInProgress))
-                .setSmallIcon(R.drawable.driver_100);
-
-        Intent resultIntent = new Intent(this, Main.class);
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-        stackBuilder.addParentStack(Main.class);
-
-        stackBuilder.addNextIntent(resultIntent);
-        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        b.setContentIntent(resultPendingIntent);
-
-
-        startForeground(1337, b.build());
+        GeneralForegroundNotification.notify(this);
 
         return START_NOT_STICKY;
+    }
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        Log.d(TAG_LOG, "BOUND");
+
+        return myBinder;
     }
 
     /**
@@ -267,11 +241,6 @@ public class CourseManagementService extends Service {
     public void refuseCarpooling(Carpooling carpooling) {
         carpoolingToRefuse = carpooling;
         new AsynchronousRefuseCarpool().execute();
-    }
-
-    public void abortCarpooling(Carpooling carpooling) {
-        carpoolingToAbort = carpooling;
-        new AsynchronousAbortCarpool().execute();
     }
 
     public void abortCourse() {
@@ -441,17 +410,6 @@ public class CourseManagementService extends Service {
         protected String doInBackground(String... urls) {
             Log.d(TAG_LOG, "Carpooling refused");
             serverCom.refuseCarpool(carpoolingToRefuse);
-            return null;
-        }
-    }
-
-    /**
-     * Abort a carpool in a new thread
-     */
-    private class AsynchronousAbortCarpool extends AsyncTask<String, String,String> {
-        protected String doInBackground(String... urls) {
-            Log.d(TAG_LOG, "Carpooling aborted");
-            serverCom.abortCarpool(carpoolingToAbort);
             return null;
         }
     }

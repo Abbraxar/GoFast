@@ -12,7 +12,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.AlertDialog;
@@ -27,6 +26,7 @@ import com.i3cnam.gofast.model.Carpooling;
 import com.i3cnam.gofast.model.PassengerTravel;
 import com.i3cnam.gofast.model.Place;
 import com.i3cnam.gofast.model.User;
+import com.i3cnam.gofast.tools.activityRestarter.ActivityRestarterImpl;
 
 import java.util.List;
 
@@ -35,7 +35,6 @@ public class CarpoolingList extends ListActivity {
 
     /** globals */
     public final static String TRAVEL = "com.i3cnam.gofast.TRAVEL";
-    private PassengerTravel passengerTravel;
     private CarpoolingManagementService myService;
     protected boolean isBound = false;
     protected boolean isTravelInit = false;
@@ -47,7 +46,7 @@ public class CarpoolingList extends ListActivity {
         super.onCreate(savedInstanceState);
 
         // get all the data of the intent and create a new travel object
-        passengerTravel = new PassengerTravel();
+        PassengerTravel passengerTravel = new PassengerTravel();
 
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
@@ -71,7 +70,6 @@ public class CarpoolingList extends ListActivity {
         bindService(serviceIntent, myConnection, Context.BIND_AUTO_CREATE);
     }
 
-
     @Override
     protected void onStart() {
         super.onStart();
@@ -79,7 +77,6 @@ public class CarpoolingList extends ListActivity {
         // tester l'appel au service
 //        myService.requestCarpool();
     }
-
 
     @Override
     protected void onResume() {
@@ -94,10 +91,7 @@ public class CarpoolingList extends ListActivity {
         registerReceiver(broadcastTravelInitReceiver, filterTravelInit);
 
         // save current activity as last activity opened
-        SharedPreferences prefs = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putString("lastActivity", getClass().getName());
-        editor.commit();
+        ActivityRestarterImpl.getInstance().setActivityToRestart(getClass().getName());
 
         prepareListData();
 
@@ -221,7 +215,6 @@ public class CarpoolingList extends ListActivity {
     ------------------------------------------------------------------------------------------------
     */
 
-
     private void searchForAcceptedCarpool() {
         for (Carpooling c : myService.getCarpoolingPossibilities()) {
             if (c.getState().equals(Carpooling.CarpoolingState.IN_PROGRESS)) {
@@ -238,10 +231,7 @@ public class CarpoolingList extends ListActivity {
         myService.stopSelf();
 
         // save main activity as activity to restart
-        SharedPreferences prefs = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.remove("lastActivity");
-        editor.commit();
+        ActivityRestarterImpl.getInstance().clearActivityToRestart();
 
         // open main activity
         Intent intent = new Intent(this, Main.class);

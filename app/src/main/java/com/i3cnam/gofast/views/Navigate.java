@@ -1,22 +1,15 @@
 package com.i3cnam.gofast.views;
 
-import android.app.Fragment;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -43,16 +36,15 @@ import com.i3cnam.gofast.model.Carpooling;
 import com.i3cnam.gofast.model.DriverCourse;
 import com.i3cnam.gofast.model.Place;
 import com.i3cnam.gofast.model.User;
+import com.i3cnam.gofast.tools.activityRestarter.ActivityRestarterImpl;
+import com.i3cnam.gofast.views.abstractViews.CourseServiceConnectedActivity;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
+public class Navigate extends CourseServiceConnectedActivity implements OnMapReadyCallback {
 
-    public final static String COURSE = "com.i3cnam.gofast.COURSE";
-    CourseManagementService myService;
-    boolean isBound = false;
     GoogleMap mMap;
     SupportMapFragment mapFragment;
     Polyline pathPolyline;
@@ -64,9 +56,6 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
     ImageView showOnoingCarpoolsButton;
     Marker requestedCarpoolPickupMarker;
     Marker requestedCarpoolDropoffMarker;
-    // finally we dont need it
-//    DriverCourse driverCourse;
-//    boolean restartByMain = false;
 
     Carpooling newRequestedCarpool;
 
@@ -79,7 +68,6 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
     boolean ongoingCarpoolsVisible = false;
 
     boolean mapIsReady = false; // for synchronisation
-    boolean courseIsInitialised = false; // for synchronisation
 
     private final static String TAG_LOG = "Navigate view";
     Context thisContext;
@@ -113,63 +101,19 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
         waitingSignal = (ProgressBar) findViewById(R.id.waiting);
         waitingSignal.setVisibility(View.VISIBLE);
         showOnoingCarpoolsButton = (ImageView) findViewById(R.id.hitchingImg);
-//        showOnoingCarpoolsButton.setVisibility(View.INVISIBLE);
 
         //get context for other classes
         thisContext = this;
 
         // launch and bind CourseManagementService
-        launchAndBindCourseManagementService(driverCourse);
-
+        launchAndBindService(driverCourse);
     }
-
-
-    private void launchAndBindCourseManagementService(DriverCourse driverCourse)  {
-        // new intent for publication:
-        Intent serviceIntent = new Intent(Navigate.this, CourseManagementService.class);
-        // new bundle
-        Bundle serviceBundle = new Bundle();
-        serviceBundle.putSerializable(COURSE, driverCourse);
-        serviceIntent.putExtras(serviceBundle);
-        // start service with th intent and bind it
-        startService(serviceIntent);
-        Log.d(TAG_LOG, "Bind Service");
-        bindService(serviceIntent, myConnection, Context.BIND_AUTO_CREATE);
-
-    }
-
-    /** Defines callbacks for service binding, passed to bindService() */
-    private ServiceConnection myConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName className,
-                                       IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
-            CourseManagementService.LocalBinder binder = (CourseManagementService.LocalBinder) service;
-            myService = binder.getService();
-            isBound = true;
-            initMap();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            isBound = false;
-        }
-    };
-
 
     /*
     ------------------------------------------------------------------------------------------------
         ACTIVITY STATE CHANGES:
     ------------------------------------------------------------------------------------------------
      */
-    @Override
-    protected void onDestroy() {
-        Log.d(TAG_LOG, "DESTROY");
-
-        unbindService(myConnection);
-        super.onDestroy();
-    }
-
     @Override
     protected void onResume() {
         Log.d(TAG_LOG, "RESUME");
@@ -190,10 +134,7 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
         registerReceiver(broadcastCarpoolingReceiver, carpoolingFilter);
 
         // save current activity as last activity opened
-        SharedPreferences prefs = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putString("lastActivity", getClass().getName());
-        editor.commit();
+        ActivityRestarterImpl.getInstance().setActivityToRestart(getClass().getName());
 
         super.onResume();
     }
@@ -218,15 +159,16 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
                 .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        myService.abortCourse();
-//                    stopService(new Intent(context, CourseManagementService.class));
-                        stopServiceAndCloseAvtivity();
+                        if(isBound) {
+                          myService.abortCourse();
+                        }
+                        stopServiceAndCloseActivity();
 
                     }
                 })
                 .setNegativeButton(R.string.no, null)
                 .show();
-    }
+       }
 
 
     /*
@@ -260,13 +202,6 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
         requestedCarpoolPickupMarker.remove();
         requestedCarpoolDropoffMarker.remove();
     }
-
-
-    public void abortCarpooling(View view) {
-        Log.d(TAG_LOG, "abortCarpooling");
-        myService.abortCarpooling(myService.getRequestedCarpoolings().get(0));
-    }
-
 
 
     /*
@@ -347,7 +282,7 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
         @Override
         public void onReceive(Context context, Intent intent) {
             // update the boolean and attempt to init the map
-            courseIsInitialised = true;
+            isDataInit = true;
             initMap();
             handleCarpoolingChanges();
         }
@@ -552,13 +487,13 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
 
     /**
      * Init map method :
-     * Il will only be activated while mapIsReady AND courseIsInitialised AND isBound variables are true
+     * Il will only be activated while mapIsReady AND isDataInit AND isBound variables are true
      */
     public void initMap(){
         Log.d("NAV", (isBound ? "bound" : "not bound"));
         Log.d("NAV", (mapIsReady ? "mapIsReady" : "not mapIsReady"));
-        Log.d("NAV", (courseIsInitialised ? "courseIsInitialised" : "not courseIsInitialised"));
-        if (mapIsReady && courseIsInitialised && isBound) {
+        Log.d("NAV", (isDataInit ? "isDataInit" : "not isDataInit"));
+        if (mapIsReady && isDataInit && isBound) {
             // stop waiting
             waitingSignal.setVisibility(View.INVISIBLE);
 
@@ -606,28 +541,14 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
                 Log.d("NAV", ("deiver course null"));
                 // si malgré tout on n'a pas d'objet course, on quite la vue
 
-                stopServiceAndCloseAvtivity();
+                stopServiceAndCloseActivity();
             }
         }
     }
 
-    private void stopServiceAndCloseAvtivity() {
-        // stop service
-        myService.stopForeground(true);
-        myService.stopSelf();
-
-        // save main activity as activity to restart
-        SharedPreferences prefs = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.remove("lastActivity");
-        editor.commit();
-
-        // open main activity
-        Intent intent = new Intent(this, Main.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(intent);
+    protected void afterServiceConnected() {
+        initMap();
     }
-
 
     /**
      * Abort a carpool in a new thread
