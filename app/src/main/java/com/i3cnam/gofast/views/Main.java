@@ -2,7 +2,6 @@ package com.i3cnam.gofast.views;
 
 import android.Manifest;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -15,6 +14,7 @@ import android.view.View;
 
 import com.i3cnam.gofast.R;
 import com.i3cnam.gofast.model.User;
+import com.i3cnam.gofast.tools.activityRestarter.ActivityRestarterImpl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,21 +49,7 @@ public class Main extends AppCompatActivity {
             Log.d("nickname", User.getMe(this).getNickname());
             Log.d("phone", User.getMe(this).getPhoneNumber());
 
-            SharedPreferences prefs = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
-            // go to last activity if needed
-            Class<?> activityClass;
-
-            try {
-                activityClass = Class.forName(
-                        prefs.getString("lastActivity", Main.class.getName())
-                );
-            } catch (ClassNotFoundException ex) {
-                activityClass = Main.class;
-            }
-
-            if (activityClass != Main.class) {
-                startActivity(new Intent(this, activityClass));
-            }
+            ActivityRestarterImpl.getInstance().startActivityToRestart();
         }
     }
 

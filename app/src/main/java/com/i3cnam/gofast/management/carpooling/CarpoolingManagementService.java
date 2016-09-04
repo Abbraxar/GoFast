@@ -1,14 +1,11 @@
 package com.i3cnam.gofast.management.carpooling;
 
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 
 import com.i3cnam.gofast.R;
@@ -17,8 +14,8 @@ import com.i3cnam.gofast.communication.Communication;
 import com.i3cnam.gofast.model.Carpooling;
 import com.i3cnam.gofast.model.PassengerTravel;
 import com.i3cnam.gofast.model.User;
-import com.i3cnam.gofast.views.CarpoolingList;
-import com.i3cnam.gofast.views.Main;
+import com.i3cnam.gofast.views.abstractViews.TravelServiceConnectedActivity;
+import com.i3cnam.gofast.views.notifications.GeneralForegroundNotification;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,7 +90,7 @@ public class CarpoolingManagementService extends Service {
         if (passengerTravel == null) {
             // get the driver course from the intent bundle
             Bundle bundle = intent.getExtras();
-            passengerTravel = (PassengerTravel)(bundle.getSerializable(CarpoolingList.TRAVEL));
+            passengerTravel = (PassengerTravel)(bundle.getSerializable(TravelServiceConnectedActivity.PRIMARY_DATA));
 
             // init the communication module for the service
             serverCom = new Communication();
@@ -109,25 +106,7 @@ public class CarpoolingManagementService extends Service {
         }
 
         Log.d(TAG_LOG, "Build notification");
-        NotificationCompat.Builder b = new NotificationCompat.Builder(this);
-
-        b.setOngoing(true);
-
-        b.setContentTitle(getString(R.string.app_name))
-                .setContentText(getString(R.string.travelInProgress))
-                .setSmallIcon(R.drawable.pedestrian_50);
-
-        Intent resultIntent = new Intent(this, Main.class);
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-        stackBuilder.addParentStack(Main.class);
-
-        stackBuilder.addNextIntent(resultIntent);
-        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        b.setContentIntent(resultPendingIntent);
-
-
-        startForeground(1337, b.build());
+        GeneralForegroundNotification.notify(this, R.drawable.ic_general_notification_pedestrian);
 
         return START_NOT_STICKY;
     }
@@ -175,11 +154,6 @@ public class CarpoolingManagementService extends Service {
     public void cancelRequest(Carpooling carpooling) {
         carpoolingToCancel = carpooling;
         new AsynchronousCancelRequest().execute();
-    }
-
-    public void abortCarpooling(Carpooling carpooling) {
-        carpoolingToAbort = carpooling;
-        new AsynchronousAbortCarpool().execute();
     }
 
     public void abortTravel() {
@@ -296,18 +270,6 @@ public class CarpoolingManagementService extends Service {
             Log.d(TAG_LOG, "Request canceled");
             Log.d(TAG_LOG, passengerTravel.getParametersString());
             serverCom.cancelRequest(carpoolingToCancel);
-            return null;
-        }
-    }
-
-    /**
-     * Abort a carpool in a new thread
-     */
-    private class AsynchronousAbortCarpool extends AsyncTask<String, String,String> {
-        protected String doInBackground(String... urls) {
-            Log.d(TAG_LOG, "Carpooling aborted");
-            Log.d(TAG_LOG, passengerTravel.getParametersString());
-            serverCom.abortCarpool(carpoolingToAbort);
             return null;
         }
     }

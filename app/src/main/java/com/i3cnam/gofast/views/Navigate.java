@@ -1,13 +1,14 @@
 package com.i3cnam.gofast.views;
 
+import android.app.Fragment;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
-import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.AlertDialog;
@@ -39,6 +40,8 @@ import com.i3cnam.gofast.model.Carpooling;
 import com.i3cnam.gofast.model.DriverCourse;
 import com.i3cnam.gofast.model.Place;
 import com.i3cnam.gofast.model.User;
+import com.i3cnam.gofast.tools.activityRestarter.ActivityRestarterImpl;
+import com.i3cnam.gofast.views.abstractViews.CourseServiceConnectedActivity;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -62,9 +65,6 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
     ImageView showOnoingCarpoolsButton;
     Marker requestedCarpoolPickupMarker;
     Marker requestedCarpoolDropoffMarker;
-    // finally we dont need it
-//    DriverCourse driverCourse;
-//    boolean restartByMain = false;
 
     Carpooling newRequestedCarpool;
 
@@ -117,8 +117,7 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
         thisContext = this;
 
         // launch and bind CourseManagementService
-        launchAndBindCourseManagementService(driverCourse);
-
+        launchAndBindService(driverCourse);
     }
 
 
@@ -188,10 +187,7 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
         registerReceiver(broadcastCarpoolingReceiver, carpoolingFilter);
 
         // save current activity as last activity opened
-        SharedPreferences prefs = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putString("lastActivity", getClass().getName());
-        editor.commit();
+        ActivityRestarterImpl.getInstance().setActivityToRestart(getClass().getName());
 
         super.onResume();
     }
@@ -216,15 +212,16 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
                 .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        myService.abortCourse();
-//                    stopService(new Intent(context, CourseManagementService.class));
-                        stopServiceAndCloseAvtivity();
+                        if(isBound) {
+                          myService.abortCourse();
+                        }
+                        stopServiceAndCloseActivity();
 
                     }
                 })
                 .setNegativeButton(R.string.no, null)
                 .show();
-    }
+       }
 
 
     /*
@@ -352,7 +349,7 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
         @Override
         public void onReceive(Context context, Intent intent) {
             // update the boolean and attempt to init the map
-            courseIsInitialised = true;
+            isDataInit = true;
             initMap();
             handleCarpoolingChanges();
         }
@@ -399,7 +396,6 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
         Log.d("BroadcastReceiver", "Broadcast received");
         Toast.makeText(getApplicationContext(), "Carpooling received", Toast.LENGTH_SHORT).show();
 
-        Log.d("BroadcastReceiver", "myService is " + (myService == null ? "null" : "not null"));
         String s;
         if (isBound) {
             for (Carpooling c : myService.getRequestedCarpoolings()) {
@@ -556,13 +552,13 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
 
     /**
      * Init map method :
-     * Il will only be activated while mapIsReady AND courseIsInitialised AND isBound variables are true
+     * Il will only be activated while mapIsReady AND isDataInit AND isBound variables are true
      */
     public void initMap(){
         Log.d("NAV", (isBound ? "bound" : "not bound"));
         Log.d("NAV", (mapIsReady ? "mapIsReady" : "not mapIsReady"));
-        Log.d("NAV", (courseIsInitialised ? "courseIsInitialised" : "not courseIsInitialised"));
-        if (mapIsReady && courseIsInitialised && isBound) {
+        Log.d("NAV", (isDataInit ? "isDataInit" : "not isDataInit"));
+        if (mapIsReady && isDataInit && isBound) {
             // stop waiting
             waitingSignal.setVisibility(View.INVISIBLE);
 
@@ -610,7 +606,7 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
                 Log.d("NAV", ("deiver course null"));
                 // si malgré tout on n'a pas d'objet course, on quite la vue
 
-                stopServiceAndCloseAvtivity();
+                stopServiceAndCloseActivity();
             }
         }
     }
