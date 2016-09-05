@@ -12,6 +12,7 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -110,10 +111,15 @@ public class CarpoolingList extends TravelServiceConnectedActivity {
      */
     private void prepareListData() {
         Log.d(TAG_LOG, "prepareListData: enter function. bound: " + isBound + ", init: " + isDataInit);
+
         if(isBound && isDataInit) {
+            Log.d(TAG_LOG, "prepareListData: enter function. myService: " + myService + ", cp: " + myService.getCarpoolingPossibilities().size());
             Log.d(TAG_LOG, "prepareListData: set adapter");
             List<Carpooling> carpoolings = myService.getCarpoolingPossibilities();
-            adapter.setCarpoolings(carpoolings);
+
+            ListAdapter adapter =  new CarpoolingPassengerArrayAdapter(this, R.layout.list_item_carpooling_passenger, carpoolings);
+            myListView.setAdapter(adapter);
+//            adapter.setCarpoolings(carpoolings);
         }
     }
 

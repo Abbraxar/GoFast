@@ -49,14 +49,14 @@ public class NewRequestNotification {
 
         // This image is used as the notification's large icon (thumbnail).
         // TODO: Remove this if your notification has no relevant thumbnail.
-        final Bitmap picture = BitmapFactory.decodeResource(res, R.drawable.example_picture);
+//        final Bitmap picture = BitmapFactory.decodeResource(res, R.drawable.carpool_request_n);
 
 
         final String ticker = exampleString;
         final String title = res.getString(
-                R.string.new_request_notification_title_template, exampleString);
+                R.string.new_carpooling_request_notification_title);
         final String text = res.getString(
-                R.string.new_request_notification_placeholder_text_template, exampleString);
+                R.string.new_carpooling_request_notification_text, exampleString);
 
         final NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
 
@@ -66,7 +66,7 @@ public class NewRequestNotification {
 
                 // Set required fields, including the small icon, the
                 // notification title, and text.
-                .setSmallIcon(R.drawable.ic_stat_new_request)
+                .setSmallIcon(R.drawable.carpool_request_n)
                 .setContentTitle(title)
                 .setContentText(text)
 
@@ -74,18 +74,18 @@ public class NewRequestNotification {
 
                 // Use a default priority (recognized on devices running Android
                 // 4.1 or later)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+//                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
 
                 // Provide a large icon, shown with the notification in the
                 // notification drawer on devices running Android 3.0 or later.
-                .setLargeIcon(picture)
+//                .setLargeIcon(picture)
 
                 // Set ticker text (preview) information for this notification.
-                .setTicker(ticker)
+//                .setTicker(ticker)
 
                 // Show a number. This is useful when stacking notifications of
                 // a single type.
-                .setNumber(number)
+//                .setNumber(number)
 
                 // If this notification relates to a past or upcoming event, you
                 // should set the relevant time information using the setWhen
@@ -110,6 +110,7 @@ public class NewRequestNotification {
                 // should ensure that the activity in this notification's
                 // content intent provides access to the same actions in
                 // another way.
+                /*
                 .addAction(
                         R.drawable.ic_action_stat_share,
                         res.getString(R.string.action_share),
@@ -127,7 +128,8 @@ public class NewRequestNotification {
 
                 // Automatically dismiss the notification when it is touched.
                 .setAutoCancel(true);
-
+*/
+        ;
         notify(context, builder.build());
     }
 

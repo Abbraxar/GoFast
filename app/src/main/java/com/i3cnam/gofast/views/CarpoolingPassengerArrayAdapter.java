@@ -1,6 +1,7 @@
 package com.i3cnam.gofast.views;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,6 +33,7 @@ public class CarpoolingPassengerArrayAdapter extends ArrayAdapter<Carpooling> {
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
+        Log.d("WTF","getViewFunction");
         LayoutInflater inflater = (LayoutInflater) getContext()
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View rowView = inflater.inflate(R.layout.list_item_carpooling_passenger, parent, false);
@@ -82,5 +84,6 @@ public class CarpoolingPassengerArrayAdapter extends ArrayAdapter<Carpooling> {
     public void setCarpoolings(List<Carpooling> carpoolings) {
         this.carpoolings = carpoolings;
         this.notifyDataSetChanged();
+        Log.d("array adapter", "set carpoolings");
     }
 }

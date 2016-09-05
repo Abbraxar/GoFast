@@ -171,7 +171,7 @@ public class CarpoolingManagementService extends Service {
     private class ObserveTravel implements Runnable {
         List<Carpooling> lastList;
         private volatile boolean running = true;
-        private static final String TAG_LOG = "ObserveCourse";
+        private static final String TAG_LOG = "ObserveTravel";
 
         public void terminate(){
             running = false;

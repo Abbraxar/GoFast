@@ -49,11 +49,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
+public class Navigate extends CourseServiceConnectedActivity implements OnMapReadyCallback {
 
-    public final static String COURSE = "com.i3cnam.gofast.COURSE";
-    CourseManagementService myService;
-    boolean isBound = false;
+//    public final static String COURSE = "com.i3cnam.gofast.COURSE";
+//    CourseManagementService myService;
+//    boolean isBound = false;
     GoogleMap mMap;
     SupportMapFragment mapFragment;
     Polyline pathPolyline;
@@ -121,50 +121,14 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
     }
 
 
-    private void launchAndBindCourseManagementService(DriverCourse driverCourse)  {
-        // new intent for publication:
-        Intent serviceIntent = new Intent(Navigate.this, CourseManagementService.class);
-        // new bundle
-        Bundle serviceBundle = new Bundle();
-        serviceBundle.putSerializable(COURSE, driverCourse);
-        serviceIntent.putExtras(serviceBundle);
-        // start service with th intent and bind it
-        startService(serviceIntent);
-        Log.d(TAG_LOG, "Bind Service");
-        bindService(serviceIntent, myConnection, Context.BIND_AUTO_CREATE);
-
-    }
-
-    /** Defines callbacks for service binding, passed to bindService() */
-    private ServiceConnection myConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName className,
-                                       IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
-            CourseManagementService.LocalBinder binder = (CourseManagementService.LocalBinder) service;
-            myService = binder.getService();
-            isBound = true;
-            initMap();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            isBound = false;
-        }
-    };
-
-
     /*
     ------------------------------------------------------------------------------------------------
         ACTIVITY STATE CHANGES:
     ------------------------------------------------------------------------------------------------
      */
     @Override
-    protected void onDestroy() {
-        Log.d(TAG_LOG, "DESTROY");
+    protected void afterServiceConnected() {
 
-        unbindService(myConnection);
-        super.onDestroy();
     }
 
     @Override
@@ -238,8 +202,9 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
         // hide dialog
         newDemandDialog.setVisibility(View.INVISIBLE);
 
-        // add to accepted list
-        acceptedCarpools.add(newRequestedCarpool.getId());
+        // remove markers
+        requestedCarpoolPickupMarker.remove();
+        requestedCarpoolDropoffMarker.remove();
     }
 
     /** Action : pressed Refuse button */
@@ -256,11 +221,6 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
         requestedCarpoolDropoffMarker.remove();
     }
 
-
-    public void abortCarpooling(View view) {
-        Log.d(TAG_LOG, "abortCarpooling");
-        myService.abortCarpooling(myService.getRequestedCarpoolings().get(0));
-    }
 
 
 
@@ -511,7 +471,7 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
                         new AlertDialog.Builder(thisContext)
                                 .setIcon(android.R.drawable.ic_dialog_info)
                                 .setTitle("Covoiturage terminé")
-                                .setMessage(c.getPassenger().getNickname() + " a fini don covoiturage")
+                                .setMessage(c.getPassenger().getNickname() + " a fini son covoiturage")
                                 .setPositiveButton(R.string.ok, null)
                                 .show();
 
@@ -556,6 +516,7 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
      */
     public void initMap(){
         Log.d("NAV", (isBound ? "bound" : "not bound"));
+        Log.d("NAV", (super.isBound ? "super.isBound" : "not super.isBound"));
         Log.d("NAV", (mapIsReady ? "mapIsReady" : "not mapIsReady"));
         Log.d("NAV", (isDataInit ? "isDataInit" : "not isDataInit"));
         if (mapIsReady && isDataInit && isBound) {
@@ -610,22 +571,4 @@ public class Navigate extends AppCompatActivity implements OnMapReadyCallback {
             }
         }
     }
-
-    private void stopServiceAndCloseAvtivity() {
-        // stop service
-        myService.stopForeground(true);
-        myService.stopSelf();
-
-        // save main activity as activity to restart
-        SharedPreferences prefs = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.remove("lastActivity");
-        editor.commit();
-
-        // open main activity
-        Intent intent = new Intent(this, Main.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(intent);
-    }
-
 }

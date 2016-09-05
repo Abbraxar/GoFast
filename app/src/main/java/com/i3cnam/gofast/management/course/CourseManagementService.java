@@ -202,11 +202,6 @@ public class CourseManagementService extends Service {
     private void sendCourseUpdate() {
         Log.d(TAG_LOG, "entered sendCourseUpdate");
 
-        for (Carpooling c : requestedCarpoolings) {
-            if (c.getState().equals(Carpooling.CarpoolingState.IN_DEMAND)) {
-                new NewRequestNotification().notify(this, "salut", 1);
-            }
-        }
         sendBroadcast(broadcastCourseIntent);
     }
 
@@ -225,6 +220,13 @@ public class CourseManagementService extends Service {
     private void sendCarpoolUpdate() {
         Log.d(TAG_LOG, "entered sendCarpoolUpdate");
 
+        for (Carpooling c : requestedCarpoolings) {
+            Log.d(TAG_LOG, "carpool id : " + c.getId());
+            if (c.getState().equals(Carpooling.CarpoolingState.IN_DEMAND)) {
+                Log.d(TAG_LOG, "send notification");
+                new NewRequestNotification().notify(this, "salut", 1);
+            }
+        }
         sendBroadcast(broadcastCarpoolingIntent);
     }
 
