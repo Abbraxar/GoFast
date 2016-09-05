@@ -430,5 +430,4 @@ public class CourseManagementService extends Service {
             return null;
         }
     }
-
 }

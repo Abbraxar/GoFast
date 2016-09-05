@@ -7,8 +7,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
@@ -44,11 +42,11 @@ public class NewRequestNotification {
      * @see #cancel(Context)
      */
     public static void notify(final Context context,
-                              final String exampleString, final int number) {
+                              final String exampleString,
+                              final int number) {
         final Resources res = context.getResources();
 
         // This image is used as the notification's large icon (thumbnail).
-        // TODO: Remove this if your notification has no relevant thumbnail.
 //        final Bitmap picture = BitmapFactory.decodeResource(res, R.drawable.carpool_request_n);
 
 
@@ -70,7 +68,15 @@ public class NewRequestNotification {
                 .setContentTitle(title)
                 .setContentText(text)
 
-                // All fields below this line are optional.
+                // vibration
+//                .setVibrate(new long[] { 1000, 1000, 1000, 1000, 1000 })
+
+                // sound
+//                .setSound(Uri.parse("uri://res/raw/chiflido.wav"))
+
+
+
+        // All fields below this line are optional.
 
                 // Use a default priority (recognized on devices running Android
                 // 4.1 or later)
