@@ -92,7 +92,7 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="à 250 m"
-        android:id="@+id/textView3"
+        android:id="@+id/dropoffDistance"
         android:layout_alignTop="@+id/dropoffLabel"
         android:layout_toEndOf="@+id/dropoffLabel"
         android:textStyle="bold"

@@ -1,6 +1,7 @@
 package com.i3cnam.gofast.views;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -10,8 +11,11 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -19,16 +23,23 @@ import com.i3cnam.gofast.R;
 import com.i3cnam.gofast.geo.DirectionsService;
 import com.i3cnam.gofast.model.Carpooling;
 import com.i3cnam.gofast.model.DriverCourse;
+import com.i3cnam.gofast.model.PassengerTravel;
 import com.i3cnam.gofast.views.abstractViews.CourseServiceConnectedActivity;
 
 import java.util.List;
 
 public class CarpoolingDetails extends FragmentActivity implements OnMapReadyCallback {
     public static final String CARPOOLING = "com.i3cnam.gofast.CARPOOLING";
+    public static final String TRAVEL = "com.i3cnam.gofast.TRAVEL";
     private static final String TAG_LOG = "CarpoolingDetails";
     private GoogleMap mMap;
     private Carpooling carpooling;
-
+    private PassengerTravel travel;
+    // maps bounds
+    double northest;
+    double southest;
+    double westest;
+    double eastest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +54,7 @@ public class CarpoolingDetails extends FragmentActivity implements OnMapReadyCal
 
         Bundle bundle = intent.getExtras();
         carpooling = (Carpooling)(bundle.getSerializable(CARPOOLING));
-
+        travel = (PassengerTravel) (bundle.getSerializable(TRAVEL));
     }
 
 
@@ -60,42 +71,85 @@ public class CarpoolingDetails extends FragmentActivity implements OnMapReadyCal
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        // asynchronous computation of both paths
+        new TaskComputeAndDrawPath(travel.getOrigin().getCoordinates(),
+                carpooling.getPickupPoint(),
+                BitmapDescriptorFactory.fromResource(R.drawable.walking),
+                BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)).execute();
+        new TaskComputeAndDrawPath(carpooling.getDropoffPoint(),
+                travel.getDestination().getCoordinates(),
+                BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN),
+                BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)).execute();
 
-        new TaskComputeAndDrawPath().execute();
+        // calculate bounds
+        double northest = Math.max(travel.getOrigin().getCoordinates().latitude,
+                travel.getDestination().getCoordinates().latitude);
+        double southest = Math.min(travel.getOrigin().getCoordinates().latitude,
+                travel.getDestination().getCoordinates().latitude);
+        double westest = Math.max(travel.getOrigin().getCoordinates().longitude,
+                travel.getDestination().getCoordinates().longitude);
+        double eastest = Math.min(travel.getOrigin().getCoordinates().longitude,
+                travel.getDestination().getCoordinates().longitude);
+
+        northest = Math.max(northest,carpooling.getPickupPoint().latitude);
+        northest = Math.max(northest,carpooling.getDropoffPoint().latitude);
+
+        southest = Math.min(southest,carpooling.getPickupPoint().latitude);
+        southest = Math.min(southest,carpooling.getDropoffPoint().latitude);
+
+        westest = Math.max(westest,carpooling.getPickupPoint().longitude);
+        westest = Math.max(westest,carpooling.getDropoffPoint().longitude);
+
+        eastest = Math.min(eastest,carpooling.getPickupPoint().longitude);
+        eastest = Math.min(eastest,carpooling.getDropoffPoint().longitude);
+
+        double latMargin = Math.abs(northest - southest) * 0.2;
+        double longMargin = Math.abs(westest - eastest) * 0.2;
+
+        LatLngBounds mapBounds = new LatLngBounds( new LatLng(southest - latMargin, eastest - longMargin),
+                new LatLng(northest + latMargin, westest + longMargin));
+
+        // set the camera to the calculated bounds
+        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(mapBounds, 0));
+
     }
 
 
     /**
-     * inner class that computes and draws the path
+     * inner class that computes and draws one path
      */
     private class TaskComputeAndDrawPath extends AsyncTask<String, String,String> {
         private List<LatLng> pathPoints;
+        private LatLng origin, destination;
+        private BitmapDescriptor originIcon, destinationIcon;
+
+        public TaskComputeAndDrawPath(LatLng origin, LatLng destination, BitmapDescriptor originIcon, BitmapDescriptor destinationIcon) {
+            this.origin = origin;
+            this.destination = destination;
+            this.originIcon = originIcon;
+            this.destinationIcon = destinationIcon;
+        }
+
         protected String doInBackground(String... urls) {
             // calculate the path between the two points
-            Log.d(TAG_LOG, carpooling.getPassengerTravel().getOrigin().getCoordinates().toString());
-            Log.d(TAG_LOG, carpooling.getPickupPoint().toString());
 
             DirectionsService path = new DirectionsService();
-            path.setOrigin(carpooling.getPassengerTravel().getOrigin().getCoordinates());
-            path.setDestination(carpooling.getPickupPoint());
+            path.setOrigin(origin);
+            path.setDestination(destination);
             path.setMode("walking");
             path.computeDirections();
-            String encodedPoints = path.getEncodedPolyline();
             pathPoints = path.getPathPoints();
             return null;
         }
+
         protected void onPostExecute(String result) {
             // draw the path
             Polyline pathPolyline = mMap.addPolyline(new PolylineOptions());
             pathPolyline.setPoints(pathPoints);
+            pathPolyline.setColor(Color.GREEN);
 
-//            homeMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.driver_50));
+            mMap.addMarker(new MarkerOptions().position(origin).icon(originIcon));
+            mMap.addMarker(new MarkerOptions().position(destination).icon(destinationIcon));
         }
     }
 }
-
-

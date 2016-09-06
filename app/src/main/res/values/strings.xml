@@ -80,5 +80,8 @@
     <string name="serverUnavailableTitle">Serveur inaccessible</string>
     <string name="yourPossition">Vous êtes ici</string>
     <string name="title_activity_carpooling_details">Map</string>
+    <string name="requestCarpoolLabel">Demander covoiturage</string>
+    <string name="cancelRequestLabel">Annuler demande</string>
+    <string name="abortCarpoolingLabel">Annuler covoiturage</string>
     >>>>>>> 0d1dfedd8114708620bef33ee1a087165ca9a337
 </resources>

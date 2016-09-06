@@ -123,23 +123,29 @@ public class CarpoolingList extends TravelServiceConnectedActivity {
         }
     }
 
+    /**
+     * public getter for carpooling details fragment
+     * @return
+     */
+    public PassengerTravel getTravel() {
+        return myService.getTravel();
+    }
+
     /** Boutons de tests */
     public void requestCarpool(int position) {
         Log.d(TAG_LOG, "requestCarpool");
         myService.requestCarpool(myService.getCarpoolingPossibilities().get(position));
     }
 
-    /*
-    public void cancelRequest(View view) {
+    public void cancelRequest(int position) {
         Log.d(TAG_LOG, "cancelRequest");
-        myService.cancelRequest(possibilities.get(0));
+        myService.cancelRequest(myService.getCarpoolingPossibilities().get(position));
     }
 
-    public void abortCarpooling(View view) {
+    public void abortCarpooling(int position) {
         Log.d(TAG_LOG, "abortCarpooling");
-        myService.abortCarpooling(possibilities.get(0));
+        myService.abortCarpool(myService.getCarpoolingPossibilities().get(position));
     }
-    */
 
     /*
     ------------------------------------------------------------------------------------------------

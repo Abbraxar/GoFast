@@ -13,10 +13,13 @@ import android.widget.TextView;
 
 import com.i3cnam.gofast.R;
 import com.i3cnam.gofast.model.Carpooling;
+import com.i3cnam.gofast.model.PassengerTravel;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
+
+import systr.cartographie.Operations;
 
 /**
  * Created by Alix on 03/09/2016.
@@ -24,18 +27,21 @@ import java.util.List;
 public class CarpoolingPassengerArrayAdapter extends ArrayAdapter<Carpooling> {
     private List<Carpooling> carpoolings;
     private final static DateFormat formatDate = new SimpleDateFormat("HH:mm");
-    private final CarpoolingList context;
+    final CarpoolingList context;
 
-    public CarpoolingPassengerArrayAdapter(CarpoolingList context, int resource, List<Carpooling> carpoolings) {
+    public CarpoolingPassengerArrayAdapter(CarpoolingList context,
+                                           int resource,
+                                           List<Carpooling> carpoolings) {
         super(context, resource, carpoolings);
 
         this.carpoolings = carpoolings;
         this.context = context;
+
     }
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-        Log.d("WTF","getViewFunction");
+        Log.wtf("WTF","getViewFunction");
         LayoutInflater inflater = (LayoutInflater) getContext()
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View rowView = inflater.inflate(R.layout.list_item_carpooling_passenger, parent, false);
@@ -46,9 +52,13 @@ public class CarpoolingPassengerArrayAdapter extends ArrayAdapter<Carpooling> {
         TextView dropOffInfo = (TextView) rowView.findViewById(R.id.dropOffInfo);
         TextView pickupTime = (TextView) rowView.findViewById(R.id.pickupTime);
         TextView fare = (TextView) rowView.findViewById(R.id.fare);
+        TextView pickupDistance = (TextView) rowView.findViewById(R.id.pickupDistance);
+        TextView dropoffDistance = (TextView) rowView.findViewById(R.id.dropoffDistance);
 
         pickupTime.setText(formatDate.format(c.getPickupTime()));
         fare.setText("€ " + c.getFare());
+        pickupDistance.setText((int) Operations.dist2PointsEnM(context.getTravel().getOrigin().getCoordinates(),c.getPickupPoint()) + " m");
+        dropoffDistance.setText((int) Operations.dist2PointsEnM(context.getTravel().getDestination().getCoordinates(),c.getDropoffPoint()) + " m");
 
         new TryToCompletePlaceName(null,
                 pickupInfo,
@@ -64,13 +74,37 @@ public class CarpoolingPassengerArrayAdapter extends ArrayAdapter<Carpooling> {
         Button btRequest = (Button) rowView.findViewById(R.id.btRequest);
         Button btDetails = (Button) rowView.findViewById(R.id.btDetails);
 
-        btRequest.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View view) {
-                context.requestCarpool(position);
-            }
-        });
+        // following the carpooling, change the action button
+        // POTENTIAL : Action request
+        if (c.getState().equals(Carpooling.CarpoolingState.POTENTIAL)) {
+            btRequest.setText(R.string.requestCarpoolLabel);
+            btRequest.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    context.requestCarpool(position);
+                }
+            });
+        }
+        // IN_DEMAND : Action cancel request
+        if (c.getState().equals(Carpooling.CarpoolingState.IN_DEMAND)) {
+            btRequest.setText(R.string.cancelRequestLabel);
+            btRequest.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    context.cancelRequest(position);
+                }
+            });
+        }
+        // IN_PROGRESS : Action abort carpool
+        if (c.getState().equals(Carpooling.CarpoolingState.IN_DEMAND)) {
+            btRequest.setText(R.string.abortCarpoolingLabel);
+            btRequest.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    context.abortCarpooling(position);
+                }
+            });
+        }
 
         btDetails.setOnClickListener(new View.OnClickListener() {
 
@@ -80,8 +114,8 @@ public class CarpoolingPassengerArrayAdapter extends ArrayAdapter<Carpooling> {
 
                 Bundle serviceBundle = new Bundle();
                 serviceBundle.putSerializable(CarpoolingDetails.CARPOOLING, c);
+                serviceBundle.putSerializable(CarpoolingDetails.TRAVEL, context.getTravel());
                 intent.putExtras(serviceBundle);
-
                 context.startActivity(intent);
             }
         });

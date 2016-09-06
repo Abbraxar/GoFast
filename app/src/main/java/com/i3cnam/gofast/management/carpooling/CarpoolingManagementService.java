@@ -156,12 +156,22 @@ public class CarpoolingManagementService extends Service {
         new AsynchronousCancelRequest().execute();
     }
 
+
+    public void abortCarpool(Carpooling carpooling) {
+        carpoolingToCancel = carpooling;
+        new AsynchronousAbortCarpool().execute();
+    }
+
     public void abortTravel() {
         new AsynchronousAbortTravel().execute();
     }
 
     public List<Carpooling> getCarpoolingPossibilities() {
         return carpoolingPossibilities;
+    }
+
+    public PassengerTravel getTravel() {
+        return passengerTravel;
     }
 
     /*
@@ -212,7 +222,6 @@ public class CarpoolingManagementService extends Service {
                     }
 
                     // do the query
-                    serverCom.observeCarpoolTravel(passengerTravel);
                     lastList = serverCom.getCarpoolTravelState(passengerTravel);
                     // compare results
                     if (searchStateChanges()) {
@@ -276,6 +285,18 @@ public class CarpoolingManagementService extends Service {
 
     /**
      * Abort a carpool in a new thread
+     */
+    private class AsynchronousAbortCarpool extends AsyncTask<String, String,String> {
+        protected String doInBackground(String... urls) {
+            Log.d(TAG_LOG, "Carpool aborted");
+            Log.d(TAG_LOG, passengerTravel.getParametersString());
+            serverCom.abortCarpool(carpoolingToAbort);
+            return null;
+        }
+    }
+
+    /**
+     * Abort a travel in a new thread
      */
     private class AsynchronousAbortTravel extends AsyncTask<String, String,String> {
         protected String doInBackground(String... urls) {

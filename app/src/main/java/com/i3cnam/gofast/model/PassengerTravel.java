@@ -57,6 +57,17 @@ public class PassengerTravel implements Serializable{
         this.radius = radius;
     }
 
+    @Override
+    public String toString() {
+        return "PassengerTravel{" +
+                "id=" + id +
+                ", passenger=" + passenger +
+                ", origin=" + origin +
+                ", destination=" + destination +
+                ", radius=" + radius +
+                '}';
+    }
+
     public String getParametersString() {
         String returnString = "passenger=" + getPassenger().getNickname();
         returnString += "&origin=";
