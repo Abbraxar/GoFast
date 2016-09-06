@@ -1,11 +1,13 @@
 package com.i3cnam.gofast.views;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v4.content.ContextCompat;
+import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -15,23 +17,24 @@ import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.i3cnam.gofast.R;
 import com.i3cnam.gofast.geo.DirectionsService;
 import com.i3cnam.gofast.model.Carpooling;
-import com.i3cnam.gofast.model.DriverCourse;
 import com.i3cnam.gofast.model.PassengerTravel;
-import com.i3cnam.gofast.views.abstractViews.CourseServiceConnectedActivity;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 public class CarpoolingDetails extends FragmentActivity implements OnMapReadyCallback {
     public static final String CARPOOLING = "com.i3cnam.gofast.CARPOOLING";
     public static final String TRAVEL = "com.i3cnam.gofast.TRAVEL";
     private static final String TAG_LOG = "CarpoolingDetails";
+    private final static DateFormat formatDate = new SimpleDateFormat("HH:mm");
+    private Context context = this;
     private GoogleMap mMap;
     private Carpooling carpooling;
     private PassengerTravel travel;
@@ -55,8 +58,39 @@ public class CarpoolingDetails extends FragmentActivity implements OnMapReadyCal
         Bundle bundle = intent.getExtras();
         carpooling = (Carpooling)(bundle.getSerializable(CARPOOLING));
         travel = (PassengerTravel) (bundle.getSerializable(TRAVEL));
+
+        updateCarpoolingDetails();
     }
 
+    private void updateCarpoolingDetails() {
+        TextView pickupDistance = (TextView) findViewById(R.id.pickupDistance);
+        TextView dropoffDistance = (TextView) findViewById(R.id.dropoffDistance);
+        TextView pickupTime = (TextView) findViewById(R.id.pickupTime);
+        TextView fare = (TextView) findViewById(R.id.fare);
+        TextView state = (TextView) findViewById(R.id.state);
+
+        pickupTime.setText(formatDate.format(carpooling.getPickupTime()));
+        fare.setText("€ " + carpooling.getFare());
+        switch(carpooling.getState().name()) {
+            case "POTENTIAL" :
+                state.setText("Disponible");
+                state.setTextColor(ContextCompat.getColor(this, R.color.colorPotential));
+                break;
+            case "IN_DEMAND" :
+                state.setText("Demandé");
+                state.setTextColor(ContextCompat.getColor(this, R.color.colorRequested));
+                break;
+            case "IN_PROGRESS" :
+                state.setText("Accepté / En cours");
+                state.setTextColor(ContextCompat.getColor(this, R.color.colorAccepted));
+                break;
+            case "REFUSED" :
+                state.setText("Refusé");
+                state.setTextColor(ContextCompat.getColor(this, R.color.colorRefused));
+                break;
+        }
+
+    }
 
     /**
      * Manipulates the map once available.
@@ -75,11 +109,13 @@ public class CarpoolingDetails extends FragmentActivity implements OnMapReadyCal
         new TaskComputeAndDrawPath(travel.getOrigin().getCoordinates(),
                 carpooling.getPickupPoint(),
                 BitmapDescriptorFactory.fromResource(R.drawable.walking),
-                BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)).execute();
+                BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN),
+                (TextView) findViewById(R.id.pickupDistance)).execute();
         new TaskComputeAndDrawPath(carpooling.getDropoffPoint(),
                 travel.getDestination().getCoordinates(),
                 BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN),
-                BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)).execute();
+                BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED),
+                (TextView) findViewById(R.id.dropoffDistance)).execute();
 
         // calculate bounds
         double northest = Math.max(travel.getOrigin().getCoordinates().latitude,
@@ -112,6 +148,8 @@ public class CarpoolingDetails extends FragmentActivity implements OnMapReadyCal
         // set the camera to the calculated bounds
         mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(mapBounds, 0));
 
+
+
     }
 
 
@@ -119,37 +157,40 @@ public class CarpoolingDetails extends FragmentActivity implements OnMapReadyCal
      * inner class that computes and draws one path
      */
     private class TaskComputeAndDrawPath extends AsyncTask<String, String,String> {
-        private List<LatLng> pathPoints;
+        private DirectionsService path;
         private LatLng origin, destination;
         private BitmapDescriptor originIcon, destinationIcon;
+        private TextView distanceText;
 
-        public TaskComputeAndDrawPath(LatLng origin, LatLng destination, BitmapDescriptor originIcon, BitmapDescriptor destinationIcon) {
+        public TaskComputeAndDrawPath(LatLng origin, LatLng destination, BitmapDescriptor originIcon, BitmapDescriptor destinationIcon, TextView distanceText) {
             this.origin = origin;
             this.destination = destination;
             this.originIcon = originIcon;
             this.destinationIcon = destinationIcon;
+            this.distanceText = distanceText;
         }
 
         protected String doInBackground(String... urls) {
             // calculate the path between the two points
 
-            DirectionsService path = new DirectionsService();
+            path = new DirectionsService();
             path.setOrigin(origin);
             path.setDestination(destination);
             path.setMode("walking");
             path.computeDirections();
-            pathPoints = path.getPathPoints();
             return null;
         }
 
         protected void onPostExecute(String result) {
             // draw the path
             Polyline pathPolyline = mMap.addPolyline(new PolylineOptions());
-            pathPolyline.setPoints(pathPoints);
-            pathPolyline.setColor(Color.GREEN);
+            pathPolyline.setPoints(path.getPathPoints());
+            pathPolyline.setColor(ContextCompat.getColor(context, R.color.walkingRoute));
 
             mMap.addMarker(new MarkerOptions().position(origin).icon(originIcon));
             mMap.addMarker(new MarkerOptions().position(destination).icon(destinationIcon));
+
+            distanceText.setText(path.getDistance() + " m");
         }
     }
 }

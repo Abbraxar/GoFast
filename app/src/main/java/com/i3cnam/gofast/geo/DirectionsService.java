@@ -219,6 +219,21 @@ public class DirectionsService {
             return PolyUtil.decode(getEncodedPolyline());
     }
 
+    public Integer getDistance() {
+        try {
+            JSONArray routesJsonArray = resultJson.getJSONArray("routes");
+            JSONArray legsJsonArray = routesJsonArray.getJSONObject(0).getJSONArray("legs");
+            JSONObject distanceJsonObj = legsJsonArray.getJSONObject(0).getJSONObject("distance");
+
+            return distanceJsonObj.getInt("value");
+        }
+        catch (JSONException e) {
+            Log.e(LOG_TAG, "Cannot process JSON results", e);
+            return null;
+        }
+    }
+
+
     /**
      * static call of directions api
      * @param destination destination Place

@@ -2,7 +2,9 @@ package com.i3cnam.gofast.views;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -74,7 +76,36 @@ public class CarpoolingPassengerArrayAdapter extends ArrayAdapter<Carpooling> {
         Button btRequest = (Button) rowView.findViewById(R.id.btRequest);
         Button btDetails = (Button) rowView.findViewById(R.id.btDetails);
 
-        // following the carpooling, change the action button
+
+        // following the carpooling, change the background color ***********************************
+        // POTENTIAL :
+        if (c.getState().equals(Carpooling.CarpoolingState.POTENTIAL)) {
+            rowView.setBackgroundColor(ContextCompat.getColor(context, R.color.colorPotential));
+            btDetails.setBackgroundColor(ContextCompat.getColor(context, R.color.colorPotential));
+            btRequest.setBackgroundColor(ContextCompat.getColor(context, R.color.colorRequested));
+        }
+        // IN_DEMAND
+        else if (c.getState().equals(Carpooling.CarpoolingState.IN_DEMAND)) {
+            rowView.setBackgroundColor(ContextCompat.getColor(context, R.color.colorRequested));
+            btDetails.setBackgroundColor(ContextCompat.getColor(context, R.color.colorRequested));
+            btRequest.setBackgroundColor(ContextCompat.getColor(context, R.color.colorPotential));
+        }
+        // IN_PROGRESS
+        else if (c.getState().equals(Carpooling.CarpoolingState.IN_PROGRESS)) {
+            rowView.setBackgroundColor(ContextCompat.getColor(context, R.color.colorAccepted));
+            btDetails.setBackgroundColor(ContextCompat.getColor(context, R.color.colorAccepted));
+            btRequest.setBackgroundColor(ContextCompat.getColor(context, R.color.colorRefused));
+        }
+        // REFUSED
+        else if (c.getState().equals(Carpooling.CarpoolingState.REFUSED)) {
+            rowView.setBackgroundColor(ContextCompat.getColor(context, R.color.colorRefused));
+            btRequest.setVisibility(View.INVISIBLE);
+            btDetails.setBackgroundColor(ContextCompat.getColor(context, R.color.colorRefused));
+        }
+
+
+
+        // following the carpooling, change the action button **************************************
         // POTENTIAL : Action request
         if (c.getState().equals(Carpooling.CarpoolingState.POTENTIAL)) {
             btRequest.setText(R.string.requestCarpoolLabel);
@@ -86,7 +117,7 @@ public class CarpoolingPassengerArrayAdapter extends ArrayAdapter<Carpooling> {
             });
         }
         // IN_DEMAND : Action cancel request
-        if (c.getState().equals(Carpooling.CarpoolingState.IN_DEMAND)) {
+        else if (c.getState().equals(Carpooling.CarpoolingState.IN_DEMAND)) {
             btRequest.setText(R.string.cancelRequestLabel);
             btRequest.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -96,7 +127,7 @@ public class CarpoolingPassengerArrayAdapter extends ArrayAdapter<Carpooling> {
             });
         }
         // IN_PROGRESS : Action abort carpool
-        if (c.getState().equals(Carpooling.CarpoolingState.IN_DEMAND)) {
+        else if (c.getState().equals(Carpooling.CarpoolingState.IN_DEMAND)) {
             btRequest.setText(R.string.abortCarpoolingLabel);
             btRequest.setOnClickListener(new View.OnClickListener() {
                 @Override

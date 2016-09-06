@@ -8,7 +8,139 @@
     tools:context=".views.CarpoolingDetails" >
 
 
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="600px"
+        android:layout_height="wrap_content"
+        android:id="@+id/carpoolingDetailsLayout"
+        android:layout_gravity="top|right"
+        android:background="#99000000">
 
+        <!-- Pick up ***** -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="@string/pickupLabel"
+            android:id="@+id/pickupLabel"
+            android:textColor="@color/colorAccentLight"
+            android:textStyle="bold"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="3px"
+            android:layout_marginLeft="10px" />
+
+        <!-- Distance ***** -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="à 420m"
+            android:id="@+id/pickupDistance"
+            android:layout_alignParentTop="true"
+            android:layout_toEndOf="@+id/pickupLabel"
+            android:layout_marginTop="3px"
+            android:textStyle="bold"
+            android:textColor="#ffffffff"
+            android:layout_marginLeft="10px" />
+
+        <!-- Time Label ***** -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="@string/timeLabel"
+            android:id="@+id/timeLabel"
+            android:textColor="@color/colorAccentLight"
+            android:textStyle="bold"
+            android:layout_alignParentTop="true"
+            android:layout_toStartOf="@+id/pickupTime"
+            android:layout_marginRight="10px"
+            android:layout_marginTop="3px" />
+
+        <!-- Time ***** -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="00:00"
+            android:id="@+id/pickupTime"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:textColor="#ffffffff"
+            android:textStyle="bold"
+            android:layout_marginRight="10px" />
+
+        <!-- Drop off ***** -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="@string/dropoffLabel"
+            android:id="@+id/dropoffLabel"
+            android:layout_below="@+id/pickupLabel"
+            android:layout_alignParentStart="true"
+            android:textColor="@color/colorAccentLight"
+            android:textStyle="bold"
+            android:layout_marginLeft="10px"
+            android:layout_marginTop="10px" />
+
+        <!-- Distance ***** -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="à 250 m"
+            android:id="@+id/dropoffDistance"
+            android:layout_alignTop="@+id/dropoffLabel"
+            android:layout_toEndOf="@+id/dropoffLabel"
+            android:textStyle="bold"
+            android:textColor="#ffffffff"
+            android:layout_marginLeft="10px" />
+
+        <!-- Fare ***** -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="@string/fareLabel"
+            android:id="@+id/fareLabel"
+            android:textColor="@color/colorAccentLight"
+            android:textStyle="bold"
+            android:layout_below="@+id/pickupLabel"
+            android:layout_toStartOf="@+id/fare"
+            android:layout_marginRight="10px"
+            android:layout_marginBottom="3px" />
+
+        <!-- Amount ***** -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="€ 3.50"
+            android:id="@+id/fare"
+            android:textStyle="bold"
+            android:textColor="#ffffffff"
+            android:layout_marginRight="10px"
+            android:layout_below="@+id/pickupLabel"
+            android:layout_alignParentEnd="true" />
+
+
+        <!-- State ***** -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Disponible"
+            android:id="@+id/state"
+            android:textStyle="bold"
+            android:textColor="#ffffffff"
+            android:layout_below="@+id/dropoffLabel"
+            android:layout_margin="20px"
+            android:layout_centerHorizontal="true" />
+
+
+
+    </RelativeLayout>
 
 
     <ImageView
@@ -29,7 +161,7 @@
         android:id="@+id/close"
         android:contextClickable="false"
         android:clickable="true"
-        android:src="android:@drawable/ic_dialog_info"
+        android:src="@android:drawable/ic_dialog_info"
         android:layout_gravity="top|left"
         android:layout_margin="10dp"
         android:onClick="back" />
@@ -41,18 +173,11 @@
         android:id="@+id/info"
         android:contextClickable="false"
         android:clickable="true"
-        android:src="android:@drawable/ic_back"
+        android:src="@android:drawable/ic_dialog_info"
         android:layout_gravity="bottom|left"
         android:layout_margin="10dp"
         android:onClick="info" />
 
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="match_parent"
-        android:layout_height="400px"
-        android:background="#99000000">
-
-
-    </RelativeLayout>
 
 
 </fragment>
