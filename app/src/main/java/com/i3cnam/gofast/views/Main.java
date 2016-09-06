@@ -39,11 +39,12 @@ public class Main extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         // FOR TEST
+        /*
         SharedPreferences prefs = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString("last_activity", CarpoolingList.class.getName());
         editor.commit();
-
+*/
 
         // check permissions
         checkAndRequestPermissions();

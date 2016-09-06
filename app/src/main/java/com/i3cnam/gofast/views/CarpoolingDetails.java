@@ -39,10 +39,6 @@ public class CarpoolingDetails extends FragmentActivity implements OnMapReadyCal
     private Carpooling carpooling;
     private PassengerTravel travel;
     // maps bounds
-    double northest;
-    double southest;
-    double westest;
-    double eastest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
