@@ -402,7 +402,7 @@ public class Communication implements CommInterface {
             }
 
         } catch (JSONException e) {
-            Log.e(LOG_TAG, "Cannot process JSON results", e);
+            Log.d(LOG_TAG, "Parse problem means that we don't have received a course object");
         }
         return driverCourse;
     }
@@ -457,7 +457,7 @@ public class Communication implements CommInterface {
             passengerTravel.setRadius(jsonObject.getInt("radius"));
 
         } catch (JSONException e) {
-            Log.e(LOG_TAG, "Cannot process JSON results", e);
+            Log.d(LOG_TAG, "Parse problem means that we don't have received a travel object");
         }
         return passengerTravel;
     }

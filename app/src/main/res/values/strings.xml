@@ -83,5 +83,7 @@
     <string name="requestCarpoolLabel">Demander covoiturage</string>
     <string name="cancelRequestLabel">Annuler demande</string>
     <string name="abortCarpoolingLabel">Annuler covoiturage</string>
+    <string name="emptyCarpoolingsList">Il n\'y a pas de covoiturage disponible pour votre déplacement.</string>
+    <string name="radiusLabel">Je peux marcher jusqu\'à</string>
     >>>>>>> 0d1dfedd8114708620bef33ee1a087165ca9a337
 </resources>

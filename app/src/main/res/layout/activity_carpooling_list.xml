@@ -1,7 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal">
+
 <ListView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/carpoolsListView"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
 </ListView>
+
+<TextView
+    android:id="@+id/empty"
+    android:textAppearance="?android:attr/textAppearanceLarge"
+    android:text="@string/emptyCarpoolingsList"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:gravity="center"
+    android:layout_margin="20px"/>
+
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/refresh"
+        android:contextClickable="false"
+        android:clickable="true"
+        android:src="@drawable/refresh_75"
+        android:layout_gravity="bottom"
+        android:layout_margin="10dp"
+        android:onClick="info" />
+
+</LinearLayout>

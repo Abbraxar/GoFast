@@ -7,6 +7,8 @@ import android.os.AsyncTask;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -59,11 +61,15 @@ public class CarpoolingDetails extends FragmentActivity implements OnMapReadyCal
     }
 
     private void updateCarpoolingDetails() {
-        TextView pickupDistance = (TextView) findViewById(R.id.pickupDistance);
-        TextView dropoffDistance = (TextView) findViewById(R.id.dropoffDistance);
         TextView pickupTime = (TextView) findViewById(R.id.pickupTime);
         TextView fare = (TextView) findViewById(R.id.fare);
         TextView state = (TextView) findViewById(R.id.state);
+
+        // buttons
+        ImageView actionRequestImg = (ImageView) findViewById(R.id.btRequest);
+        ImageView actionCancelImg = (ImageView) findViewById(R.id.btCancelRequest);
+        actionRequestImg.setVisibility(View.INVISIBLE);
+        actionCancelImg.setVisibility(View.INVISIBLE);
 
         pickupTime.setText(formatDate.format(carpooling.getPickupTime()));
         fare.setText("€ " + carpooling.getFare());
@@ -71,10 +77,12 @@ public class CarpoolingDetails extends FragmentActivity implements OnMapReadyCal
             case "POTENTIAL" :
                 state.setText("Disponible");
                 state.setTextColor(ContextCompat.getColor(this, R.color.colorPotential));
+                actionRequestImg.setVisibility(View.INVISIBLE);
                 break;
             case "IN_DEMAND" :
                 state.setText("Demandé");
                 state.setTextColor(ContextCompat.getColor(this, R.color.colorRequested));
+                actionCancelImg.setVisibility(View.INVISIBLE);
                 break;
             case "IN_PROGRESS" :
                 state.setText("Accepté / En cours");

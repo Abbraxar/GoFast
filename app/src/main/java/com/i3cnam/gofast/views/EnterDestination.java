@@ -30,6 +30,7 @@ public class EnterDestination extends Activity implements OnItemClickListener {
     private GooglePlacesAutocompleteAdapter autocompleteAdapter;
     private Place selectedPlace;
     private String userType;
+    private NumberPicker radius;
 
     private final static String TAG_LOG = "EnterDestination view";
 
@@ -42,15 +43,17 @@ public class EnterDestination extends Activity implements OnItemClickListener {
 
         setContentView(R.layout.activity_enter_destination);
 
-        NumberPicker np;
-        np = (NumberPicker) findViewById(R.id.radius);
         // only show radius selector to the pedestrian
-        if (userType.equals("driver")) {
-            String[] values = {"100","200","300","400","500","600","700","800","900","1000"};
-            np.setDisplayedValues(values);
-            np.setVisibility(View.INVISIBLE);
+        if (userType.equals("passenger")) {
+            radius = (NumberPicker) findViewById(R.id.radius);
+            radius.setVisibility(View.VISIBLE);
+            radius.setMinValue(1);
+            radius.setMaxValue(10);
+            radius.setWrapSelectorWheel(true);
+            String[] values = {"100", "200", "300", "400", "500", "600", "700", "800", "900", "1000"};
+            radius.setDisplayedValues(values);
+            radius.setValue(5);
         }
-        np.setWrapSelectorWheel(false);
 
         AutoCompleteTextView autoCompView = (AutoCompleteTextView) findViewById(R.id.autoCompleteTextView);
 
@@ -91,8 +94,9 @@ public class EnterDestination extends Activity implements OnItemClickListener {
         bundle.putSerializable(DESTINATION, selectedPlace);
         intent.putExtras(bundle);
         intent.putExtra(Main.USER_TYPE, userType);
-//        intent.putExtra(RADIUS, Integer.parseInt(((NumberPicker) findViewById(R.id.radius)).getValue());
-        intent.putExtra(RADIUS, 500);
+        if (userType.equals("passenger")) {
+            intent.putExtra(RADIUS, radius.getValue() * 100);
+        }
 
         startActivity(intent);
 

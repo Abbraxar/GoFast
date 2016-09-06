@@ -146,13 +146,25 @@
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/hitchingImg"
+        android:id="@+id/btRequest"
         android:contextClickable="false"
         android:clickable="true"
         android:src="@drawable/carpooling_request"
         android:layout_gravity="bottom|right"
         android:layout_margin="10dp"
         android:onClick="requestCarpool" />
+
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/btCancelRequest"
+        android:contextClickable="false"
+        android:clickable="true"
+        android:src="@drawable/carpooling_request"
+        android:layout_gravity="bottom|right"
+        android:layout_margin="10dp"
+        android:onClick="cancelRequest" />
 
 
     <ImageView

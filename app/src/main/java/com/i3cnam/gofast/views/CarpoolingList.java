@@ -12,6 +12,7 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.View;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -105,6 +106,16 @@ public class CarpoolingList extends TravelServiceConnectedActivity {
                 .setNegativeButton(R.string.no, null)
                 .show();
     }
+
+    @Override
+    public void onContentChanged() {
+        super.onContentChanged();
+
+        View empty = findViewById(R.id.empty);
+        ListView list = (ListView) findViewById(R.id.carpoolsListView);
+        list.setEmptyView(empty);
+    }
+
 
     /*
      * Preparing the list data
