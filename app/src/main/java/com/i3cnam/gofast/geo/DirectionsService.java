@@ -30,6 +30,7 @@ public class DirectionsService {
     private boolean alternatives; // when alternatives is true, multiple results can be returned
     private Place origin = null; // if origin is null, the device position is used
     private Place destination = null; // mandatory
+    private LatLng destinationCoordinates = null; // mandatory
     private String mode = "driving"; // Specifies the mode of transport to use when calculating directions (driving, walking bicycling)
     private List<LatLng> waypoints = null; // Specifies an array of waypoints. Waypoints alter a route by routing it through the specified location(s)
 
@@ -53,6 +54,10 @@ public class DirectionsService {
 
     public void setDestination(Place destination) {
         this.destination = destination;
+    }
+
+    public void setDestination(LatLng destinationCoordinates) {
+        this.destinationCoordinates = destinationCoordinates;
     }
 
     public void unsetOrigin() {
@@ -107,14 +112,18 @@ public class DirectionsService {
     }
 
     private String DestinationString() {
-        if (destination.getPlaceId() != null) {
-            return "&destination=place_id:" + destination.getPlaceId();
+        if (destination != null) {
+            if (destination.getPlaceId() != null) {
+                return "&destination=place_id:" + destination.getPlaceId();
+            } else if (destination.getCoordinates() != null) {
+                return "&destination=" + Double.toString(destination.getCoordinates().latitude) + ","
+                        + Double.toString(destination.getCoordinates().longitude);
+            } else return "&destination=" + destination.getPlaceName();
         }
-        else if (destination.getCoordinates() != null) {
-            return "&destination=" +  Double.toString(destination.getCoordinates().latitude) + ","
-                    + Double.toString(destination.getCoordinates().longitude);
+        else {
+            return "&destination=" + Double.toString(destinationCoordinates.latitude) + ","
+                    + Double.toString(destinationCoordinates.longitude);
         }
-        else return "&destination=" + destination.getPlaceName();
     }
 
     private String ModeString() {

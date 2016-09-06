@@ -16,6 +16,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -485,6 +486,8 @@ public class Communication implements CommInterface {
 
         } catch (MalformedURLException e) {
             Log.e(LOG_TAG, "Error processing URL", e);
+        } catch (java.net.ConnectException e) {
+            Log.e(LOG_TAG, "Connection to server failed", e);
         } catch (IOException e) {
             Log.e(LOG_TAG, "Error connecting to API", e);
         } finally {
@@ -494,7 +497,44 @@ public class Communication implements CommInterface {
         }
 
         return jsonResults.toString();
+    }
 
+
+    /**
+     * Connects to the server, makes the request with the string passed in parameter and returns the response
+     * @param serviceString the request
+     * @return the response
+     */
+    private static String useService2(String serviceString) throws ConnectException {
+        HttpURLConnection conn = null;
+        StringBuilder jsonResults = new StringBuilder();
+        try {
+            Log.d(LOG_TAG, serviceString);
+            URL url = new URL(serviceString);
+            conn = (HttpURLConnection) url.openConnection();
+            InputStreamReader in = new InputStreamReader(conn.getInputStream());
+
+            // Load the results into a StringBuilder
+            int read;
+            char[] buff = new char[1024];
+            while ((read = in.read(buff)) != -1) {
+                jsonResults.append(buff, 0, read);
+            }
+
+        } catch (MalformedURLException e) {
+            Log.e(LOG_TAG, "Error processing URL", e);
+        } catch (java.net.ConnectException e) {
+            Log.e(LOG_TAG, "Connection to server failed");
+            throw e;
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Error connecting to API", e);
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+
+        return jsonResults.toString();
     }
 
 
@@ -561,7 +601,7 @@ public class Communication implements CommInterface {
 
 
     @Override
-    public String declareUser(User user) {
+    public String declareUser(User user) throws ConnectException {
         // the return variable
         String returnStatus = "";
         // prepare the string for the request
@@ -569,7 +609,7 @@ public class Communication implements CommInterface {
         url += "?nickname=" + user.getNickname() + "&phone_number=" + user.getPhoneNumber();
 
         // call the service and obtain a response
-        String rawJSON = useService(url);
+        String rawJSON = useService2(url);
 
         try {
             // Create a JSON object hierarchy from the results
@@ -588,7 +628,7 @@ public class Communication implements CommInterface {
     }
 
     @Override
-    public String retrieveAccount(String phoneNumber) {
+    public String retrieveAccount(String phoneNumber) throws ConnectException {
         // the return variable
         String returnNickname = null;
         // prepare the string for the request
@@ -596,7 +636,7 @@ public class Communication implements CommInterface {
         url += "?phone_number=" + phoneNumber;
 
         // call the service and obtain a response
-        String rawJSON = useService(url);
+        String rawJSON = useService2(url);
 
         try {
             // Create a JSON object hierarchy from the results

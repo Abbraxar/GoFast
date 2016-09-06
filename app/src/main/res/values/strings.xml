@@ -52,7 +52,7 @@
     <string name="fareLabel">Tarif</string>
     <string name="timeLabel">Heure</string>
     <string name="passengerLabel">Passager</string>
-=======
+    =======
 
     <string name="general_foreground_notification_title_template">General foreground: %1$s</string>
 
@@ -77,5 +77,8 @@
         viverra rhoncus sit amet nec magna. Donec lacinia ligula at libero volutpat volutpat nec nec
         tortor.
     </string>
->>>>>>> 0d1dfedd8114708620bef33ee1a087165ca9a337
+    <string name="serverUnavailableTitle">Serveur inaccessible</string>
+    <string name="yourPossition">Vous êtes ici</string>
+    <string name="title_activity_carpooling_details">Map</string>
+    >>>>>>> 0d1dfedd8114708620bef33ee1a087165ca9a337
 </resources>

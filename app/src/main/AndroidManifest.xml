@@ -57,6 +57,9 @@
             android:exported="true" />
 
         <activity android:name=".views.ConfigureAccount" />
+        <activity
+            android:name=".views.CarpoolingDetails"
+            android:label="@string/title_activity_carpooling_details"></activity>
     </application>
 
 </manifest>

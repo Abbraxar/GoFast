@@ -41,7 +41,13 @@ public class CourseManagementService extends Service {
     private DriverCourse driverCourse;
     private List<Carpooling> requestedCarpoolings = new ArrayList<>();
 
-    // test for broadcast
+    // for state storage
+    List<Integer> requestedCarpoolsIndexes = new ArrayList<>();
+    List<Integer> acceptedCarpoolsIndexes = new ArrayList<>();
+    List<Integer> conflictCarpoolsIndexes = new ArrayList<>();
+    List<Integer> achievedCarpoolsIndexes = new ArrayList<>();
+
+    // for broadcast
     public static final String BROADCAST_INIT_COURSE_ACTION = "com.i3cnam.gofast.INIT_COURSE";
     public static final String BROADCAST_UPDATE_COURSE_ACTION = "com.i3cnam.gofast.UPDATE_COURSE";
     public static final String BROADCAST_UPDATE_CARPOOLING_ACTION = "com.i3cnam.gofast.UPDATE_CARPOOLING";
@@ -98,8 +104,6 @@ public class CourseManagementService extends Service {
             myCourseObserver = (new ObserveCourse());
             new Thread(myCourseObserver).start();
 
-            // start the navigation listener
-            navGPS = new GPSForNavigation(this);
         }
         else {
             // broadcast course init to the activity
@@ -211,6 +215,9 @@ public class CourseManagementService extends Service {
     private void sendCourseInit() {
         Log.d(TAG_LOG, "entered sendCourseInit");
 
+        // start the navigation listener
+        navGPS = new GPSForNavigation(this);
+
         sendBroadcast(broadcastInitIntent);
     }
 
@@ -223,8 +230,39 @@ public class CourseManagementService extends Service {
         for (Carpooling c : requestedCarpoolings) {
             Log.d(TAG_LOG, "carpool id : " + c.getId());
             if (c.getState().equals(Carpooling.CarpoolingState.IN_DEMAND)) {
-                Log.d(TAG_LOG, "send notification");
-                new NewRequestNotification().notify(this, "salut", 1);
+                // if it is a new demand
+                if (!requestedCarpoolsIndexes.contains(c.getId())) {
+                    Log.d(TAG_LOG, "send notification");
+                    new NewRequestNotification().notify(this, c.getPickupPoint().toString(), c.getId(), 1);
+                    // and add it to the indexes
+                    requestedCarpoolsIndexes.add(c.getId());
+                }
+            }
+            if (c.getState().equals(Carpooling.CarpoolingState.IN_PROGRESS)) {
+                // if it is a new acceptation
+                if (!acceptedCarpoolsIndexes.contains(c.getId())) {
+                    Log.d(TAG_LOG, "acquit notification");
+                    new NewRequestNotification().cancel(this, c.getId());
+                    // and add it to the indexes
+                    acceptedCarpoolsIndexes.add(c.getId());
+                    if (!requestedCarpoolsIndexes.contains(c.getId())) {
+                        if (!requestedCarpoolsIndexes.contains(c.getId())) {
+                            requestedCarpoolsIndexes.remove((Integer)c.getId());
+                        }
+                    }
+                }
+            }
+            if (c.getState().equals(Carpooling.CarpoolingState.CONFLICT)) {
+                // if it is a new abort
+                if (!conflictCarpoolsIndexes.contains(c.getId())) {
+                    Log.d(TAG_LOG, "show notification");
+                    new NewRequestNotification().notify(this, c.getPickupPoint().toString(), c.getId(), 1);
+                    // and add it to the indexes
+                    conflictCarpoolsIndexes.add(c.getId());
+                    if (!acceptedCarpoolsIndexes.contains(c.getId())) {
+                        acceptedCarpoolsIndexes.remove((Integer)c.getId());
+                    }
+                }
             }
         }
         sendBroadcast(broadcastCarpoolingIntent);

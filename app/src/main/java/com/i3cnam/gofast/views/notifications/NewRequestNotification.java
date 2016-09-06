@@ -12,6 +12,7 @@ import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 
 import com.i3cnam.gofast.R;
+import com.i3cnam.gofast.views.Main;
 
 /**
  * Helper class for showing and canceling new request
@@ -39,10 +40,11 @@ public class NewRequestNotification {
      * <a href="https://developer.android.com/design/patterns/notifications.html">
      * Notification design guidelines</a> when doing so.
      *
-     * @see #cancel(Context)
+     * @see #cancel(Context, int)
      */
     public static void notify(final Context context,
                               final String exampleString,
+                              final int carpoolingId,
                               final int number) {
         final Resources res = context.getResources();
 
@@ -64,7 +66,7 @@ public class NewRequestNotification {
 
                 // Set required fields, including the small icon, the
                 // notification title, and text.
-                .setSmallIcon(R.drawable.carpool_request_n)
+                .setSmallIcon(R.drawable.carpool_request_d)
                 .setContentTitle(title)
                 .setContentText(text)
 
@@ -108,7 +110,7 @@ public class NewRequestNotification {
                         PendingIntent.getActivity(
                                 context,
                                 0,
-                                new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.google.com")),
+                                new Intent(context, Main.class),
                                 PendingIntent.FLAG_UPDATE_CURRENT))
 
                 // Example additional actions for this notification. These will
@@ -133,35 +135,42 @@ public class NewRequestNotification {
                         null)
 
                 // Automatically dismiss the notification when it is touched.
-                .setAutoCancel(true);
 */
-        ;
-        notify(context, builder.build());
+                .setAutoCancel(true);
+        notify(context, builder.build(), carpoolingId);
     }
 
     @TargetApi(Build.VERSION_CODES.ECLAIR)
-    private static void notify(final Context context, final Notification notification) {
+    private static void notify(final Context context,
+                               final Notification notification,
+                               final int carpoolingId) {
         final NotificationManager nm = (NotificationManager) context
                 .getSystemService(Context.NOTIFICATION_SERVICE);
+        /*
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ECLAIR) {
             nm.notify(NOTIFICATION_TAG, 0, notification);
         } else {
             nm.notify(NOTIFICATION_TAG.hashCode(), notification);
         }
+        */
+        nm.notify(1000 + carpoolingId, notification);
     }
 
     /**
      * Cancels any notifications of this type previously shown using
-     * {@link #notify(Context, String, int)}.
+     * {@link #notify(Context, String, int, int)}.
      */
     @TargetApi(Build.VERSION_CODES.ECLAIR)
-    public static void cancel(final Context context) {
+    public static void cancel(final Context context, int carpoolingId) {
         final NotificationManager nm = (NotificationManager) context
                 .getSystemService(Context.NOTIFICATION_SERVICE);
+        /*
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ECLAIR) {
             nm.cancel(NOTIFICATION_TAG, 0);
         } else {
             nm.cancel(NOTIFICATION_TAG.hashCode());
         }
+        */
+        nm.cancel(1000 + carpoolingId);
     }
 }

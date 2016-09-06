@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
@@ -17,11 +18,14 @@ import com.i3cnam.gofast.communication.CommInterface;
 import com.i3cnam.gofast.communication.Communication;
 import com.i3cnam.gofast.model.User;
 
+import java.net.ConnectException;
+
 public class ConfigureAccount extends AppCompatActivity {
     private String mPhoneNumber;
     private boolean declareUser = true;
     private EditText nicknameEdit;
     private TextView foundMessage;
+    private EditText phoneNumberField;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,14 +35,14 @@ public class ConfigureAccount extends AppCompatActivity {
         TelephonyManager tMgr = (TelephonyManager)this.getSystemService(Context.TELEPHONY_SERVICE);
         mPhoneNumber = tMgr.getLine1Number();
         // get the telephone number field
-        EditText phoneNumberField = (EditText) findViewById(R.id.phoneNumberField);
+        phoneNumberField = (EditText) findViewById(R.id.phoneNumberField);
         // fill the telephone number field
         phoneNumberField.setText(mPhoneNumber);
         // get the nickname field
         nicknameEdit = (EditText) findViewById(R.id.editNickname);
         // get the message field
         foundMessage = (TextView) findViewById(R.id.foundMessage);
-        new TaskRetrieveAccount().execute();
+        new TaskRetrieveAccount(this).execute(mPhoneNumber);
     }
 
     public void recordUser(View view) {
@@ -47,10 +51,10 @@ public class ConfigureAccount extends AppCompatActivity {
         }
         else {
             if (declareUser) {
-                new TaskCreateAccount().execute(nicknameEdit.getText().toString(), mPhoneNumber);
+                new TaskCreateAccount(this).execute(nicknameEdit.getText().toString(), phoneNumberField.getText().toString());
             }
             else {
-                writeSharedPreferences(nicknameEdit.getText().toString(), mPhoneNumber);
+                writeSharedPreferences(nicknameEdit.getText().toString(), phoneNumberField.getText().toString());
             }
         }
     }
@@ -69,10 +73,22 @@ public class ConfigureAccount extends AppCompatActivity {
     }
 
     private class TaskRetrieveAccount extends AsyncTask<String, String,String> {
+        Context context;
+        boolean error = false;
+
+        public TaskRetrieveAccount(Context context) {
+            this.context = context;
+        }
+
         protected String doInBackground(String... urls) {
             // call the service to know is the phone number is already registered
             CommInterface comm = new Communication();
-            return comm.retrieveAccount(mPhoneNumber);
+            try {
+                return comm.retrieveAccount(mPhoneNumber);
+            } catch (ConnectException e) {
+                error = true;
+                return null;
+            }
         }
         protected void onPostExecute(String result) {
             if (result != null) {
@@ -87,18 +103,47 @@ public class ConfigureAccount extends AppCompatActivity {
             else {
                 declareUser = true;
             }
+            if (error) {
+                new AlertDialog.Builder(context)
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setTitle(R.string.serverUnavailableTitle)
+                        .setMessage(getString(R.string.serverUnavailable))
+                        .setPositiveButton(R.string.ok, null)
+                        .show();
+            }
         }
     }
 
     private class TaskCreateAccount extends AsyncTask<String, String,String> {
         private User declared;
+        Context context;
+        boolean error = false;
+
+        public TaskCreateAccount(Context context) {
+            this.context = context;
+        }
+
         protected String doInBackground(String... urls) {
             // call the service to know is the phone number is already registered
             CommInterface comm = new Communication();
             declared = new User(urls[0],urls[1]);
-            return comm.declareUser(declared);
+            try {
+                return comm.declareUser(declared);
+            } catch (ConnectException e) {
+                error = true ;
+                return null;
+            }
         }
         protected void onPostExecute(String result) {
+
+            if (error) {
+                new AlertDialog.Builder(context)
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setTitle(R.string.serverUnavailableTitle)
+                        .setMessage(getString(R.string.serverUnavailable))
+                        .setPositiveButton(R.string.ok, null)
+                        .show();
+            }
             switch (result) {
                 case "ok":
                     writeSharedPreferences(declared.getNickname(), declared.getPhoneNumber());

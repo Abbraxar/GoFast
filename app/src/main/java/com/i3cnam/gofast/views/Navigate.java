@@ -1,18 +1,12 @@
 package com.i3cnam.gofast.views;
 
-import android.app.Fragment;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,6 +29,7 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.android.PolyUtil;
 import com.i3cnam.gofast.R;
+import com.i3cnam.gofast.geo.LocationService;
 import com.i3cnam.gofast.management.course.CourseManagementService;
 import com.i3cnam.gofast.model.Carpooling;
 import com.i3cnam.gofast.model.DriverCourse;
@@ -68,9 +63,9 @@ public class Navigate extends CourseServiceConnectedActivity implements OnMapRea
 
     Carpooling newRequestedCarpool;
 
-    List<Integer> acceptedCarpools = new ArrayList<>();
-    List<Integer> conflictCarpools = new ArrayList<>();
-    List<Integer> achievedCarpools = new ArrayList<>();
+    List<Integer> acceptedCarpoolsIndexes = new ArrayList<>();
+    List<Integer> conflictCarpoolsIndexes = new ArrayList<>();
+    List<Integer> achievedCarpoolsIndexes = new ArrayList<>();
     List<Marker> pickUpPointMarkers = new ArrayList<>();
     List<Marker> dropoffPointMarkers = new ArrayList<>();
 
@@ -236,6 +231,8 @@ public class Navigate extends CourseServiceConnectedActivity implements OnMapRea
         // get layer
         ongoingCarpoolsLayout = (RelativeLayout) findViewById(R.id.ongoingCarpoolsLayout);
 
+        int rowViewMaxWidth = ongoingCarpoolsLayout.getWidth() - 100;
+
         if (ongoingCarpoolsVisible) {
 
             LayoutInflater inflater;
@@ -250,6 +247,8 @@ public class Navigate extends CourseServiceConnectedActivity implements OnMapRea
                     inflater = (LayoutInflater) this
                             .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                     rowView = inflater.inflate(R.layout.list_item_carpooling_driver, ongoingCarpoolsLayout, false);
+
+
 
                     passenger = (TextView) rowView.findViewById(R.id.passenger);
                     pickupInfo = (TextView) rowView.findViewById(R.id.pickupInfo);
@@ -279,6 +278,7 @@ public class Navigate extends CourseServiceConnectedActivity implements OnMapRea
                     params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
                     params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
                     params.bottomMargin = bottomMargin;
+                    params.leftMargin = 100;
                     rowView.setLayoutParams(params);
                     bottomMargin += 370;
                 }
@@ -398,9 +398,9 @@ public class Navigate extends CourseServiceConnectedActivity implements OnMapRea
                     requestedCarpoolPickupMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
                     requestedCarpoolDropoffMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
                 } else if (c.getState().equals(Carpooling.CarpoolingState.IN_PROGRESS)) {
-                    if (!acceptedCarpools.contains(c.getId())) {
+                    if (!acceptedCarpoolsIndexes.contains(c.getId())) {
                         // add to list
-                        acceptedCarpools.add(c.getId());
+                        acceptedCarpoolsIndexes.add(c.getId());
                         pickUpPointMarkers.add(mMap.addMarker(new MarkerOptions().
                                 position(c.getPickupPoint()).title(c.getPassenger().getNickname() + " " + getString(R.string.pickupLabel))));
                         dropoffPointMarkers.add(mMap.addMarker(new MarkerOptions().
@@ -423,9 +423,9 @@ public class Navigate extends CourseServiceConnectedActivity implements OnMapRea
                     }
 
                 } else if (c.getState().equals(Carpooling.CarpoolingState.CONFLICT)) {
-                    if (!conflictCarpools.contains(c.getId())) {
-                        conflictCarpools.add(c.getId());
-                        if (acceptedCarpools.contains(c.getId())) {
+                    if (!conflictCarpoolsIndexes.contains(c.getId())) {
+                        conflictCarpoolsIndexes.add(c.getId());
+                        if (acceptedCarpoolsIndexes.contains(c.getId())) {
                             // notifier
 
                             new AlertDialog.Builder(thisContext)
@@ -435,17 +435,17 @@ public class Navigate extends CourseServiceConnectedActivity implements OnMapRea
                                     .setPositiveButton(R.string.ok, null)
                                     .show();
 
-                            int index = acceptedCarpools.indexOf(c.getId());
+                            int index = acceptedCarpoolsIndexes.indexOf(c.getId());
                             Marker oneMarker = pickUpPointMarkers.get(index);
                             oneMarker.remove();
                             oneMarker = dropoffPointMarkers.get(index);
                             oneMarker.remove();
 
-                            acceptedCarpools.remove(index);
+                            acceptedCarpoolsIndexes.remove(index);
                             pickUpPointMarkers.remove(index);
                             dropoffPointMarkers.remove(index);
 
-                        } else if (achievedCarpools.contains(c.getId())) {
+                        } else if (achievedCarpoolsIndexes.contains(c.getId())) {
                             // notifier
 
 
@@ -457,15 +457,15 @@ public class Navigate extends CourseServiceConnectedActivity implements OnMapRea
                                     .show();
 
 
-                            achievedCarpools.remove(c.getId());
+                            achievedCarpoolsIndexes.remove(c.getId());
                         }
                     }
                 } else if (c.getState().equals(Carpooling.CarpoolingState.ACHIEVED)) {
-                    if (!achievedCarpools.contains(c.getId())) {
-                        achievedCarpools.add(c.getId());
+                    if (!achievedCarpoolsIndexes.contains(c.getId())) {
+                        achievedCarpoolsIndexes.add(c.getId());
                     }
 
-                    if (acceptedCarpools.contains(c.getId())) {
+                    if (acceptedCarpoolsIndexes.contains(c.getId())) {
                         // notifier
 
                         new AlertDialog.Builder(thisContext)
@@ -475,23 +475,22 @@ public class Navigate extends CourseServiceConnectedActivity implements OnMapRea
                                 .setPositiveButton(R.string.ok, null)
                                 .show();
 
-                        int index = acceptedCarpools.indexOf(c.getId());
+                        int index = acceptedCarpoolsIndexes.indexOf(c.getId());
                         Marker oneMarker = pickUpPointMarkers.get(index);
                         oneMarker.remove();
                         oneMarker = dropoffPointMarkers.get(index);
                         oneMarker.remove();
 
-                        acceptedCarpools.remove(index);
+                        acceptedCarpoolsIndexes.remove(index);
                         pickUpPointMarkers.remove(index);
                         dropoffPointMarkers.remove(index);
 
                     }
 
-
                 }
 
                 // show or hide button
-                if (acceptedCarpools.size() > 0) {
+                if (acceptedCarpoolsIndexes.size() > 0) {
                     showOnoingCarpoolsButton.setVisibility(View.VISIBLE);
                 }
                 else {
@@ -506,6 +505,8 @@ public class Navigate extends CourseServiceConnectedActivity implements OnMapRea
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         // update the boolean and attempt to init the map
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(LocationService.getActualLocation(this)));
+        mMap.moveCamera(CameraUpdateFactory.zoomTo(6));
         mapIsReady = true;
         initMap();
     }
@@ -526,14 +527,14 @@ public class Navigate extends CourseServiceConnectedActivity implements OnMapRea
             if (myService.getDriverCourse().getDestination() != null) {
                 Log.d("NAV", ("deiver course not null"));
                 DriverCourse course = myService.getDriverCourse();
-                LatLng actualPosition = course.getOrigin().getCoordinates();
+                LatLng actualPosition = course.getActualPosition();
                 Place destination = course.getDestination();
-                Place origin = course.getOrigin();
+//                Place origin = course.getOrigin();
 
                 Log.d("NAV", ("draw origin"));
 
                 // set the ORIGIN marker
-                homeMarker = mMap.addMarker(new MarkerOptions().position(actualPosition).title(getResources().getString(R.string.origin_title)));
+                homeMarker = mMap.addMarker(new MarkerOptions().position(actualPosition).title(getString(R.string.yourPossition)));
                 // set the destination marker
                 destinationMarker = mMap.addMarker(new MarkerOptions().position(destination.getCoordinates())
                         .title(getResources().getString(R.string.destination_title))
@@ -549,10 +550,10 @@ public class Navigate extends CourseServiceConnectedActivity implements OnMapRea
                 homeMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.driver_50));
 
                 // zoom map
-                double northest = Math.max(destination.getCoordinates().latitude, origin.getCoordinates().latitude);
-                double southest = Math.min(destination.getCoordinates().latitude, origin.getCoordinates().latitude);
-                double westest = Math.max(destination.getCoordinates().longitude, origin.getCoordinates().longitude);
-                double eastest = Math.min(destination.getCoordinates().longitude, origin.getCoordinates().longitude);
+                double northest = Math.max(destination.getCoordinates().latitude, actualPosition.latitude);
+                double southest = Math.min(destination.getCoordinates().latitude, actualPosition.latitude);
+                double westest = Math.max(destination.getCoordinates().longitude, actualPosition.longitude);
+                double eastest = Math.min(destination.getCoordinates().longitude, actualPosition.longitude);
 
                 double latMargin = Math.abs(northest - southest) * 0.2;
                 double longMargin = Math.abs(westest - eastest) * 0.2;

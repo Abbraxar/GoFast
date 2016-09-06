@@ -5,6 +5,7 @@ import com.i3cnam.gofast.model.DriverCourse;
 import com.i3cnam.gofast.model.PassengerTravel;
 import com.i3cnam.gofast.model.User;
 
+import java.net.ConnectException;
 import java.util.List;
 
 
@@ -141,7 +142,7 @@ public interface CommInterface {
      * @param user
      * @return "ok" if done "taken" if nickname is already taken "existing" if user already exists
      */
-    String declareUser(User user);
+    String declareUser(User user) throws ConnectException;
 
 
     /**
@@ -149,5 +150,5 @@ public interface CommInterface {
      * @param phoneNumber
      * @return nullstring if not found, nickname of user if found
      */
-    String retrieveAccount(String phoneNumber);
+    String retrieveAccount(String phoneNumber) throws ConnectException;
 }

@@ -6,6 +6,7 @@ import com.i3cnam.gofast.model.DriverCourse;
 import com.i3cnam.gofast.model.PassengerTravel;
 import com.i3cnam.gofast.model.User;
 
+import java.net.ConnectException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -17,6 +18,7 @@ import java.util.List;
  * Created by Nestor on 22/07/2016.
  */
 public class CommunicationStub implements CommInterface {
+
 
     private int counter = 0;
 
@@ -256,7 +258,7 @@ public class CommunicationStub implements CommInterface {
     }
 
     @Override
-    public String retrieveAccount(String phoneNumber) {
+    public String retrieveAccount(String phoneNumber)  {
         return null;
     }
 

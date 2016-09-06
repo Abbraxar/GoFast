@@ -1,6 +1,8 @@
 package com.i3cnam.gofast.views;
 
 import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,7 +40,7 @@ public class CarpoolingPassengerArrayAdapter extends ArrayAdapter<Carpooling> {
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View rowView = inflater.inflate(R.layout.list_item_carpooling_passenger, parent, false);
 
-        Carpooling c = carpoolings.get(position);
+        final Carpooling c = carpoolings.get(position);
 
         TextView pickupInfo = (TextView) rowView.findViewById(R.id.pickupInfo);
         TextView dropOffInfo = (TextView) rowView.findViewById(R.id.dropOffInfo);
@@ -74,7 +76,13 @@ public class CarpoolingPassengerArrayAdapter extends ArrayAdapter<Carpooling> {
 
             @Override
             public void onClick(View view) {
-                // context.requestCarpool(position);
+                Intent intent = new Intent(context,CarpoolingDetails.class);
+
+                Bundle serviceBundle = new Bundle();
+                serviceBundle.putSerializable(CarpoolingDetails.CARPOOLING, c);
+                intent.putExtras(serviceBundle);
+
+                context.startActivity(intent);
             }
         });
 
