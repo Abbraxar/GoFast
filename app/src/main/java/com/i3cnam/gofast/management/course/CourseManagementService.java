@@ -9,6 +9,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -26,6 +27,7 @@ import com.i3cnam.gofast.views.abstractViews.CourseServiceConnectedActivity;
 import com.i3cnam.gofast.views.notifications.GeneralForegroundNotification;
 import com.i3cnam.gofast.views.notifications.NewRequestNotification;
 
+import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -51,9 +53,11 @@ public class CourseManagementService extends Service {
     public static final String BROADCAST_INIT_COURSE_ACTION = "com.i3cnam.gofast.INIT_COURSE";
     public static final String BROADCAST_UPDATE_COURSE_ACTION = "com.i3cnam.gofast.UPDATE_COURSE";
     public static final String BROADCAST_UPDATE_CARPOOLING_ACTION = "com.i3cnam.gofast.UPDATE_CARPOOLING";
+    public static final String BROADCAST_SERVER_UNAVAILABLE = "com.i3cnam.gofast.SERVER_UNAVAILABLE";
     private Intent broadcastCourseIntent;
     private Intent broadcastInitIntent;
     private Intent broadcastCarpoolingIntent;
+    private Intent broadcastServerUnavailable;
 
     // temporary global variables to communicate between threads:
     private Carpooling carpoolingToAccept;
@@ -85,6 +89,7 @@ public class CourseManagementService extends Service {
         broadcastInitIntent = new Intent(BROADCAST_INIT_COURSE_ACTION);
         broadcastCourseIntent = new Intent(BROADCAST_UPDATE_COURSE_ACTION);
         broadcastCarpoolingIntent = new Intent(BROADCAST_UPDATE_CARPOOLING_ACTION);
+        broadcastServerUnavailable = new Intent(BROADCAST_SERVER_UNAVAILABLE);
         thisService = this;
     }
 
@@ -219,6 +224,14 @@ public class CourseManagementService extends Service {
         navGPS = new GPSForNavigation(this);
 
         sendBroadcast(broadcastInitIntent);
+    }
+
+    /**
+     * Broadcast the course initialisation
+     */
+    private void sendServerUnavailble() {
+        Log.e(TAG_LOG, "ERREUR Connection Serveur");
+        sendBroadcast(broadcastServerUnavailable);
     }
 
     /**
@@ -364,21 +377,34 @@ public class CourseManagementService extends Service {
         @Override
         public void run() {
 
+            boolean serverFound = false;
+
             // first declare the course on the server or
             // recover course from the server if course is not provided by intent nor service
-            if (driverCourse.getDestination() == null) {
-                // recover course from the server
-                driverCourse = serverCom.getDriverCourse(User.getMe(thisService));
-            } else {
-                // declare the course on the server
-                int courseID = serverCom.declareCourse(driverCourse);
-                // set the returned id to the object
-                driverCourse.setId(courseID);
-                Log.d(TAG_LOG, "the course was declared with ID: " + courseID);
+            while (!serverFound & running) {
+                try {
+                    if (driverCourse.getDestination() == null) {
+                        // recover course from the server
+                        driverCourse = serverCom.getDriverCourse(User.getMe(thisService));
+                    } else {
+                        // declare the course on the server
+                        int courseID = serverCom.declareCourse(driverCourse);
+                        // set the returned id to the object
+                        driverCourse.setId(courseID);
+                        Log.d(TAG_LOG, "the course was declared with ID: " + courseID);
+                        // broadcast course to the activity
+                    }
+                    sendCourseInit();
+                    serverFound = true;
+                } catch (ConnectException e) {
+                    sendServerUnavailble();
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                }
             }
-
-            // broadcast course to the activity
-            sendCourseInit();
 
             // if the id is 0, the course has not been registered into database, abort
             if (driverCourse.getId() == 0) {
@@ -395,13 +421,17 @@ public class CourseManagementService extends Service {
                         e.printStackTrace();
                     }
 
-                    // do the query
-                    serverCom.observeCarpoolCourse(driverCourse);
-                    lastList = serverCom.getCarpoolCourseState(driverCourse);
-                    // compare results
-                    if (searchStateChanges()) {
-                        requestedCarpoolings = lastList;
-                        sendCarpoolUpdate();
+                    try {
+                        // do the query
+                        serverCom.observeCarpoolCourse(driverCourse);
+                        lastList = serverCom.getCarpoolCourseState(driverCourse);
+                        // compare results
+                        if (searchStateChanges()) {
+                            requestedCarpoolings = lastList;
+                            sendCarpoolUpdate();
+                        }
+                    } catch (ConnectException e) {
+                        sendServerUnavailble();
                     }
                 }
             }

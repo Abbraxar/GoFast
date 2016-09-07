@@ -52,7 +52,7 @@ public class Communication implements CommInterface {
     static final String RETIEVE_ACCOUNT = "/retrieve_account";
     static final String ABORT_COURSE = "/abort_course";
 
-    private static final String LOG_TAG = "Server Communication";
+    private static final String LOG_TAG = "ServerCommunication";
     private static final DateFormat format = new SimpleDateFormat("y/M/d H:m");
 
 
@@ -299,7 +299,7 @@ public class Communication implements CommInterface {
     }
 
     @Override
-    public List<Carpooling> getCarpoolCourseState(DriverCourse driverCourse) {
+    public List<Carpooling> getCarpoolCourseState(DriverCourse driverCourse) throws ConnectException {
         // prepare the return variable
         List<Carpooling> requestedCarpoolings = new ArrayList<>();
 
@@ -308,7 +308,7 @@ public class Communication implements CommInterface {
         sb.append("?course_id=" + driverCourse.getId());
 
         // call the service and obtain a response
-        String rawJSON = useService(sb.toString());
+        String rawJSON = useService2(sb.toString());
 
         try {
             // Create a JSON object hierarchy from the results
@@ -332,7 +332,7 @@ public class Communication implements CommInterface {
     }
 
     @Override
-    public DriverCourse getDriverCourse(User driver) {
+    public DriverCourse getDriverCourse(User driver) throws ConnectException {
         // prepare the return variable
         DriverCourse driverCourse = new DriverCourse();
 
@@ -341,7 +341,7 @@ public class Communication implements CommInterface {
         sb.append("?user_id=" + driver.getNickname());
 
         // call the service and obtain a response
-        String rawJSON = useService(sb.toString());
+        String rawJSON = useService2(sb.toString());
 
         try {
             // Create a JSON object hierarchy from the results

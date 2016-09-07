@@ -127,7 +127,7 @@ public class CarpoolingPassengerArrayAdapter extends ArrayAdapter<Carpooling> {
             });
         }
         // IN_PROGRESS : Action abort carpool
-        else if (c.getState().equals(Carpooling.CarpoolingState.IN_DEMAND)) {
+        else if (c.getState().equals(Carpooling.CarpoolingState.IN_PROGRESS)) {
             btRequest.setText(R.string.abortCarpoolingLabel);
             btRequest.setOnClickListener(new View.OnClickListener() {
                 @Override

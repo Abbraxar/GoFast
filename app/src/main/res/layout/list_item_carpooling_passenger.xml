@@ -151,7 +151,10 @@
         android:layout_below="@+id/dropOffInfo"
         android:layout_alignParentStart="true"
         android:layout_marginLeft="50px"
-        android:layout_marginTop="10px" />
+        android:layout_marginTop="10px"
+        android:layout_marginBottom="10px"
+        android:paddingEnd="15px"
+        android:paddingStart="15px" />
 
     <Button
         android:layout_width="wrap_content"
@@ -162,7 +165,10 @@
         android:layout_below="@+id/dropOffInfo"
         android:layout_alignParentEnd="true"
         android:layout_marginRight="50px"
-        android:layout_marginTop="10px" />
+        android:layout_marginTop="10px"
+        android:layout_marginBottom="10px"
+        android:paddingEnd="15px"
+        android:paddingStart="15px" />
 
 
 

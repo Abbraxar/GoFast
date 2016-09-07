@@ -6,7 +6,7 @@
     <color name="colorAccentLight">#1680cc</color>
     <color name="drivingRoute">#000000</color>
     <color name="walkingRoute">#327328</color>
-    <color name="colorPotential">#cccccc</color>
+    <color name="colorPotential">#dddddd</color>
     <color name="colorRequested">#1990e6</color>
     <color name="colorAccepted">#4fb53f</color>
     <color name="colorRefused">#e61919</color>

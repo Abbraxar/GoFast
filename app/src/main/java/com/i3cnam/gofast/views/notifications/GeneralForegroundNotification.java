@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 
 import com.i3cnam.gofast.R;
@@ -26,7 +27,8 @@ public class GeneralForegroundNotification {
 
                 // Set appropriate defaults for the notification light, sound,
                 // and vibration.
-                .setDefaults(Notification.DEFAULT_ALL)
+//                .setDefaults(Notification.DEFAULT_ALL)
+                .setDefaults(0)
 
                 // Set required fields, including the small icon, the
                 // notification title, and text.
@@ -35,6 +37,12 @@ public class GeneralForegroundNotification {
                 .setContentText(text)
 
                 // All fields below this line are optional.
+
+                // vibration
+                .setVibrate(null)
+
+                // sound
+                .setSound(null)
 
                 // Set the pending intent to be initiated when the user touches
                 // the notification.

@@ -138,15 +138,13 @@
             android:layout_margin="20px"
             android:layout_centerHorizontal="true" />
 
-
-
     </RelativeLayout>
 
 
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/btRequest"
+        android:id="@+id/btRequestCarpool"
         android:contextClickable="false"
         android:clickable="true"
         android:src="@drawable/carpooling_request"

@@ -122,13 +122,13 @@ public interface CommInterface {
      * Returns the carpooling of the course
      * @param driverCourse the travel to be observed
      */
-    List<Carpooling> getCarpoolCourseState(DriverCourse driverCourse);
+    List<Carpooling> getCarpoolCourseState(DriverCourse driverCourse) throws ConnectException;
 
     /**
      * Returns current course for user.
      * @param driver the user to get course from
      */
-    DriverCourse getDriverCourse(User driver);
+    DriverCourse getDriverCourse(User driver) throws ConnectException;
 
     /**
      * Returns current travel for user.

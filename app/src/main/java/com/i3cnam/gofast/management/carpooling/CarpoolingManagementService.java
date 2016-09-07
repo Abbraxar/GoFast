@@ -158,7 +158,7 @@ public class CarpoolingManagementService extends Service {
 
 
     public void abortCarpool(Carpooling carpooling) {
-        carpoolingToCancel = carpooling;
+        carpoolingToAbort = carpooling;
         new AsynchronousAbortCarpool().execute();
     }
 

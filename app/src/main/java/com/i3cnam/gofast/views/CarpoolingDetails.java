@@ -66,7 +66,7 @@ public class CarpoolingDetails extends FragmentActivity implements OnMapReadyCal
         TextView state = (TextView) findViewById(R.id.state);
 
         // buttons
-        ImageView actionRequestImg = (ImageView) findViewById(R.id.btRequest);
+        ImageView actionRequestImg = (ImageView) findViewById(R.id.btRequestCarpool);
         ImageView actionCancelImg = (ImageView) findViewById(R.id.btCancelRequest);
         actionRequestImg.setVisibility(View.INVISIBLE);
         actionCancelImg.setVisibility(View.INVISIBLE);
@@ -77,12 +77,12 @@ public class CarpoolingDetails extends FragmentActivity implements OnMapReadyCal
             case "POTENTIAL" :
                 state.setText("Disponible");
                 state.setTextColor(ContextCompat.getColor(this, R.color.colorPotential));
-                actionRequestImg.setVisibility(View.INVISIBLE);
+                actionRequestImg.setVisibility(View.VISIBLE);
                 break;
             case "IN_DEMAND" :
                 state.setText("Demandé");
                 state.setTextColor(ContextCompat.getColor(this, R.color.colorRequested));
-                actionCancelImg.setVisibility(View.INVISIBLE);
+                actionCancelImg.setVisibility(View.VISIBLE);
                 break;
             case "IN_PROGRESS" :
                 state.setText("Accepté / En cours");
