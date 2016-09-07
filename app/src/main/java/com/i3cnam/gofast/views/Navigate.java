@@ -135,6 +135,12 @@ public class Navigate extends CourseServiceConnectedActivity implements OnMapRea
         initFilter.addAction(CourseManagementService.BROADCAST_INIT_COURSE_ACTION);
         registerReceiver(broadcastCourseInitReceiver, initFilter);
 
+
+        // for the course init
+        IntentFilter noServerFilter = new IntentFilter();
+        noServerFilter.addAction(CourseManagementService.BROADCAST_SERVER_UNAVAILABLE);
+        registerReceiver(broadcastServerUnavailableReceiver, initFilter);
+
         // for the course changes
         IntentFilter courseFilter = new IntentFilter();
         courseFilter.addAction(CourseManagementService.BROADCAST_UPDATE_COURSE_ACTION);
@@ -157,6 +163,7 @@ public class Navigate extends CourseServiceConnectedActivity implements OnMapRea
         unregisterReceiver(broadcastCarpoolingReceiver);
         unregisterReceiver(broadcastCourseReceiver);
         unregisterReceiver(broadcastCourseInitReceiver);
+        unregisterReceiver(broadcastServerUnavailableReceiver);
 
         super.onPause();
     }
@@ -312,6 +319,18 @@ public class Navigate extends CourseServiceConnectedActivity implements OnMapRea
             isDataInit = true;
             initMap();
             handleCarpoolingChanges();
+        }
+    };
+
+    /**
+     * Event : The server is not available
+     */
+    private BroadcastReceiver broadcastServerUnavailableReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // show the message if not visible
+            TextView tv = (TextView) findViewById(R.id.serverUnavailable);
+            tv.setVisibility(View.VISIBLE);
         }
     };
 

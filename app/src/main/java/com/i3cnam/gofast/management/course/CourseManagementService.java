@@ -9,7 +9,6 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -349,16 +348,20 @@ public class CourseManagementService extends Service {
             driverCourse.setActualPosition(new LatLng(newLocation.getLatitude(), newLocation.getLongitude()));
             driverCourse.setPositioningTime(new Date());
             // verify if user has deviated and consequently recalculate the path
-            if (courseChanged()) {
-                recalculatePath();
-                Log.d(TAG_LOG,"COURSE POSITION UPDATE");
-                serverCom.updateCourse(driverCourse);
+            try {
+                if (courseChanged()) {
+                    recalculatePath();
+                    Log.d(TAG_LOG, "COURSE POSITION UPDATE");
+                    serverCom.updateCourse(driverCourse);
+                } else {
+                    Log.d(TAG_LOG, "SENDING POSITION UPDATE");
+                    serverCom.updatePosition(driverCourse);
+                }
+                sendCourseUpdate();
             }
-            else {
-                Log.d(TAG_LOG,"SENDING POSITION UPDATE");
-                serverCom.updatePosition(driverCourse);
+            catch (ConnectException e) {
+                sendServerUnavailble();
             }
-            sendCourseUpdate();
         }
     }
 
@@ -423,7 +426,6 @@ public class CourseManagementService extends Service {
 
                     try {
                         // do the query
-                        serverCom.observeCarpoolCourse(driverCourse);
                         lastList = serverCom.getCarpoolCourseState(driverCourse);
                         // compare results
                         if (searchStateChanges()) {
@@ -491,10 +493,24 @@ public class CourseManagementService extends Service {
      */
     private class AsynchronousAbortCourse extends AsyncTask<String, String,String> {
         protected String doInBackground(String... urls) {
+            boolean serverFound = false;
             Log.d(TAG_LOG, "Course aborted");
             myCourseObserver.terminate();
-            serverCom.abortCourse(driverCourse);
             navGPS.stopUsingGPS();
+            while (!serverFound) {
+                try {
+                    serverCom.abortCourse(driverCourse);
+                    serverFound = true;
+                } catch (ConnectException e) {
+                    sendServerUnavailble();
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+
+                }
+            }
             return null;
         }
     }

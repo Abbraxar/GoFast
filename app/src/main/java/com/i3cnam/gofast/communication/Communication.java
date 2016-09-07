@@ -57,7 +57,7 @@ public class Communication implements CommInterface {
 
 
     @Override
-    public int declareCourse(DriverCourse driverCourse) {
+    public int declareCourse(DriverCourse driverCourse) throws ConnectException {
         // prepare the return variable
         int returnValue = 0;
 
@@ -66,7 +66,7 @@ public class Communication implements CommInterface {
         sb.append("?" + driverCourse.getParametersString());
 
         // call the service and obtain a response
-        String rawJSON = useService(sb.toString());
+        String rawJSON = useService2(sb.toString());
 
 
         try {
@@ -200,13 +200,13 @@ public class Communication implements CommInterface {
     }
 
     @Override
-    public void abortCourse(DriverCourse course) {
+    public void abortCourse(DriverCourse course) throws ConnectException {
         // prepare the string for the request
         StringBuilder sb = new StringBuilder(SERVER_IP + ABORT_COURSE);
         sb.append("?course_id=" + course.getId());
 
         // call the service and obtain a response
-        String rawJSON = useService(sb.toString());
+        String rawJSON = useService2(sb.toString());
     }
 
     @Override
@@ -221,19 +221,19 @@ public class Communication implements CommInterface {
 
 
     @Override
-    public void updatePosition(DriverCourse driverCourse) {
+    public void updatePosition(DriverCourse driverCourse) throws ConnectException {
         // prepare the string for the request
         StringBuilder sb = new StringBuilder(SERVER_IP + UPDATE_POSITION);
         sb.append("?course_id=" + driverCourse.getId());
         sb.append("&new_position=" + GeoConstants.coordinatesUrlParam(driverCourse.getActualPosition()));
 
         // call the service and obtain a response
-        String rawJSON = useService(sb.toString());
+        String rawJSON = useService2(sb.toString());
 
     }
 
     @Override
-    public void updateCourse(DriverCourse driverCourse) {
+    public void updateCourse(DriverCourse driverCourse) throws ConnectException {
 
         // prepare the string for the request
         StringBuilder sb = new StringBuilder(SERVER_IP + UPDATE_COURSE);
@@ -242,7 +242,7 @@ public class Communication implements CommInterface {
         sb.append("&new_encoded_points=" + driverCourse.getEncodedPoints());
 
         // call the service and obtain a response
-        String rawJSON = useService(sb.toString());
+        String rawJSON = useService2(sb.toString());
     }
 
     @Override

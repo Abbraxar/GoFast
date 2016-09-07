@@ -100,30 +100,31 @@
 
     </RelativeLayout>
 
-<!--
     <TextView
+        android:visibility="invisible"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="#000000"
-        android:text="titi42 RDV: Pont des Minimes - 8:24"
-        android:background="#ffffff"
-        android:id="@+id/ongoingCarpool2"
-        android:layout_gravity="bottom|right"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="#ff0000"
+        android:text="Le Serveur est inaccessible"
+        android:background="#99ffffff"
+        android:id="@+id/serverUnavailable"
+        android:layout_gravity="center"
         android:layout_marginTop="10dp" />
 
+    <!--
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="#000000"
-        android:text="titi42 RDV: Pont des Minimes - 8:24"
-        android:background="#ffffff"
-        android:id="@+id/ongoingCarpool3"
-        android:layout_gravity="bottom|right"
-        android:layout_marginTop="10dp" />
--->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="#000000"
+            android:text="titi42 RDV: Pont des Minimes - 8:24"
+            android:background="#ffffff"
+            android:id="@+id/ongoingCarpool3"
+            android:layout_gravity="bottom|right"
+            android:layout_marginTop="10dp" />
+    -->
 
     <ImageView
         android:layout_width="wrap_content"

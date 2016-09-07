@@ -17,7 +17,7 @@ public interface CommInterface {
      * @param driverCourse
      * @return the id of the course
      */
-    int declareCourse(DriverCourse driverCourse);
+    int declareCourse(DriverCourse driverCourse) throws ConnectException;
 
     /**
      * Declares a new travel into the system
@@ -67,7 +67,7 @@ public interface CommInterface {
      * Abort a requested course
      * @param course the course aborted
      */
-    void abortCourse(DriverCourse course);
+    void abortCourse(DriverCourse course) throws ConnectException;
 
     /**
      * Abort a requested travel
@@ -79,13 +79,13 @@ public interface CommInterface {
      * Updates the new position of the car
      * @param driverCourse the travel to be updated
      */
-    void updatePosition(DriverCourse driverCourse);
+    void updatePosition(DriverCourse driverCourse) throws ConnectException;
 
     /**
      * Updates the path of the course
      * @param driverCourse
      */
-    void updateCourse(DriverCourse driverCourse);
+    void updateCourse(DriverCourse driverCourse) throws ConnectException;
 
     /**
      * Request to keep informed about the carpooling of the course
