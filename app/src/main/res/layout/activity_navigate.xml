@@ -105,12 +105,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="#ff0000"
-        android:text="Le Serveur est inaccessible"
-        android:background="#99ffffff"
+        android:textColor="#ffffff"
+        android:text="@string/serverUnavailable"
+        android:background="#99000000"
         android:id="@+id/serverUnavailable"
         android:layout_gravity="center"
-        android:layout_marginTop="10dp" />
+        android:padding="50px" />
 
     <!--
 

@@ -139,7 +139,7 @@ public class Navigate extends CourseServiceConnectedActivity implements OnMapRea
         // for the course init
         IntentFilter noServerFilter = new IntentFilter();
         noServerFilter.addAction(CourseManagementService.BROADCAST_SERVER_UNAVAILABLE);
-        registerReceiver(broadcastServerUnavailableReceiver, initFilter);
+        registerReceiver(broadcastServerUnavailableReceiver, noServerFilter);
 
         // for the course changes
         IntentFilter courseFilter = new IntentFilter();
@@ -181,6 +181,9 @@ public class Navigate extends CourseServiceConnectedActivity implements OnMapRea
                         if(isBound) {
                           myService.abortCourse();
                         }
+                        TextView tv = (TextView) findViewById(R.id.serverUnavailable);
+                        tv.setVisibility(View.INVISIBLE);
+
                         stopServiceAndCloseActivity();
 
                     }
@@ -317,6 +320,8 @@ public class Navigate extends CourseServiceConnectedActivity implements OnMapRea
         public void onReceive(Context context, Intent intent) {
             // update the boolean and attempt to init the map
             isDataInit = true;
+            TextView tv = (TextView) findViewById(R.id.serverUnavailable);
+            tv.setVisibility(View.INVISIBLE);
             initMap();
             handleCarpoolingChanges();
         }
@@ -328,6 +333,7 @@ public class Navigate extends CourseServiceConnectedActivity implements OnMapRea
     private BroadcastReceiver broadcastServerUnavailableReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.d("BroadcastReceiver", "Server Unavailable");
             // show the message if not visible
             TextView tv = (TextView) findViewById(R.id.serverUnavailable);
             tv.setVisibility(View.VISIBLE);

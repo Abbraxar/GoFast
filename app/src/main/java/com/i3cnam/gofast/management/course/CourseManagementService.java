@@ -56,7 +56,7 @@ public class CourseManagementService extends Service {
     private Intent broadcastCourseIntent;
     private Intent broadcastInitIntent;
     private Intent broadcastCarpoolingIntent;
-    private Intent broadcastServerUnavailable;
+    private Intent broadcastServerUnavailableIntent;
 
     // temporary global variables to communicate between threads:
     private Carpooling carpoolingToAccept;
@@ -88,7 +88,7 @@ public class CourseManagementService extends Service {
         broadcastInitIntent = new Intent(BROADCAST_INIT_COURSE_ACTION);
         broadcastCourseIntent = new Intent(BROADCAST_UPDATE_COURSE_ACTION);
         broadcastCarpoolingIntent = new Intent(BROADCAST_UPDATE_CARPOOLING_ACTION);
-        broadcastServerUnavailable = new Intent(BROADCAST_SERVER_UNAVAILABLE);
+        broadcastServerUnavailableIntent = new Intent(BROADCAST_SERVER_UNAVAILABLE);
         thisService = this;
     }
 
@@ -230,7 +230,7 @@ public class CourseManagementService extends Service {
      */
     private void sendServerUnavailble() {
         Log.e(TAG_LOG, "ERREUR Connection Serveur");
-        sendBroadcast(broadcastServerUnavailable);
+        sendBroadcast(broadcastServerUnavailableIntent);
     }
 
     /**
