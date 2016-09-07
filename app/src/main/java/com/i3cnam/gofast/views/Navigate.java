@@ -181,8 +181,6 @@ public class Navigate extends CourseServiceConnectedActivity implements OnMapRea
                         if(isBound) {
                           myService.abortCourse();
                         }
-                        TextView tv = (TextView) findViewById(R.id.serverUnavailable);
-                        tv.setVisibility(View.INVISIBLE);
 
                         stopServiceAndCloseActivity();
 
@@ -225,8 +223,6 @@ public class Navigate extends CourseServiceConnectedActivity implements OnMapRea
         requestedCarpoolPickupMarker.remove();
         requestedCarpoolDropoffMarker.remove();
     }
-
-
 
 
     /*
@@ -320,8 +316,6 @@ public class Navigate extends CourseServiceConnectedActivity implements OnMapRea
         public void onReceive(Context context, Intent intent) {
             // update the boolean and attempt to init the map
             isDataInit = true;
-            TextView tv = (TextView) findViewById(R.id.serverUnavailable);
-            tv.setVisibility(View.INVISIBLE);
             initMap();
             handleCarpoolingChanges();
         }
@@ -333,10 +327,13 @@ public class Navigate extends CourseServiceConnectedActivity implements OnMapRea
     private BroadcastReceiver broadcastServerUnavailableReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.d("BroadcastReceiver", "Server Unavailable");
-            // show the message if not visible
+            boolean available = intent.getBooleanExtra("AVAILABLE",true);
+            Log.d("BroadcastReceiver", "Server available " + available);
+
             TextView tv = (TextView) findViewById(R.id.serverUnavailable);
-            tv.setVisibility(View.VISIBLE);
+            // show the message if not available
+            if (available) tv.setVisibility(View.INVISIBLE);
+            else tv.setVisibility(View.VISIBLE);
         }
     };
 
@@ -349,9 +346,9 @@ public class Navigate extends CourseServiceConnectedActivity implements OnMapRea
         public void onReceive(Context context, Intent intent) {
             // TODO
             Log.d("BroadcastReceiver", "Broadcast received");
-            Toast.makeText(getApplicationContext(), "Course received", Toast.LENGTH_SHORT).show();
 
-            Toast.makeText(getApplicationContext(), "New position is : \n" + myService.getDriverCourse().getActualPosition(), Toast.LENGTH_LONG).show();
+//            Toast.makeText(getApplicationContext(), "Course received", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(getApplicationContext(), "New position is : \n" + myService.getDriverCourse().getActualPosition(), Toast.LENGTH_LONG).show();
 
             homeMarker.setPosition(myService.getDriverCourse().getActualPosition());
             pathPolyline.setPoints(PolyUtil.decode(myService.getDriverCourse().getEncodedPoints()));

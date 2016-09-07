@@ -228,8 +228,9 @@ public class CourseManagementService extends Service {
     /**
      * Broadcast the course initialisation
      */
-    private void sendServerUnavailble() {
+    private void sendServerAvailble(boolean available) {
         Log.e(TAG_LOG, "ERREUR Connection Serveur");
+        broadcastServerUnavailableIntent.putExtra("AVAILABLE", available);
         sendBroadcast(broadcastServerUnavailableIntent);
     }
 
@@ -357,10 +358,11 @@ public class CourseManagementService extends Service {
                     Log.d(TAG_LOG, "SENDING POSITION UPDATE");
                     serverCom.updatePosition(driverCourse);
                 }
+                sendServerAvailble(true);
                 sendCourseUpdate();
             }
             catch (ConnectException e) {
-                sendServerUnavailble();
+                sendServerAvailble(false);
             }
         }
     }
@@ -397,10 +399,11 @@ public class CourseManagementService extends Service {
                         Log.d(TAG_LOG, "the course was declared with ID: " + courseID);
                         // broadcast course to the activity
                     }
+                    sendServerAvailble(true);
                     sendCourseInit();
                     serverFound = true;
                 } catch (ConnectException e) {
-                    sendServerUnavailble();
+                    sendServerAvailble(false);
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException e1) {
@@ -431,9 +434,10 @@ public class CourseManagementService extends Service {
                         if (searchStateChanges()) {
                             requestedCarpoolings = lastList;
                             sendCarpoolUpdate();
+                            sendServerAvailble(true);
                         }
                     } catch (ConnectException e) {
-                        sendServerUnavailble();
+                        sendServerAvailble(false);
                     }
                 }
             }
@@ -500,9 +504,10 @@ public class CourseManagementService extends Service {
             while (!serverFound) {
                 try {
                     serverCom.abortCourse(driverCourse);
+                    sendServerAvailble(true);
                     serverFound = true;
                 } catch (ConnectException e) {
-                    sendServerUnavailble();
+                    sendServerAvailble(false);
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException e1) {
