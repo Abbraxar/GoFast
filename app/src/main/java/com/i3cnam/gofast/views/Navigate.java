@@ -332,8 +332,15 @@ public class Navigate extends CourseServiceConnectedActivity implements OnMapRea
 
             TextView tv = (TextView) findViewById(R.id.serverUnavailable);
             // show the message if not available
-            if (available) tv.setVisibility(View.INVISIBLE);
-            else tv.setVisibility(View.VISIBLE);
+            if (available) {
+                tv.setVisibility(View.INVISIBLE);
+                waitingSignal.setVisibility(View.INVISIBLE);
+            }
+            else {
+                tv.setVisibility(View.VISIBLE);
+                waitingSignal.setVisibility(View.VISIBLE);
+            }
+
         }
     };
 
