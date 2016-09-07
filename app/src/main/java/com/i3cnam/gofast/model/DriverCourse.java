@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -90,7 +91,10 @@ public class DriverCourse implements Serializable{
     }
 
     public List<LatLng> getPath() {
-        return PolyUtil.decode(encodedPoints);
+        if (encodedPoints != null) {
+            return PolyUtil.decode(encodedPoints);
+        }
+        else return new ArrayList<>();
     }
 
     /**

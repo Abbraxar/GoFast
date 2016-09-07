@@ -16,9 +16,12 @@ import android.widget.Toast;
 import com.i3cnam.gofast.R;
 import com.i3cnam.gofast.communication.CommInterface;
 import com.i3cnam.gofast.communication.Communication;
+import com.i3cnam.gofast.communication.GofastCommunicationException;
 import com.i3cnam.gofast.model.User;
 
+import java.io.UnsupportedEncodingException;
 import java.net.ConnectException;
+import java.net.URLEncoder;
 
 public class ConfigureAccount extends AppCompatActivity {
     private String mPhoneNumber;
@@ -50,11 +53,17 @@ public class ConfigureAccount extends AppCompatActivity {
             Toast.makeText(ConfigureAccount.this, R.string.empyNicknameMsg, Toast.LENGTH_SHORT).show();
         }
         else {
-            if (declareUser) {
-                new TaskCreateAccount(this).execute(nicknameEdit.getText().toString(), phoneNumberField.getText().toString());
-            }
-            else {
-                writeSharedPreferences(nicknameEdit.getText().toString(), phoneNumberField.getText().toString());
+            try {
+                String nickname  = URLEncoder.encode(nicknameEdit.getText().toString(), "UTF-8");
+                String phoneNumber  = URLEncoder.encode(phoneNumberField.getText().toString(), "UTF-8");
+                if (declareUser) {
+                    new TaskCreateAccount(this).execute(nickname, phoneNumber);
+                }
+                else {
+                    writeSharedPreferences(nickname, phoneNumber);
+                }
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -85,7 +94,7 @@ public class ConfigureAccount extends AppCompatActivity {
             CommInterface comm = new Communication();
             try {
                 return comm.retrieveAccount(mPhoneNumber);
-            } catch (ConnectException e) {
+            } catch (GofastCommunicationException e) {
                 error = true;
                 return null;
             }
@@ -129,7 +138,7 @@ public class ConfigureAccount extends AppCompatActivity {
             declared = new User(urls[0],urls[1]);
             try {
                 return comm.declareUser(declared);
-            } catch (ConnectException e) {
+            } catch (GofastCommunicationException e) {
                 error = true ;
                 return null;
             }

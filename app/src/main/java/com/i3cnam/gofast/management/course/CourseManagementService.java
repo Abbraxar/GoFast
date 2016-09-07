@@ -17,6 +17,7 @@ import com.i3cnam.gofast.R;
 import com.i3cnam.gofast.communication.CommInterface;
 import com.i3cnam.gofast.communication.Communication;
 import com.i3cnam.gofast.communication.CommunicationStub;
+import com.i3cnam.gofast.communication.GofastCommunicationException;
 import com.i3cnam.gofast.geo.DirectionsService;
 import com.i3cnam.gofast.geo.GPSTracker;
 import com.i3cnam.gofast.model.Carpooling;
@@ -138,7 +139,7 @@ public class CourseManagementService extends Service {
     private boolean courseChanged() {
         Log.d(TAG_LOG, "COURSE CHANGED?");
         boolean returnValue = true;
-        // TODO
+
         List<LatLng> actualPath = driverCourse.getPath();
         int i = 0 , j;
         double delta;
@@ -238,6 +239,18 @@ public class CourseManagementService extends Service {
      */
     private void sendCarpoolUpdate() {
         Log.d(TAG_LOG, "entered sendCarpoolUpdate");
+        manageNotifications();
+        sendBroadcast(broadcastCarpoolingIntent);
+    }
+
+    /*
+    ------------------------------------------------------------------------------------------------
+        NOTIFICATIONS
+        (Called by the activity)
+    ------------------------------------------------------------------------------------------------
+     */
+
+    private void manageNotifications() {
 
         for (Carpooling c : requestedCarpoolings) {
             Log.d(TAG_LOG, "carpool id : " + c.getId());
@@ -245,7 +258,7 @@ public class CourseManagementService extends Service {
                 // if it is a new demand
                 if (!requestedCarpoolsIndexes.contains(c.getId())) {
                     Log.d(TAG_LOG, "send notification");
-                    new NewRequestNotification().notify(this, c.getPickupPoint().toString(), c.getId(), 1);
+                    NewRequestNotification.notify(this, getString(R.string.carpoolingRequest), getString(R.string.new_carpooling_request_notification_text), c.getId(), c.getState());
                     // and add it to the indexes
                     requestedCarpoolsIndexes.add(c.getId());
                 }
@@ -254,7 +267,7 @@ public class CourseManagementService extends Service {
                 // if it is a new acceptation
                 if (!acceptedCarpoolsIndexes.contains(c.getId())) {
                     Log.d(TAG_LOG, "acquit notification");
-                    new NewRequestNotification().cancel(this, c.getId());
+                    NewRequestNotification.cancel(this, c.getId());
                     // and add it to the indexes
                     acceptedCarpoolsIndexes.add(c.getId());
                     if (!requestedCarpoolsIndexes.contains(c.getId())) {
@@ -268,7 +281,7 @@ public class CourseManagementService extends Service {
                 // if it is a new abort
                 if (!conflictCarpoolsIndexes.contains(c.getId())) {
                     Log.d(TAG_LOG, "show notification");
-                    new NewRequestNotification().notify(this, c.getPickupPoint().toString(), c.getId(), 1);
+                    NewRequestNotification.notify(this, getString(R.string.carpoolingCanceled), c.getPassenger().getNickname() +  getString(R.string.conflict_carpooling_notification_text), c.getId(), c.getState());
                     // and add it to the indexes
                     conflictCarpoolsIndexes.add(c.getId());
                     if (!acceptedCarpoolsIndexes.contains(c.getId())) {
@@ -277,8 +290,24 @@ public class CourseManagementService extends Service {
                 }
             }
         }
-        sendBroadcast(broadcastCarpoolingIntent);
+        boolean found;
+        for (Integer oldRequested : requestedCarpoolsIndexes) {
+            found = false;
+            for (Carpooling c : requestedCarpoolings) {
+                if (oldRequested.equals(c.getId())) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                // cancel notification
+                NewRequestNotification.cancel(this, oldRequested);
+                requestedCarpoolsIndexes.remove(oldRequested);
+            }
+        }
+
     }
+
 
     /*
     ------------------------------------------------------------------------------------------------
@@ -362,7 +391,7 @@ public class CourseManagementService extends Service {
                 sendServerAvailble(true);
                 sendCourseUpdate();
             }
-            catch (ConnectException e) {
+            catch (GofastCommunicationException e) {
                 sendServerAvailble(false);
             }
         }
@@ -403,7 +432,7 @@ public class CourseManagementService extends Service {
                     sendServerAvailble(true);
                     sendCourseInit();
                     serverFound = true;
-                } catch (ConnectException e) {
+                } catch (GofastCommunicationException e) {
                     sendServerAvailble(false);
                     try {
                         Thread.sleep(1000);
@@ -437,7 +466,7 @@ public class CourseManagementService extends Service {
                             sendCarpoolUpdate();
                         }
                         sendServerAvailble(true);
-                    } catch (ConnectException e) {
+                    } catch (GofastCommunicationException e) {
                         sendServerAvailble(false);
                     }
                 }
@@ -507,7 +536,7 @@ public class CourseManagementService extends Service {
                     serverCom.abortCourse(driverCourse);
                     sendServerAvailble(true);
                     serverFound = true;
-                } catch (ConnectException e) {
+                } catch (GofastCommunicationException e) {
                     sendServerAvailble(false);
                     try {
                         Thread.sleep(1000);

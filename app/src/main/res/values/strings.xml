@@ -44,7 +44,7 @@
     <string name="new_carpooling_request_notification_title">Demande de covoiturage</string>
 
     <!-- TODO: remove this placeholder text -->
-    <string name="new_carpooling_request_notification_text">Vous avez une nouvelle demande de covoiturage %1$s
+    <string name="new_carpooling_request_notification_text">Vous avez une nouvelle demande de covoiturage
     </string>
 
     <string name="action_share">Share</string>
@@ -83,7 +83,10 @@
     <string name="requestCarpoolLabel">Demander covoiturage</string>
     <string name="cancelRequestLabel">Annuler demande</string>
     <string name="abortCarpoolingLabel">Annuler covoiturage</string>
-    <string name="emptyCarpoolingsList">Il n\'y a pas de covoiturage disponible pour votre déplacement.</string>
+    <string name="emptyCarpoolingsList">Recherche de covoiturages en cours.</string>
     <string name="radiusLabel">Je peux marcher jusqu\'à</string>
+    <string name="conflict_carpooling_notification_text">" a annulé son covoiturage"</string>
+    <string name="carpoolingCanceled">Annulation de covoiturage</string>
+    <string name="carpoolingRequest">Demande de covoiturage</string>
     >>>>>>> 0d1dfedd8114708620bef33ee1a087165ca9a337
 </resources>

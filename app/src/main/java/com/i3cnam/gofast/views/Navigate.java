@@ -389,6 +389,9 @@ public class Navigate extends CourseServiceConnectedActivity implements OnMapRea
 
         String s;
         if (isBound) {
+            // instantiate dialog
+            newDemandDialog = (RelativeLayout) findViewById(R.id.carpoolingDemandDialog);
+            newDemandDialog.setVisibility(View.INVISIBLE);
             for (Carpooling c : myService.getRequestedCarpoolings()) {
                 s = "Carpooling " + c.getId() + "\n" +
                         "pick up: " + c.getPickupPoint() + "\n" +
@@ -403,8 +406,6 @@ public class Navigate extends CourseServiceConnectedActivity implements OnMapRea
                 if (c.getState().equals(Carpooling.CarpoolingState.IN_DEMAND)) {
                     // NEW CARPOOL DEMAND
                     newRequestedCarpool = c;
-                    // instantiate dialog
-                    newDemandDialog = (RelativeLayout) findViewById(R.id.carpoolingDemandDialog);
                     // show dialog
                     newDemandDialog.setVisibility(View.VISIBLE);
 

@@ -20,6 +20,7 @@ import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -57,7 +58,7 @@ public class Communication implements CommInterface {
 
 
     @Override
-    public int declareCourse(DriverCourse driverCourse) throws ConnectException {
+    public int declareCourse(DriverCourse driverCourse) throws GofastCommunicationException {
         // prepare the return variable
         int returnValue = 0;
 
@@ -200,7 +201,7 @@ public class Communication implements CommInterface {
     }
 
     @Override
-    public void abortCourse(DriverCourse course) throws ConnectException {
+    public void abortCourse(DriverCourse course) throws GofastCommunicationException {
         // prepare the string for the request
         StringBuilder sb = new StringBuilder(SERVER_IP + ABORT_COURSE);
         sb.append("?course_id=" + course.getId());
@@ -221,7 +222,7 @@ public class Communication implements CommInterface {
 
 
     @Override
-    public void updatePosition(DriverCourse driverCourse) throws ConnectException {
+    public void updatePosition(DriverCourse driverCourse) throws GofastCommunicationException {
         // prepare the string for the request
         StringBuilder sb = new StringBuilder(SERVER_IP + UPDATE_POSITION);
         sb.append("?course_id=" + driverCourse.getId());
@@ -233,7 +234,7 @@ public class Communication implements CommInterface {
     }
 
     @Override
-    public void updateCourse(DriverCourse driverCourse) throws ConnectException {
+    public void updateCourse(DriverCourse driverCourse) throws GofastCommunicationException {
 
         // prepare the string for the request
         StringBuilder sb = new StringBuilder(SERVER_IP + UPDATE_COURSE);
@@ -299,7 +300,7 @@ public class Communication implements CommInterface {
     }
 
     @Override
-    public List<Carpooling> getCarpoolCourseState(DriverCourse driverCourse) throws ConnectException {
+    public List<Carpooling> getCarpoolCourseState(DriverCourse driverCourse) throws GofastCommunicationException {
         // prepare the return variable
         List<Carpooling> requestedCarpoolings = new ArrayList<>();
 
@@ -332,7 +333,7 @@ public class Communication implements CommInterface {
     }
 
     @Override
-    public DriverCourse getDriverCourse(User driver) throws ConnectException {
+    public DriverCourse getDriverCourse(User driver) throws GofastCommunicationException {
         // prepare the return variable
         DriverCourse driverCourse = new DriverCourse();
 
@@ -505,7 +506,7 @@ public class Communication implements CommInterface {
      * @param serviceString the request
      * @return the response
      */
-    private static String useService2(String serviceString) throws ConnectException {
+    private static String useService2(String serviceString) throws GofastCommunicationException {
         HttpURLConnection conn = null;
         StringBuilder jsonResults = new StringBuilder();
         try {
@@ -521,13 +522,8 @@ public class Communication implements CommInterface {
                 jsonResults.append(buff, 0, read);
             }
 
-        } catch (MalformedURLException e) {
-            Log.e(LOG_TAG, "Error processing URL", e);
-        } catch (java.net.ConnectException e) {
-            Log.e(LOG_TAG, "Connection to server failed");
-            throw e;
-        } catch (IOException e) {
-            Log.e(LOG_TAG, "Error connecting to API", e);
+        } catch (Exception e) {
+            throw new GofastCommunicationException();
         } finally {
             if (conn != null) {
                 conn.disconnect();
@@ -601,7 +597,7 @@ public class Communication implements CommInterface {
 
 
     @Override
-    public String declareUser(User user) throws ConnectException {
+    public String declareUser(User user) throws GofastCommunicationException {
         // the return variable
         String returnStatus = "";
         // prepare the string for the request
@@ -628,7 +624,7 @@ public class Communication implements CommInterface {
     }
 
     @Override
-    public String retrieveAccount(String phoneNumber) throws ConnectException {
+    public String retrieveAccount(String phoneNumber) throws GofastCommunicationException {
         // the return variable
         String returnNickname = null;
         // prepare the string for the request

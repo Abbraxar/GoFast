@@ -12,6 +12,7 @@ import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 
 import com.i3cnam.gofast.R;
+import com.i3cnam.gofast.model.Carpooling;
 import com.i3cnam.gofast.views.Main;
 
 /**
@@ -43,20 +44,25 @@ public class NewRequestNotification {
      * @see #cancel(Context, int)
      */
     public static void notify(final Context context,
-                              final String exampleString,
+                              final String title,
+                              final String text,
                               final int carpoolingId,
-                              final int number) {
-        final Resources res = context.getResources();
+                              final Carpooling.CarpoolingState state) {
 
         // This image is used as the notification's large icon (thumbnail).
 //        final Bitmap picture = BitmapFactory.decodeResource(res, R.drawable.carpool_request_n);
 
+        final int icon;
 
-        final String ticker = exampleString;
-        final String title = res.getString(
-                R.string.new_carpooling_request_notification_title);
-        final String text = res.getString(
-                R.string.new_carpooling_request_notification_text, exampleString);
+        if (state.equals(Carpooling.CarpoolingState.IN_PROGRESS)) {
+            icon = R.drawable.carpool_request_d;
+        }
+        else if (state.equals(Carpooling.CarpoolingState.CONFLICT)) {
+            icon = R.drawable.example_picture;
+        }
+        else {
+            icon = R.drawable.example_picture;
+        }
 
         final NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
 
@@ -66,7 +72,7 @@ public class NewRequestNotification {
 
                 // Set required fields, including the small icon, the
                 // notification title, and text.
-                .setSmallIcon(R.drawable.carpool_request_d)
+                .setSmallIcon(icon)
                 .setContentTitle(title)
                 .setContentText(text)
 
@@ -158,7 +164,7 @@ public class NewRequestNotification {
 
     /**
      * Cancels any notifications of this type previously shown using
-     * {@link #notify(Context, String, int, int)}.
+     * {@link #cancel(Context, int)}.
      */
     @TargetApi(Build.VERSION_CODES.ECLAIR)
     public static void cancel(final Context context, int carpoolingId) {

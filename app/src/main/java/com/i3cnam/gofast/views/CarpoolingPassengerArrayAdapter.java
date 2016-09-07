@@ -102,6 +102,12 @@ public class CarpoolingPassengerArrayAdapter extends ArrayAdapter<Carpooling> {
             btRequest.setVisibility(View.INVISIBLE);
             btDetails.setBackgroundColor(ContextCompat.getColor(context, R.color.colorRefused));
         }
+        // CONFLICT
+        else if (c.getState().equals(Carpooling.CarpoolingState.CONFLICT)) {
+            rowView.setBackgroundColor(ContextCompat.getColor(context, R.color.colorRefused));
+            btRequest.setVisibility(View.INVISIBLE);
+            btDetails.setBackgroundColor(ContextCompat.getColor(context, R.color.colorRefused));
+        }
 
         // following the carpooling, change the action button **************************************
         // POTENTIAL : Action request

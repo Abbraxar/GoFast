@@ -17,7 +17,7 @@ public interface CommInterface {
      * @param driverCourse
      * @return the id of the course
      */
-    int declareCourse(DriverCourse driverCourse) throws ConnectException;
+    int declareCourse(DriverCourse driverCourse) throws GofastCommunicationException;
 
     /**
      * Declares a new travel into the system
@@ -67,7 +67,7 @@ public interface CommInterface {
      * Abort a requested course
      * @param course the course aborted
      */
-    void abortCourse(DriverCourse course) throws ConnectException;
+    void abortCourse(DriverCourse course) throws GofastCommunicationException;
 
     /**
      * Abort a requested travel
@@ -79,13 +79,13 @@ public interface CommInterface {
      * Updates the new position of the car
      * @param driverCourse the travel to be updated
      */
-    void updatePosition(DriverCourse driverCourse) throws ConnectException;
+    void updatePosition(DriverCourse driverCourse) throws GofastCommunicationException;
 
     /**
      * Updates the path of the course
      * @param driverCourse
      */
-    void updateCourse(DriverCourse driverCourse) throws ConnectException;
+    void updateCourse(DriverCourse driverCourse) throws GofastCommunicationException;
 
     /**
      * Request to keep informed about the carpooling of the course
@@ -122,13 +122,13 @@ public interface CommInterface {
      * Returns the carpooling of the course
      * @param driverCourse the travel to be observed
      */
-    List<Carpooling> getCarpoolCourseState(DriverCourse driverCourse) throws ConnectException;
+    List<Carpooling> getCarpoolCourseState(DriverCourse driverCourse) throws GofastCommunicationException;
 
     /**
      * Returns current course for user.
      * @param driver the user to get course from
      */
-    DriverCourse getDriverCourse(User driver) throws ConnectException;
+    DriverCourse getDriverCourse(User driver) throws GofastCommunicationException;
 
     /**
      * Returns current travel for user.
@@ -142,7 +142,7 @@ public interface CommInterface {
      * @param user
      * @return "ok" if done "taken" if nickname is already taken "existing" if user already exists
      */
-    String declareUser(User user) throws ConnectException;
+    String declareUser(User user) throws GofastCommunicationException;
 
 
     /**
@@ -150,5 +150,5 @@ public interface CommInterface {
      * @param phoneNumber
      * @return nullstring if not found, nickname of user if found
      */
-    String retrieveAccount(String phoneNumber) throws ConnectException;
+    String retrieveAccount(String phoneNumber) throws GofastCommunicationException;
 }
