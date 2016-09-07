@@ -31,7 +31,7 @@ import java.util.List;
  */
 public class Communication implements CommInterface {
 
-//    static final String SERVER_IP = "http://10.0.2.2:9090"; // serveur local
+    //static final String SERVER_IP = "http://10.0.2.2:9090"; // serveur local
     static final String SERVER_IP = "http://92.222.82.175:9090"; // serveur OVH
     static final String DECLARE_COURSE = "/declare_course";
     static final String DECLARE_TRAVEL = "/declare_travel";

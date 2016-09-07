@@ -108,6 +108,9 @@ public class CourseManagementService extends Service {
             myCourseObserver = (new ObserveCourse());
             new Thread(myCourseObserver).start();
 
+            // start the navigation listener
+            navGPS = new GPSForNavigation(this);
+
         }
         else {
             // broadcast course init to the activity
@@ -219,9 +222,6 @@ public class CourseManagementService extends Service {
     private void sendCourseInit() {
         Log.d(TAG_LOG, "entered sendCourseInit");
 
-        // start the navigation listener
-        navGPS = new GPSForNavigation(this);
-
         sendBroadcast(broadcastInitIntent);
     }
 
@@ -229,7 +229,6 @@ public class CourseManagementService extends Service {
      * Broadcast the course initialisation
      */
     private void sendServerAvailble(boolean available) {
-        Log.e(TAG_LOG, "ERREUR Connection Serveur");
         broadcastServerUnavailableIntent.putExtra("AVAILABLE", available);
         sendBroadcast(broadcastServerUnavailableIntent);
     }
@@ -322,10 +321,12 @@ public class CourseManagementService extends Service {
 
         public GPSForNavigation(Context context) {
             super(context);
+            Log.d(TAG_LOG, "GPSForNavigation cretaed");
         }
 
         @Override
         public void onLocationChanged(Location location) {
+            Log.d(TAG_LOG, "Location changed");
             new Thread(new ProcessLocationChanged(location)).start();
         }
 

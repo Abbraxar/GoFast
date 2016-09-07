@@ -357,8 +357,10 @@ public class Navigate extends CourseServiceConnectedActivity implements OnMapRea
 //            Toast.makeText(getApplicationContext(), "Course received", Toast.LENGTH_SHORT).show();
 //            Toast.makeText(getApplicationContext(), "New position is : \n" + myService.getDriverCourse().getActualPosition(), Toast.LENGTH_LONG).show();
 
-            homeMarker.setPosition(myService.getDriverCourse().getActualPosition());
-            pathPolyline.setPoints(PolyUtil.decode(myService.getDriverCourse().getEncodedPoints()));
+            if (isDataInit) {
+                homeMarker.setPosition(myService.getDriverCourse().getActualPosition());
+                pathPolyline.setPoints(PolyUtil.decode(myService.getDriverCourse().getEncodedPoints()));
+            }
         }
     };
 

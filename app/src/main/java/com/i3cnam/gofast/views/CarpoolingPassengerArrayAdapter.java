@@ -103,8 +103,6 @@ public class CarpoolingPassengerArrayAdapter extends ArrayAdapter<Carpooling> {
             btDetails.setBackgroundColor(ContextCompat.getColor(context, R.color.colorRefused));
         }
 
-
-
         // following the carpooling, change the action button **************************************
         // POTENTIAL : Action request
         if (c.getState().equals(Carpooling.CarpoolingState.POTENTIAL)) {
