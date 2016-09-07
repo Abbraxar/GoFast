@@ -39,11 +39,13 @@
 
 
     <TextView
+        android:visibility="invisible"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="@string/radiusLabel"
         android:labelFor="@+id/radius"
+        android:id="@+id/radiusLabel"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="46dp" />

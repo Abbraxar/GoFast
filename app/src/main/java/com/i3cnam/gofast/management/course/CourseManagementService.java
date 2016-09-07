@@ -434,8 +434,8 @@ public class CourseManagementService extends Service {
                         if (searchStateChanges()) {
                             requestedCarpoolings = lastList;
                             sendCarpoolUpdate();
-                            sendServerAvailble(true);
                         }
+                        sendServerAvailble(true);
                     } catch (ConnectException e) {
                         sendServerAvailble(false);
                     }

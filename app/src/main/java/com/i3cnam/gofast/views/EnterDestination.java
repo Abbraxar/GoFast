@@ -14,6 +14,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.NumberPicker;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -50,9 +51,12 @@ public class EnterDestination extends Activity implements OnItemClickListener {
             radius.setMinValue(1);
             radius.setMaxValue(10);
             radius.setWrapSelectorWheel(true);
-            String[] values = {"100", "200", "300", "400", "500", "600", "700", "800", "900", "1000"};
+            String[] values = {"100 m", "200 m", "300 m", "400 m", "500 m", "600 m", "700 m", "800 m", "900 m", "1000 m"};
             radius.setDisplayedValues(values);
             radius.setValue(5);
+
+            TextView tv = (TextView) findViewById(R.id.radiusLabel);
+            tv.setVisibility(View.VISIBLE);
         }
 
         AutoCompleteTextView autoCompView = (AutoCompleteTextView) findViewById(R.id.autoCompleteTextView);
