@@ -16,7 +16,6 @@ import com.google.maps.android.PolyUtil;
 import com.i3cnam.gofast.R;
 import com.i3cnam.gofast.communication.CommInterface;
 import com.i3cnam.gofast.communication.Communication;
-import com.i3cnam.gofast.communication.CommunicationStub;
 import com.i3cnam.gofast.communication.GofastCommunicationException;
 import com.i3cnam.gofast.geo.DirectionsService;
 import com.i3cnam.gofast.geo.GPSTracker;
@@ -27,7 +26,6 @@ import com.i3cnam.gofast.views.abstractViews.CourseServiceConnectedActivity;
 import com.i3cnam.gofast.views.notifications.GeneralForegroundNotification;
 import com.i3cnam.gofast.views.notifications.NewRequestNotification;
 
-import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -63,6 +61,7 @@ public class CourseManagementService extends Service {
     private Carpooling carpoolingToAccept;
     private Carpooling carpoolingToRefuse;
     private Carpooling carpoolingToAbort;
+    private Carpooling carpoolingToValidate;
 
     private ObserveCourse myCourseObserver;
     private GPSForNavigation navGPS;
@@ -326,6 +325,16 @@ public class CourseManagementService extends Service {
         new AsynchronousRefuseCarpool().execute();
     }
 
+    public void abortCarpooling(Carpooling carpooling) {
+        carpoolingToAbort = carpooling;
+        new AsynchronousAbortCarpool().execute();
+    }
+
+    public void validateCarpooling(Carpooling carpooling) {
+        carpoolingToValidate = carpooling;
+        new AsynchronousValidateCarpool().execute();
+    }
+
     public void abortCourse() {
         new AsynchronousAbortCourse().execute();
     }
@@ -518,6 +527,28 @@ public class CourseManagementService extends Service {
         protected String doInBackground(String... urls) {
             Log.d(TAG_LOG, "Carpooling refused");
             serverCom.refuseCarpool(carpoolingToRefuse);
+            return null;
+        }
+    }
+
+    /**
+     * Abort a carpool in a new thread
+     */
+    private class AsynchronousAbortCarpool extends AsyncTask<String, String,String> {
+        protected String doInBackground(String... urls) {
+            Log.d(TAG_LOG, "Carpooling refused");
+            serverCom.abortCarpool(carpoolingToAbort);
+            return null;
+        }
+    }
+
+    /**
+     * Abort a carpool in a new thread
+     */
+    private class AsynchronousValidateCarpool extends AsyncTask<String, String,String> {
+        protected String doInBackground(String... urls) {
+            Log.d(TAG_LOG, "Carpooling refused");
+            serverCom.validateCarpool(carpoolingToValidate, "driver");
             return null;
         }
     }

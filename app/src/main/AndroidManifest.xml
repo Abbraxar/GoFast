@@ -59,7 +59,8 @@
         <activity android:name=".views.ConfigureAccount" />
         <activity
             android:name=".views.CarpoolingDetails"
-            android:label="@string/title_activity_carpooling_details"></activity>
+            android:label="@string/title_activity_carpooling_details" />
+        <activity android:name=".views.PassengerList"></activity>
     </application>
 
 </manifest>

@@ -15,7 +15,6 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.NumberPicker;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.i3cnam.gofast.R;
@@ -77,7 +76,6 @@ public class EnterDestination extends Activity implements OnItemClickListener {
         System.out.println("onItemClick OK");
 //        String str = ((Place) adapterView.getItemAtPosition(position)).getPlaceName();
         String str = (adapterView.getItemAtPosition(position)).toString();
-        Toast.makeText(this, str, Toast.LENGTH_SHORT).show();
         selectedPlace = autocompleteAdapter.getResultList().get(position);
         System.out.println("SELECTED PLACE:");
         System.out.println(selectedPlace.getPlaceName());

@@ -64,6 +64,12 @@ public interface CommInterface {
     void abortCarpool(Carpooling carpooling);
 
     /**
+     * Validate a requested carpooling
+     * @param carpooling the carpooling aborted
+     */
+    void validateCarpool(Carpooling carpooling, String role);
+
+    /**
      * Abort a requested course
      * @param course the course aborted
      */

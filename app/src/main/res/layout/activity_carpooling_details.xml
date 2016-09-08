@@ -140,54 +140,18 @@
 
     </RelativeLayout>
 
-
-    <ImageView
+    <Button
+        android:id="@+id/btValidateDestination"
+        android:onClick="validateCarpool"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/btRequestCarpool"
-        android:contextClickable="false"
-        android:clickable="true"
-        android:src="@drawable/carpooling_request"
-        android:layout_gravity="bottom|right"
-        android:layout_margin="10dp"
-        android:onClick="requestCarpool" />
-
-
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/btCancelRequest"
-        android:contextClickable="false"
-        android:clickable="true"
-        android:src="@drawable/carpooling_request"
-        android:layout_gravity="bottom|right"
-        android:layout_margin="10dp"
-        android:onClick="cancelRequest" />
-
-
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/close"
-        android:contextClickable="false"
-        android:clickable="true"
-        android:src="@android:drawable/ic_dialog_info"
-        android:layout_gravity="top|left"
-        android:layout_margin="10dp"
-        android:onClick="back" />
-
-
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/info"
-        android:contextClickable="false"
-        android:clickable="true"
-        android:src="@android:drawable/ic_dialog_info"
-        android:layout_gravity="bottom|left"
-        android:layout_margin="10dp"
-        android:onClick="info" />
-
-
+        android:layout_gravity="right|bottom"
+        android:text="Valider fin"
+        android:drawableLeft="@drawable/yes_icon"
+        android:drawablePadding="15sp"
+        android:padding="10dp"
+        android:layout_marginTop="20dp"
+        android:paddingLeft="100dp"
+        android:paddingRight="10dp"/>
 
 </fragment>

@@ -14,7 +14,6 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -72,7 +71,6 @@ public class Navigate extends CourseServiceConnectedActivity implements OnMapRea
     boolean ongoingCarpoolsVisible = false;
 
     boolean mapIsReady = false; // for synchronisation
-    boolean courseIsInitialised = false; // for synchronisation
 
     private final static String TAG_LOG = "Navigate view";
     Context thisContext;
@@ -287,6 +285,13 @@ public class Navigate extends CourseServiceConnectedActivity implements OnMapRea
                     params.leftMargin = 100;
                     rowView.setLayoutParams(params);
                     bottomMargin += 370;
+
+                    rowView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            showPassengerList(view);
+                        }
+                    });
                 }
             }
         }
@@ -299,7 +304,14 @@ public class Navigate extends CourseServiceConnectedActivity implements OnMapRea
                 }
             }
         }
+    }
 
+    /**
+     * Show passengerList activity
+     */
+    public void showPassengerList(View view) {
+        Intent intent = new Intent(this, PassengerList.class);
+        startActivity(intent);
     }
 
 
@@ -354,9 +366,6 @@ public class Navigate extends CourseServiceConnectedActivity implements OnMapRea
             // TODO
             Log.d("BroadcastReceiver", "Broadcast received");
 
-//            Toast.makeText(getApplicationContext(), "Course received", Toast.LENGTH_SHORT).show();
-//            Toast.makeText(getApplicationContext(), "New position is : \n" + myService.getDriverCourse().getActualPosition(), Toast.LENGTH_LONG).show();
-
             if (isDataInit) {
                 homeMarker.setPosition(myService.getDriverCourse().getActualPosition());
                 pathPolyline.setPoints(PolyUtil.decode(myService.getDriverCourse().getEncodedPoints()));
@@ -385,7 +394,6 @@ public class Navigate extends CourseServiceConnectedActivity implements OnMapRea
     private void handleCarpoolingChanges() {
         // TODO
         Log.d("BroadcastReceiver", "Broadcast received");
-        Toast.makeText(getApplicationContext(), "Carpooling received", Toast.LENGTH_SHORT).show();
 
         String s;
         if (isBound) {
@@ -401,7 +409,6 @@ public class Navigate extends CourseServiceConnectedActivity implements OnMapRea
                         "fare: " + c.getFare() + "\n";
 
                 Log.d("BroadcastReceiver", s);
-                Toast.makeText(getApplicationContext(), s, Toast.LENGTH_SHORT).show();
 
                 if (c.getState().equals(Carpooling.CarpoolingState.IN_DEMAND)) {
                     // NEW CARPOOL DEMAND

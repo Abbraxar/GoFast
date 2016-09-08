@@ -52,6 +52,7 @@ public class Communication implements CommInterface {
     static final String DECLARE_USER = "/declare_user";
     static final String RETIEVE_ACCOUNT = "/retrieve_account";
     static final String ABORT_COURSE = "/abort_course";
+    static final String VALIDATE_CARPOOL = "/validate_end_carpooling";
 
     private static final String LOG_TAG = "ServerCommunication";
     private static final DateFormat format = new SimpleDateFormat("y/M/d H:m");
@@ -198,6 +199,16 @@ public class Communication implements CommInterface {
         // call the service and obtain a response
         String rawJSON = useService(sb.toString());
 
+    }
+
+    @Override
+    public void validateCarpool(Carpooling carpooling, String role) {
+        // prepare the string for the request
+        StringBuilder sb = new StringBuilder(SERVER_IP + VALIDATE_CARPOOL);
+        sb.append("?carpool_id=" + carpooling.getId() + "&role=" + role);
+
+        // call the service and obtain a response
+        String rawJSON = useService(sb.toString());
     }
 
     @Override

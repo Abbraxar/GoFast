@@ -26,12 +26,14 @@ import com.i3cnam.gofast.R;
 import com.i3cnam.gofast.geo.DirectionsService;
 import com.i3cnam.gofast.model.Carpooling;
 import com.i3cnam.gofast.model.PassengerTravel;
+import com.i3cnam.gofast.views.abstractViews.CourseServiceConnectedActivity;
+import com.i3cnam.gofast.views.abstractViews.TravelServiceConnectedActivity;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
-public class CarpoolingDetails extends FragmentActivity implements OnMapReadyCallback {
+public class CarpoolingDetails extends TravelServiceConnectedActivity implements OnMapReadyCallback {
     public static final String CARPOOLING = "com.i3cnam.gofast.CARPOOLING";
     public static final String TRAVEL = "com.i3cnam.gofast.TRAVEL";
     private static final String TAG_LOG = "CarpoolingDetails";
@@ -41,6 +43,7 @@ public class CarpoolingDetails extends FragmentActivity implements OnMapReadyCal
     private Carpooling carpooling;
     private PassengerTravel travel;
     // maps bounds
+    boolean mapIsInit = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +61,13 @@ public class CarpoolingDetails extends FragmentActivity implements OnMapReadyCal
         travel = (PassengerTravel) (bundle.getSerializable(TRAVEL));
 
         updateCarpoolingDetails();
+
+        launchAndBindService(travel);
+    }
+
+    @Override
+    protected void afterServiceConnected() {
+
     }
 
     private void updateCarpoolingDetails() {
@@ -65,24 +75,16 @@ public class CarpoolingDetails extends FragmentActivity implements OnMapReadyCal
         TextView fare = (TextView) findViewById(R.id.fare);
         TextView state = (TextView) findViewById(R.id.state);
 
-        // buttons
-        ImageView actionRequestImg = (ImageView) findViewById(R.id.btRequestCarpool);
-        ImageView actionCancelImg = (ImageView) findViewById(R.id.btCancelRequest);
-        actionRequestImg.setVisibility(View.INVISIBLE);
-        actionCancelImg.setVisibility(View.INVISIBLE);
-
         pickupTime.setText(formatDate.format(carpooling.getPickupTime()));
         fare.setText("€ " + carpooling.getFare());
         switch(carpooling.getState().name()) {
             case "POTENTIAL" :
                 state.setText("Disponible");
                 state.setTextColor(ContextCompat.getColor(this, R.color.colorPotential));
-                actionRequestImg.setVisibility(View.VISIBLE);
                 break;
             case "IN_DEMAND" :
                 state.setText("Demandé");
                 state.setTextColor(ContextCompat.getColor(this, R.color.colorRequested));
-                actionCancelImg.setVisibility(View.VISIBLE);
                 break;
             case "IN_PROGRESS" :
                 state.setText("Accepté / En cours");
@@ -91,6 +93,10 @@ public class CarpoolingDetails extends FragmentActivity implements OnMapReadyCal
             case "REFUSED" :
                 state.setText("Refusé");
                 state.setTextColor(ContextCompat.getColor(this, R.color.colorRefused));
+                break;
+            case "ACHIEVED" :
+                state.setText("Terminé");
+                state.setTextColor(ContextCompat.getColor(this, R.color.colorPotential));
                 break;
         }
 
@@ -107,53 +113,64 @@ public class CarpoolingDetails extends FragmentActivity implements OnMapReadyCal
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
+        if (!mapIsInit) {
+            mapIsInit = true;
+            mMap = googleMap;
 
-        // asynchronous computation of both paths
-        new TaskComputeAndDrawPath(travel.getOrigin().getCoordinates(),
-                carpooling.getPickupPoint(),
-                BitmapDescriptorFactory.fromResource(R.drawable.walking),
-                BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN),
-                (TextView) findViewById(R.id.pickupDistance)).execute();
-        new TaskComputeAndDrawPath(carpooling.getDropoffPoint(),
-                travel.getDestination().getCoordinates(),
-                BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN),
-                BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED),
-                (TextView) findViewById(R.id.dropoffDistance)).execute();
+            // asynchronous computation of both paths
+            new TaskComputeAndDrawPath(travel.getOrigin().getCoordinates(),
+                    carpooling.getPickupPoint(),
+                    BitmapDescriptorFactory.fromResource(R.drawable.walking),
+                    BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN),
+                    (TextView) findViewById(R.id.pickupDistance)).execute();
+            new TaskComputeAndDrawPath(carpooling.getDropoffPoint(),
+                    travel.getDestination().getCoordinates(),
+                    BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN),
+                    BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED),
+                    (TextView) findViewById(R.id.dropoffDistance)).execute();
 
-        // calculate bounds
-        double northest = Math.max(travel.getOrigin().getCoordinates().latitude,
-                travel.getDestination().getCoordinates().latitude);
-        double southest = Math.min(travel.getOrigin().getCoordinates().latitude,
-                travel.getDestination().getCoordinates().latitude);
-        double westest = Math.max(travel.getOrigin().getCoordinates().longitude,
-                travel.getDestination().getCoordinates().longitude);
-        double eastest = Math.min(travel.getOrigin().getCoordinates().longitude,
-                travel.getDestination().getCoordinates().longitude);
+            // calculate bounds
+            double northest = Math.max(travel.getOrigin().getCoordinates().latitude,
+                    travel.getDestination().getCoordinates().latitude);
+            double southest = Math.min(travel.getOrigin().getCoordinates().latitude,
+                    travel.getDestination().getCoordinates().latitude);
+            double westest = Math.max(travel.getOrigin().getCoordinates().longitude,
+                    travel.getDestination().getCoordinates().longitude);
+            double eastest = Math.min(travel.getOrigin().getCoordinates().longitude,
+                    travel.getDestination().getCoordinates().longitude);
 
-        northest = Math.max(northest,carpooling.getPickupPoint().latitude);
-        northest = Math.max(northest,carpooling.getDropoffPoint().latitude);
+            northest = Math.max(northest,carpooling.getPickupPoint().latitude);
+            northest = Math.max(northest,carpooling.getDropoffPoint().latitude);
 
-        southest = Math.min(southest,carpooling.getPickupPoint().latitude);
-        southest = Math.min(southest,carpooling.getDropoffPoint().latitude);
+            southest = Math.min(southest,carpooling.getPickupPoint().latitude);
+            southest = Math.min(southest,carpooling.getDropoffPoint().latitude);
 
-        westest = Math.max(westest,carpooling.getPickupPoint().longitude);
-        westest = Math.max(westest,carpooling.getDropoffPoint().longitude);
+            westest = Math.max(westest,carpooling.getPickupPoint().longitude);
+            westest = Math.max(westest,carpooling.getDropoffPoint().longitude);
 
-        eastest = Math.min(eastest,carpooling.getPickupPoint().longitude);
-        eastest = Math.min(eastest,carpooling.getDropoffPoint().longitude);
+            eastest = Math.min(eastest,carpooling.getPickupPoint().longitude);
+            eastest = Math.min(eastest,carpooling.getDropoffPoint().longitude);
 
-        double latMargin = Math.abs(northest - southest) * 0.2;
-        double longMargin = Math.abs(westest - eastest) * 0.2;
+            double latMargin = Math.abs(northest - southest) * 0.2;
+            double longMargin = Math.abs(westest - eastest) * 0.2;
 
-        LatLngBounds mapBounds = new LatLngBounds( new LatLng(southest - latMargin, eastest - longMargin),
-                new LatLng(northest + latMargin, westest + longMargin));
+            LatLngBounds mapBounds = new LatLngBounds( new LatLng(southest - latMargin, eastest - longMargin),
+                    new LatLng(northest + latMargin, westest + longMargin));
 
-        // set the camera to the calculated bounds
-        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(mapBounds, 0));
+            // set the camera to the calculated bounds
+            mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(mapBounds, 0));
 
 
+        }
 
+    }
+
+    /**
+     * Validate end of carpooling from view
+     * @param view
+     */
+    public void validateCarpool(View view) {
+        myService.validateCarpool(carpooling);
     }
 
 

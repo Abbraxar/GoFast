@@ -88,5 +88,6 @@
     <string name="conflict_carpooling_notification_text">" a annulé son covoiturage"</string>
     <string name="carpoolingCanceled">Annulation de covoiturage</string>
     <string name="carpoolingRequest">Demande de covoiturage</string>
+    <string name="validate_end_carpool">Valider fin</string>
     >>>>>>> 0d1dfedd8114708620bef33ee1a087165ca9a337
 </resources>

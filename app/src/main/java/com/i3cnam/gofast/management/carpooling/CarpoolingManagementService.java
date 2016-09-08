@@ -36,6 +36,8 @@ public class CarpoolingManagementService extends Service {
     private Carpooling carpoolingToRequest;
     private Carpooling carpoolingToCancel;
     private Carpooling carpoolingToAbort;
+    private Carpooling carpoolingToValidate;
+
 
     // test pour le broadcast
     public static final String BROADCAST_ACTION = "com.i3cnam.gofast.UPDATE_CARPOOLING";
@@ -47,6 +49,7 @@ public class CarpoolingManagementService extends Service {
 
 
     private final String TAG_LOG = "Carpooling Service"; // tag for log messages
+
 
     /**
      * Class used for the client Binder.  Because we know this service always
@@ -160,6 +163,11 @@ public class CarpoolingManagementService extends Service {
     public void abortCarpool(Carpooling carpooling) {
         carpoolingToAbort = carpooling;
         new AsynchronousAbortCarpool().execute();
+    }
+
+    public void validateCarpool(Carpooling carpooling) {
+        carpoolingToValidate = carpooling;
+        new AsynchronousValidateCarpool().execute();
     }
 
     public void abortTravel() {
@@ -292,6 +300,22 @@ public class CarpoolingManagementService extends Service {
             Log.d(TAG_LOG, passengerTravel.getParametersString());
             serverCom.abortCarpool(carpoolingToAbort);
             return null;
+        }
+    }
+
+    /**
+     * Abort a carpool in a new thread
+     */
+    private class AsynchronousValidateCarpool extends AsyncTask<String, String,String> {
+        protected String doInBackground(String... urls) {
+            Log.d(TAG_LOG, "Carpool validated");
+            serverCom.validateCarpool(carpoolingToValidate, "passenger");
+            return null;
+        }
+        protected void onPostExecute(String result) {
+            new AsynchronousAbortTravel().execute();
+            stopForeground(true);
+            stopSelf();
         }
     }
 

@@ -2,7 +2,6 @@ package com.i3cnam.gofast.views;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -15,7 +14,6 @@ import android.widget.TextView;
 
 import com.i3cnam.gofast.R;
 import com.i3cnam.gofast.model.Carpooling;
-import com.i3cnam.gofast.model.PassengerTravel;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -107,6 +105,12 @@ public class CarpoolingPassengerArrayAdapter extends ArrayAdapter<Carpooling> {
             rowView.setBackgroundColor(ContextCompat.getColor(context, R.color.colorRefused));
             btRequest.setVisibility(View.INVISIBLE);
             btDetails.setBackgroundColor(ContextCompat.getColor(context, R.color.colorRefused));
+        }
+        // ACHIEVED
+        else if (c.getState().equals(Carpooling.CarpoolingState.ACHIEVED)) {
+            rowView.setBackgroundColor(ContextCompat.getColor(context, R.color.colorPotential));
+            btRequest.setVisibility(View.INVISIBLE);
+            btDetails.setVisibility(View.INVISIBLE);
         }
 
         // following the carpooling, change the action button **************************************

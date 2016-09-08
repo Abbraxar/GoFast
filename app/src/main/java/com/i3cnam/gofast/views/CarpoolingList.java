@@ -15,7 +15,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.i3cnam.gofast.R;
 import com.i3cnam.gofast.management.carpooling.CarpoolingManagementService;
@@ -168,7 +167,6 @@ public class CarpoolingList extends TravelServiceConnectedActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d(TAG_LOG, "Broadcast carpool received");
-            Toast.makeText(getApplicationContext(), "Broadcast received", Toast.LENGTH_SHORT).show();
 
             prepareListData();
 
